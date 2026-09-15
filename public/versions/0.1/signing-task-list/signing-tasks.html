@@ -532,7 +532,7 @@
     .filter-field.is-collapsed { display: none !important; }
     .filter-collapse-btn { flex-shrink: 0; }
     /* hidden 属性强制隐藏（.filter-trigger 的 display:flex 会覆盖默认 [hidden]） */
-    #filterSummaryBtn[hidden] { display: none !important; }
+    #filterCollapseBtn[hidden] { display: none !important; }
     .filter-chips {
       display: none; align-items: center; flex-wrap: wrap; gap: 0;
     }
@@ -601,7 +601,7 @@
     }
     .filter-popover {
       position: absolute; top: calc(100% + 10px); left: 0; z-index: 50;
-      width: 248px; padding: 14px 14px 10px;
+      width: max-content; min-width: 168px; max-width: 320px; padding: 14px 14px 10px;
       border-radius: 6px; background: #fff;
       box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
       color: var(--fdd-ink);
@@ -616,7 +616,7 @@
       transform: rotate(45deg);
     }
     .filter-popover__title {
-      margin: 0; font-size: 16px; font-weight: 700; line-height: 22px;
+      margin: 0 0 16px; font-size: 16px; font-weight: 700; line-height: 22px;
     }
     .filter-popover__sub {
       margin: 2px 0 10px; font-size: 12px; color: var(--fdd-ink-3); line-height: 16px;
@@ -632,7 +632,7 @@
     }
     .filter-popover__options label {
       display: flex; align-items: center; gap: 10px;
-      font-size: 14px; cursor: pointer; line-height: 20px;
+      font-size: 14px; cursor: pointer; line-height: 20px; white-space: nowrap;
     }
     .filter-popover__options input {
       width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand);
@@ -707,7 +707,7 @@
     .applied-row .filter-chip__remove { width: 28px; }
     .applied-chip--fixed .filter-chip__remove { display: none; }
     .applied-clearall {
-      height: 28px; padding: 0 4px; border: 0; background: transparent;
+      height: 32px; padding: 0 4px; border: 0; background: transparent;
       color: var(--fdd-brand); font-size: 13px; font-weight: 500; cursor: pointer;
     }
     .applied-clearall:hover { text-decoration: underline; }
@@ -768,9 +768,10 @@
     .pop-wrap { position: relative; display: inline-block; max-width: 100%; z-index: 5; }
     .mini-popover {
       position: fixed; z-index: 95;
-      width: 264px; padding: 12px 0 8px;
-      border: 1px solid var(--fdd-line); border-radius: 6px;
-      background: #fff; box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+      width: 280px; padding: 12px 0 8px;
+      border: 1px solid var(--fdd-line-strong); border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(28, 43, 51, 0.08), 0 12px 32px rgba(28, 43, 51, 0.18), 0 28px 72px rgba(28, 43, 51, 0.14);
       animation: nsPopoverIn 0.16s cubic-bezier(0.22, 1, 0.36, 1);
       transform-origin: top left;
     }
@@ -781,7 +782,7 @@
     .mini-popover[hidden] { display: none !important; }
     .mini-popover__head {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 12px 8px; border-bottom: 1px solid var(--fdd-line-soft);
+      padding: 0 16px 15px; border-bottom: 1px solid var(--fdd-line-soft);
       font-size: 13px; font-weight: 600; color: var(--fdd-ink);
     }
     .mini-popover__close {
@@ -790,10 +791,10 @@
     }
     .mini-popover__close:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
     .mini-popover__list {
-      max-height: 260px; overflow: auto; padding: 8px 12px 0;
+      max-height: 260px; overflow: auto; padding: 0 16px;
       scrollbar-width: thin; scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
     }
-    .mini-popover__item { padding: 6px 0; border-bottom: 1px solid var(--fdd-line-soft); }
+    .mini-popover__item { padding: 8px 4px; border-bottom: 1px solid var(--fdd-line-soft); }
     .mini-popover__item:last-child { border-bottom: 0; }
     .mini-popover__item .p-name { display: block; color: var(--fdd-ink); font-size: 13px; line-height: 18px; }
     .mini-popover__item .p-time { display: block; color: var(--fdd-ink-3); font-size: 12px; line-height: 16px; margin-top: 2px; }
@@ -918,7 +919,7 @@
       animation: nsPopoverIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .filter-inner-pop[hidden] { display: none !important; }
-    .filter-inner-pop__title { margin: 0 0 10px; font-size: 15px; font-weight: 700; }
+    .filter-inner-pop__title { margin: 0 0 16px; font-size: 15px; font-weight: 700; }
     .filter-inner-pop .filter-popover__options { margin-bottom: 12px; }
     .filter-inner-pop__input {
       width: 100%; height: 34px; padding: 0 10px; box-sizing: border-box;
@@ -1767,10 +1768,6 @@
                 <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
                 筛选条件 <b id="filterCollapseCount" hidden></b>
               </button>
-              <button class="filter-trigger" type="button" id="filterSummaryBtn" aria-haspopup="dialog">
-                筛选 <b id="filterSummaryCount" hidden></b>
-                <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="funnel"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/funnel.svg" alt="" /></span>
-              </button>
             </div>
           </div>
           <span class="export-wrap">
@@ -2199,18 +2196,12 @@
       }
       clearAll.hidden = count === 0;
       if (row) row.innerHTML = '';
-      const badge = document.getElementById('filterSummaryCount');
-      if (badge) {
-        badge.hidden = count === 0;
-        badge.textContent = count ? ` ${count}` : '';
-        badge.style.fontWeight = '600';
-      }
       /* 已应用筛选与未应用下拉之间插一根分割线（第一个未应用字段前） */
       let sep = document.getElementById('filterSepApplied');
       const firstUnapplied = [...document.querySelectorAll('#filterTriggers .filter-field')]
-        .find((f) => !f.hidden && !f.classList.contains('is-applied'));
+        .find((f) => !f.hidden && !f.classList.contains('is-applied') && !f.classList.contains('is-collapsed'));
       const anyApplied = [...document.querySelectorAll('#filterTriggers .filter-field')]
-        .some((f) => f.classList.contains('is-applied'));
+        .some((f) => f.classList.contains('is-applied') && !f.classList.contains('is-collapsed'));
       if (firstUnapplied && anyApplied) {
         if (!sep) {
           sep = document.createElement('span');
@@ -2232,6 +2223,8 @@
       const search = document.querySelector('.envelope-search');
       if (!collapseBtn || !search) return;
       const fields = [...document.querySelectorAll('#filterTriggers .filter-field')].filter((f) => !f.hidden);
+      /* 徽标：宽屏显示已设置条件数；窄屏（折叠态）显示被收纳的条件数 */
+      const appliedCount = Object.keys(activeFilters).filter((k) => activeFilters[k]).length;
       /* 筛选组预算 = 行宽 - 搜索框 - 右侧筛选汇总/导出/刷新组（它们由 margin-left:auto 顶到最右，但和触发器共享一行空间） */
       const controls = document.querySelector('.envelope-controls');
       const controlsWidth = controls.getBoundingClientRect().width;
@@ -2243,42 +2236,44 @@
         if (el && el.offsetParent !== null) rightGroupW += el.getBoundingClientRect().width + 8;
       });
       const budget = controlsWidth - searchW - rightGroupW - 24;
+      const cb = document.getElementById('filterCollapseCount');
       /* 展开全部测量总宽 */
       fields.forEach((f) => f.classList.remove('is-collapsed'));
-      collapseBtn.hidden = true;
       const totalW = fields.reduce((sum, f) => sum + f.querySelector('.filter-trigger').getBoundingClientRect().width + 8, 0);
       if (totalW <= budget) {
-        collapseBtn.hidden = true;
-        const summaryBtn = document.getElementById('filterSummaryBtn');
-        if (summaryBtn) summaryBtn.hidden = false;
-        const cb = document.getElementById('filterCollapseCount');
-        if (cb) cb.hidden = true;
+        /* 空间充足：显示"筛选条件"入口，徽标 = 已设置条件数 */
+        collapseBtn.hidden = false;
+        if (cb) {
+          cb.hidden = appliedCount === 0;
+          cb.textContent = appliedCount ? ` ${appliedCount}` : '';
+          cb.style.fontWeight = '600';
+        }
         return;
       }
-      /* 需要折叠：显示折叠按钮，并把"筛选汇总"也一起收纳（只留"筛选条件"一个入口） */
+      /* 需要折叠：从右往左收纳，徽标 = 被收纳的条件数 */
       collapseBtn.hidden = false;
-      const summaryBtn = document.getElementById('filterSummaryBtn');
-      if (summaryBtn) summaryBtn.hidden = true;
       const budget2 = budget - (collapseBtn.getBoundingClientRect().width + 8);
       let used = totalW;
       let collapsed = 0;
-      for (let i = fields.length - 1; i >= 0 && used > budget2; i--) {
-        const w = fields[i].querySelector('.filter-trigger').getBoundingClientRect().width + 8;
-        fields[i].classList.add('is-collapsed');
+      /* 从右往左先收纳未应用的控件；还不够就把已设置的筛选结果也一起收纳 */
+      const fold = (f) => {
+        const w = f.querySelector('.filter-trigger').getBoundingClientRect().width + 8;
+        f.classList.add('is-collapsed');
         used -= w;
         collapsed++;
-      }
-      const cb = document.getElementById('filterCollapseCount');
+      };
+      const unapplied = fields.filter((f) => !f.classList.contains('is-applied'));
+      const applied = fields.filter((f) => f.classList.contains('is-applied'));
+      for (let i = unapplied.length - 1; i >= 0 && used > budget2; i--) fold(unapplied[i]);
+      for (let i = applied.length - 1; i >= 0 && used > budget2; i--) fold(applied[i]);
       if (cb) {
         cb.hidden = collapsed === 0;
         cb.textContent = collapsed ? ` ${collapsed}` : '';
+        cb.style.fontWeight = '600';
       }
     }
 
     window.addEventListener('resize', () => updateFilterCollapse());
-    document.getElementById('filterCollapseBtn').addEventListener('click', () => {
-      document.getElementById('filterSummaryBtn').click();
-    });
 
     document.getElementById('searchInput').addEventListener('input', () => {
       openMenuId = null;
@@ -3279,7 +3274,7 @@
     /** 筛选汇总（PRD 4.5：查找筛选项 + 已应用 + 可用项；内层编辑写草稿，外层保存一次查询） */
     (function bindFilterSummary() {
       const modal = document.getElementById('filterSummaryModal');
-      const openBtn = document.getElementById('filterSummaryBtn');
+      const openBtn = document.getElementById('filterCollapseBtn');
       const appliedCard = document.getElementById('filterSummaryAppliedCard');
       const appliedBox = document.getElementById('filterSummaryApplied');
       const appliedCount = document.getElementById('filterSummaryAppliedCount');
@@ -3325,8 +3320,10 @@
             <span>${summaryDraft[k].label}</span>
             <button type="button" data-remove-chip="${k}" aria-label="清除${FILTER_TITLES[k] || k}">×</button>
           </span>`).join('');
-        /* 可用项 */
-        const fields = availableFields().filter(([, pill, desc]) => {
+        /* 可用项：已应用到卡片里的基础字段不再重复出现在列表 */
+        const baseKeys = ['date', 'status', 'sender', 'quick'];
+        const fields = availableFields().filter(([k, pill, desc]) => {
+          if (summaryDraft[k] && baseKeys.includes(k)) return false;
           if (!q) return true;
           const text = (pill + desc).replace(/<[^>]+>/g, '');
           return text.includes(q);
@@ -3413,6 +3410,7 @@
         </div>`;
         pop.innerHTML = body;
         pop.style.position = 'fixed';
+        pop.setAttribute('data-inner-field', key);
         document.body.appendChild(pop);
         /* 默认出现在行下方（fixed 锚定行位置），空间不够再翻转到上方 */
         const rect = row.getBoundingClientRect();
@@ -3452,7 +3450,11 @@
       availBox.addEventListener('click', (e) => {
         const row = /** @type {HTMLElement} */ (e.target).closest('[data-avail-field]');
         if (!row) return;
-        if (innerPop && row.contains(innerPop)) return;
+        /* 已在该字段开着则关闭（toggle）；否则打开新浮层 */
+        if (innerPop && innerPop.getAttribute('data-inner-field') === row.getAttribute('data-avail-field')) {
+          closeInnerPop();
+          return;
+        }
         openInnerPop(row, row.getAttribute('data-avail-field'));
       });
 
