@@ -1,0 +1,9 @@
+{
+  "name": "front-aip-design",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node scripts/build.js"
+  }
+}
