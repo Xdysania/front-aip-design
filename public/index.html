@@ -1,27 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AIP 设计稿</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 32px; background: #f5f7fb; color: #17223b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
-    main { width: min(100%, 680px); padding: 56px; background: white; border: 1px solid #e7ebf2; border-radius: 24px; }
-    .label { color: #4263eb; font-size: 13px; font-weight: 600; letter-spacing: 3px; }
-    h1 { margin: 20px 0 16px; font-size: clamp(32px, 6vw, 46px); letter-spacing: -1px; }
-    p { color: #657087; font-size: 16px; line-height: 1.8; margin: 0; }
-    footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #edf0f5; font-size: 13px; color: #7c879c; }
-    @media (max-width: 480px) { body { padding: 20px; } main { padding: 32px 24px; } }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIP Design · 设计稿预览</title>
+  <link rel="stylesheet" href="shared/fonts/geist-sans.css" />
+  <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-  <main>
-    <span class="label">AIP DESIGN</span>
-    <h1>AIP 设计稿</h1>
-    <p>这里将集中展示 AIP 产品的页面设计与交互原型。</p>
-    <p>设计稿整理中，敬请期待。</p>
-    <footer>设计预览 · 仅供内部交流</footer>
+  <div class="cursor is-hidden" aria-hidden="true">
+    <div class="cursor__blob" data-cursor-blob></div>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar__brand" href="./" aria-label="AIP Design 首页" data-cursor="hover">
+      <svg class="topbar__mark" viewBox="0 0 76 65" aria-hidden="true">
+        <path fill="currentColor" d="M37.5 0L75 65H0L37.5 0Z" />
+      </svg>
+      <span class="topbar__name">AIP Design</span>
+    </a>
+    <nav class="topbar__nav" aria-label="主导航">
+      <a href="#versions" data-cursor="hover">版本</a>
+    </nav>
+  </header>
+
+  <main class="hero">
+    <section class="hero__panel" id="versions" aria-labelledby="versions-title">
+      <p class="hero__eyebrow">法大大 FASC</p>
+      <h1 id="versions-title" class="hero__title">在线设计稿</h1>
+      <p class="hero__lead">按版本浏览可交互 HTML 原型。展开分类后进入具体需求预览。</p>
+      <div class="version-list" data-version-list></div>
+    </section>
   </main>
+
+  <script src="shared/format-updated-at.js"></script>
+  <script src="shared/cursor.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+{
+    "versions": [
+        {
+            "id": "0.1",
+            "name": "0.1",
+            "open": true,
+            "requirements": [
+                {
+                    "id": "signing-task-list",
+                    "title": "签署任务列表结构调整",
+                    "href": "versions/0.1/signing-task-list/",
+                    "updatedAt": "2026-09-15T12:24:08"
+                }
+            ]
+        }
+    ]
+}

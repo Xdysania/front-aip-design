@@ -1,0 +1,87 @@
+/**
+ * Bibata Modern Ice 自定义光标（高清 SVG + 移动惯性倾斜）
+ * 资源：https://github.com/ful1e5/Bibata_Cursor （GPL-3.0）
+ * 视觉约 0.7× 基准（22px）；热点按官方 256 画布比例
+ */
+:root {
+  --bibata-size: 22px;
+  /* 256 画布热点 → 22px */
+  --bibata-hot-x: 4.73px;
+  --bibata-hot-y: 1.46px;
+  --bibata-hot-x-hover: 9.8px;
+  --bibata-hot-y-hover: 1.55px;
+}
+
+html,
+body,
+a,
+button,
+summary,
+[data-cursor="hover"],
+.portal-card,
+.req-link,
+.version__summary,
+.topbar__nav a,
+.topbar__brand {
+  cursor: none !important;
+}
+
+.cursor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: visible;
+}
+
+.cursor__blob {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--bibata-size);
+  height: var(--bibata-size);
+  margin: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("./bibata-modern-ice/left_ptr.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform: translate3d(-200px, -200px, 0);
+  transform-origin: var(--bibata-hot-x) var(--bibata-hot-y);
+  will-change: transform;
+  backface-visibility: hidden;
+  pointer-events: none;
+  contain: style paint;
+  /* SVG 矢量，避免位图缩放发糊 */
+  image-rendering: auto;
+}
+
+.cursor.is-hover .cursor__blob {
+  background-image: url("./bibata-modern-ice/hand2.svg");
+  transform-origin: var(--bibata-hot-x-hover) var(--bibata-hot-y-hover);
+}
+
+.cursor.is-hidden .cursor__blob {
+  opacity: 0;
+}
+
+@media (hover: none), (pointer: coarse) {
+  html,
+  body,
+  a,
+  button,
+  summary,
+  [data-cursor="hover"],
+  .portal-card,
+  .req-link,
+  .version__summary,
+  .topbar__nav a,
+  .topbar__brand {
+    cursor: auto !important;
+  }
+
+  .cursor {
+    display: none !important;
+  }
+}

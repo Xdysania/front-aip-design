@@ -1,0 +1,3921 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-skin="docusign">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>协议 · 签署任务列表结构调整 0.1（AIP）</title>
+  <!--
+    AIP 0.1 · 签署任务列表结构调整（r21）。
+    在 AIP v1 典型页面基础上实现：一级导航“协议”；全部任务 / 草稿 / 进行中 / 已完成状态入口；
+    访问范围（我的签署 / 全部签署）；日期、状态、发起人、快捷筛选与筛选汇总；任务文件夹独立页；
+    记录与处理五项原页面归集。默认皮肤 DocuSign 风（法大大蓝）；可切 LibraTech 悬浮侧栏风。
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="assets/components/fdd-home/home.css" />
+  <style>
+    :root {
+      --fdd-brand: #0059ef;
+      --fdd-brand-hover: #004ed6;
+      --fdd-brand-deep: #174ea6;
+      --fdd-brand-soft: #e8f1ff;
+      --fdd-accent: #42c5ff;
+      --fdd-ink: rgba(28, 43, 51, 0.9);
+      --fdd-ink-2: rgba(28, 43, 51, 0.7);
+      --fdd-ink-3: rgba(28, 43, 51, 0.5);
+      --fdd-ink-muted: rgba(28, 43, 51, 0.62);
+      --fdd-line: rgba(28, 43, 51, 0.14);
+      --fdd-line-soft: rgba(28, 43, 51, 0.08);
+      --fdd-line-strong: rgba(28, 43, 51, 0.5);
+      --fdd-bg: #ffffff;
+      --fdd-bg-sidebar: #f5f7f8;
+      --fdd-bg-hover: rgba(28, 43, 51, 0.05);
+      --fdd-bg-active: rgba(28, 43, 51, 0.1);
+      --fdd-bg-muted: rgba(28, 43, 51, 0.05);
+      --fdd-danger: #c4313b;
+      --fdd-success: #00875c;
+      --fdd-font: "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", Helvetica, Arial, sans-serif;
+      --fdd-header-h: 64px;
+      --fdd-sidebar-w: 280px;
+      --fdd-radius: 4px;
+      --fdd-radius-pill: 9999px;
+      --fdd-tab-indicator: 3px;
+      --fdd-table-head-h: 44px;
+      --fdd-table-row-h: 67px;
+      --fdd-progress-h: 3px;
+      --fdd-progress-radius: 0;
+      --fdd-shadow-dropdown: none;
+      --fdd-shadow-menu: none;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: var(--fdd-font);
+      color: var(--fdd-ink);
+      background: var(--fdd-bg);
+      -webkit-font-smoothing: antialiased;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
+    .ico { flex-shrink: 0; display: block; }
+
+    /* AIP v0 Icon（docs/icons.md · Phosphor） */
+    .aip-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; line-height: 1; color: var(--fdd-ink-2);
+    }
+    .aip-icon__svg { display: block; width: 1em; height: 1em; }
+    .aip-icon--sm { font-size: 16px; width: 16px; height: 16px; }
+    .aip-icon--md { font-size: 20px; width: 20px; height: 20px; }
+    .nav-btn .aip-icon,
+    .nav-tool .aip-icon,
+    .folder-head .aip-icon { color: inherit; }
+
+    /* —— Header（对齐 DocuSign 顶栏：logo + 分隔 + 全高 Tab 下划线） —— */
+    .app-header {
+      position: sticky; top: 0; z-index: 40;
+      height: var(--fdd-header-h);
+      display: flex; align-items: stretch; justify-content: space-between;
+      padding: 0 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--fdd-line);
+    }
+    .header-left {
+      display: flex; align-items: stretch; min-width: 0; height: 100%;
+    }
+    .brand {
+      display: flex; align-items: center;
+      align-self: center;
+      min-width: 58px; height: 29px;
+      text-decoration: none; flex: none;
+    }
+    .brand img {
+      display: block; border: 0;
+      width: auto; height: 29px; max-height: 29px; /* 原 36px × 80% */
+    }
+    .header-tabs {
+      display: flex; list-style: none; margin: 0; padding: 0; height: 100%;
+      margin-inline-start: 64px; /* 原分隔线前 40px + 再加大 24px */
+    }
+    .header-tabs li { display: flex; height: 100%; }
+    .header-tabs button {
+      position: relative;
+      display: flex; align-items: center;
+      height: 100%; padding: 0 24px; border: 0; border-radius: 0;
+      background: transparent;
+      color: var(--fdd-ink-2);
+      font-size: 16px; font-weight: 600; line-height: 24px;
+      white-space: nowrap;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .header-tabs button::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+      height: var(--fdd-tab-indicator); width: 100%; margin: auto;
+      background: transparent;
+      transition: background-color 0.2s;
+    }
+    .header-tabs button:hover {
+      color: var(--fdd-ink); background: var(--fdd-bg-hover); text-decoration: none;
+    }
+    .header-tabs button.active { color: var(--fdd-brand); }
+    .header-tabs button.active::after { background: var(--fdd-brand); }
+    .header-right { display: flex; align-items: center; gap: 0; height: 100%; }
+    .btn-upgrade {
+      height: 32px; margin-right: 8px; padding: 4px 8px; border: 0; border-radius: var(--fdd-radius-pill);
+      background: var(--fdd-brand); color: #fff;
+      font-size: 14px; font-weight: 500; line-height: 20px;
+    }
+    .btn-upgrade:hover { background: var(--fdd-brand-hover); }
+    .icon-btn {
+      width: 44px; height: 100%; display: grid; place-items: center;
+      border: 0; border-radius: 0; background: transparent; color: var(--fdd-ink-2);
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .icon-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .avatar-wrap { position: relative; }
+    .avatar {
+      width: 32px; height: 32px; padding: 0;
+      display: grid; place-items: center;
+      border: 0; border-radius: 50%;
+      background: #e8f1ff; color: var(--fdd-brand);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .avatar-menu {
+      position: absolute; top: calc(100% + 8px); right: 0; z-index: 80;
+      width: 248px; padding: 6px;
+      border: 0; border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(28, 43, 51, 0.06), 0 12px 32px rgba(28, 43, 51, 0.16), 0 24px 64px rgba(28, 43, 51, 0.12);
+      animation: nsPopoverIn 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-origin: top right;
+    }
+    .avatar-menu[hidden] { display: none !important; }
+    .avatar-menu__head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 10px 12px; border-bottom: 1px solid var(--fdd-line-soft);
+    }
+    .avatar--lg { width: 40px; height: 40px; font-size: 15px; }
+    .avatar-menu__info b { display: block; font-size: 14px; font-weight: 600; color: var(--fdd-ink); line-height: 20px; }
+    .avatar-menu__info small { display: block; font-size: 12px; color: var(--fdd-ink-3); line-height: 16px; }
+    .avatar-menu__list { padding: 4px 0; }
+    .avatar-menu__list button,
+    .avatar-menu__foot button {
+      width: 100%; height: 34px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      color: var(--fdd-ink); font-size: 13px; text-align: left; cursor: pointer;
+    }
+    .avatar-menu__list button:hover,
+    .avatar-menu__foot button:hover { background: var(--fdd-bg-hover); }
+    .avatar-menu__foot { padding: 4px 0 2px; border-top: 1px solid var(--fdd-line-soft); }
+    .avatar-menu__foot button { color: var(--fdd-danger); }
+      width: 64px; height: 100%; padding: 0 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 9999px;
+      display: grid; place-items: center;
+      background: #caf4fc; color: #035a6c; font-size: 14px; font-weight: 600;
+    }
+    @media (max-width: 1100px) {
+      .header-tabs button { padding: 0 12px; }
+      .header-tabs { margin-inline-start: 40px; }
+    }
+
+    /* —— Shell —— */
+    .page-shell { display: flex; min-height: calc(100vh - var(--fdd-header-h)); }
+    .view-home {
+      display: none;
+      min-height: calc(100vh - var(--fdd-header-h));
+      overflow: auto;
+    }
+    body[data-view="home"] .page-shell { display: none; }
+    body[data-view="home"] .view-home { display: flex; }
+    body[data-view="contracts"] .view-home { display: none; }
+    body[data-view="contracts"] .page-shell { display: flex; }
+    .contract-sidebar {
+      width: var(--fdd-sidebar-w); flex: 0 0 var(--fdd-sidebar-w);
+      background: var(--fdd-bg-sidebar);
+      border-right: 1px solid var(--fdd-line-soft);
+    }
+    .contract-side-inner {
+      height: calc(100vh - var(--fdd-header-h));
+      display: flex; flex-direction: column;
+    }
+    .contract-start { height: 72px; flex: 0 0 72px; padding: 16px; }
+    .contract-launch {
+      width: 100%; height: 40px; padding: 0 12px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 0; border-radius: var(--fdd-radius);
+      background: var(--fdd-brand); color: #fff;
+      font-size: 16px; font-weight: 500; line-height: 24px;
+    }
+    .contract-launch:hover { background: var(--fdd-brand-hover); }
+    /* —— 发起签署 hover 菜单（PRD 2.4：直接创建 / 模板创建 / 批量创建） —— */
+    .launch-wrap { position: relative; width: 100%; height: 100%; }
+    .contract-launch .launch-caret { margin-left: 0; transition: transform 0.15s; }
+    .launch-wrap:hover .launch-caret,
+    .launch-wrap.is-open .launch-caret { transform: rotate(180deg); }
+    .launch-menu {
+      position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 60;
+      padding: 6px;
+      border: 0; border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(28, 43, 51, 0.06), 0 12px 32px rgba(28, 43, 51, 0.16), 0 24px 64px rgba(28, 43, 51, 0.12);
+      opacity: 0; visibility: hidden; transform: translateY(-4px);
+      transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    }
+    .launch-wrap:hover .launch-menu,
+    .launch-wrap.is-open .launch-menu {
+      opacity: 1; visibility: visible; transform: translateY(0);
+    }
+    .launch-menu button {
+      width: 100%; padding: 8px 10px;
+      display: flex; align-items: center; gap: 10px;
+      border: 0; border-radius: 8px; background: transparent;
+      color: var(--fdd-ink); text-align: left; cursor: pointer;
+    }
+    .launch-menu button:hover { background: var(--fdd-bg-hover); }
+    .launch-item-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .launch-item-text b { font-size: 14px; font-weight: 600; line-height: 20px; }
+    .launch-item-text small { font-size: 12px; color: var(--fdd-ink-3); line-height: 16px; }
+    .launch-menu .aip-icon { color: var(--fdd-ink); }
+    .launch-menu button:hover .aip-icon { color: var(--fdd-brand); }
+    .contract-nav-scroll {
+      flex: 1; min-height: 0; overflow: auto;
+      /* 对齐 DocuSign：细滚动条 + 浅色滑块，避免系统默认粗黑条 */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
+    }
+    .contract-nav-scroll::-webkit-scrollbar { width: 6px; }
+    .contract-nav-scroll::-webkit-scrollbar-track { background: transparent; }
+    .contract-nav-scroll::-webkit-scrollbar-thumb {
+      background: rgba(28, 43, 51, 0.18);
+      border-radius: 999px;
+    }
+    .contract-nav-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(28, 43, 51, 0.28);
+    }
+
+    .nav-btn {
+      position: relative; width: 100%;
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid transparent; background: transparent;
+      text-align: left; color: var(--fdd-ink); font-size: 14px; line-height: 19.6px;
+    }
+    .nav-btn:hover { background: var(--fdd-bg-hover); }
+    .nav-btn.active { background: var(--fdd-bg-active); font-weight: 600; }
+    .nav-btn.active::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      border-radius: 0; background: var(--fdd-brand);
+    }
+    .nav-primary { height: 48px; padding: 11px 15px 11px 23px; font-weight: 600; }
+    .nav-secondary {
+      height: 41.5px; padding: 11px 15px 11px 59px;
+      color: var(--fdd-ink); font-weight: 400;
+    }
+    .nav-secondary.active { font-weight: 600; }
+
+    /* DocuSign 式「文件夹」模块：折叠后只显示模块头，展开才出子项 */
+    .folder-module {
+      position: relative;
+    }
+    .folder-module-head {
+      position: relative;
+      height: 48px; padding: 0;
+      display: flex; align-items: center;
+      width: 100%;
+    }
+    .folder-module-head:hover { background: var(--fdd-bg-hover); }
+    /* 点「文件夹」一级选中：与 .nav-btn.active 同款 */
+    .folder-module-head.is-active {
+      background: var(--fdd-bg-active);
+    }
+    .folder-module-head.is-active::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: var(--fdd-brand);
+    }
+    .folder-module-toggle {
+      flex: 1; min-width: 0; height: 100%; padding: 0 4px 0 23px;
+      display: inline-flex; align-items: center; gap: 12px;
+      border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 14px; font-weight: 600; text-align: left;
+    }
+    .folder-module-toggle:hover { background: transparent; }
+    .folder-module-more {
+      width: 48px; height: 100%; flex-shrink: 0;
+      display: grid; place-items: center;
+      border: 0; border-radius: 0; background: transparent; color: var(--fdd-ink-2);
+    }
+    .folder-module-more:hover { background: transparent; color: var(--fdd-ink); }
+    .folder-module-body { display: none; }
+    .folder-module.is-open .folder-module-body { display: block; }
+    .folder-item {
+      position: relative;
+      width: 100%; height: 40px; margin-left: 0;
+      padding: 0 15px 0 59px;
+      display: flex; align-items: center; gap: 8px;
+      border: 0; background: transparent; color: var(--fdd-ink); font-size: 14px; text-align: left;
+      box-sizing: border-box;
+    }
+    .folder-item:hover { background: var(--fdd-bg-hover); }
+    /* 二级文件夹选中：与 .nav-btn.active 一致 */
+    .folder-item.active {
+      background: var(--fdd-bg-active);
+      font-weight: 600;
+    }
+    .folder-item.active::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      border-radius: 0; background: var(--fdd-brand);
+    }
+    .folder-item span {
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .folder-item b {
+      margin-left: auto; flex-shrink: 0;
+      min-width: 24px; height: 20px; padding: 0 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-sizing: border-box;
+      border-radius: 2px; background: rgba(28, 43, 51, 0.08);
+      color: var(--fdd-ink-2); font-size: 11px; font-weight: 500;
+      line-height: 1; text-align: center;
+    }
+
+    /* —— AIP 0.1：任务文件夹树（子级缩进 20px / 结构父级 / 查找 / 更多菜单） —— */
+    .folder-more-menu {
+      position: absolute; top: 44px; right: 8px; z-index: 40;
+      width: 168px; padding: 4px;
+      border: 1px solid var(--fdd-line); border-radius: 6px;
+      background: #fff; box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+    }
+    .folder-more-menu[hidden] { display: none !important; }
+    .folder-more-menu button {
+      width: 100%; height: 32px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      text-align: left; font-size: 13px; color: var(--fdd-ink);
+    }
+    .folder-more-menu button:hover { background: var(--fdd-bg-hover); }
+    .folder-search {
+      display: flex; align-items: center; gap: 6px;
+      margin: 8px 12px 4px 23px; padding: 0 8px;
+      height: 30px; border: 1px solid var(--fdd-line); border-radius: var(--fdd-radius);
+      background: #fff;
+    }
+    .folder-search[hidden] { display: none !important; }
+    .folder-search input {
+      flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: 13px;
+    }
+    .folder-tree-row {
+      display: flex; align-items: center; width: 100%;
+      position: relative;
+    }
+    .folder-tree-row:hover { background: var(--fdd-bg-hover); }
+    .folder-tree-row.active { background: var(--fdd-bg-active); }
+    .folder-tree-row.active::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: var(--fdd-brand);
+    }
+    .folder-tree-caret {
+      width: 20px; height: 40px; flex-shrink: 0;
+      display: grid; place-items: center;
+      border: 0; background: transparent; color: var(--fdd-ink-3);
+    }
+    .folder-tree-caret svg { transition: transform 0.15s; }
+    .folder-tree-row.is-open > .folder-tree-caret svg { transform: rotate(180deg); }
+    .folder-tree-caret.is-leaf { visibility: hidden; }
+    .folder-tree-item {
+      flex: 1; min-width: 0; height: 40px; padding-right: 8px;
+      display: flex; align-items: center; gap: 8px;
+      border: 0; background: transparent; color: var(--fdd-ink); font-size: 14px; text-align: left;
+    }
+    .folder-tree-row.active .folder-tree-item { font-weight: 600; }
+    .folder-tree-item span {
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .folder-tree-item b {
+      margin-left: auto; flex-shrink: 0;
+      min-width: 24px; height: 20px; padding: 0 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-sizing: border-box;
+      border-radius: 2px; background: rgba(28, 43, 51, 0.08);
+      color: var(--fdd-ink-2); font-size: 11px; font-weight: 500;
+      line-height: 1; text-align: center;
+    }
+    .folder-tree-item.is-structural span { color: var(--fdd-ink-3); }
+    /* 文件夹行 ⋯ 节点操作按钮（hover 显示） */
+    .folder-node-more {
+      width: 28px; height: 28px; margin-right: 6px; flex-shrink: 0;
+      display: none; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2);
+      cursor: pointer;
+    }
+    .folder-tree-row:hover .folder-node-more,
+    .folder-node-more.is-open { display: grid; }
+    .folder-node-more:hover { background: var(--fdd-bg-hover-strong, #e8ebef); color: var(--fdd-ink); }
+    /* 节点操作菜单 */
+    .folder-node-menu {
+      position: fixed; z-index: 90;
+      min-width: 140px; padding: 4px;
+      border: 1px solid var(--fdd-line); border-radius: 8px;
+      background: #fff; box-shadow: var(--fdd-shadow-menu, 0 4px 16px rgba(28, 43, 51, 0.16));
+      animation: nsPopoverIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .folder-node-menu[hidden] { display: none !important; }
+    .folder-node-menu button {
+      width: 100%; height: 32px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      text-align: left; font-size: 13px; color: var(--fdd-ink);
+    }
+    .folder-node-menu button:hover { background: var(--fdd-bg-hover); }
+    .folder-tree-empty {
+      margin: 0; padding: 8px 15px 12px 59px;
+      color: var(--fdd-ink-3); font-size: 13px; line-height: 18px;
+    }
+
+    /* —— AIP 0.1：记录与处理折叠分组 —— */
+    .records-module { }
+    .records-module-toggle {
+      width: 100%; height: 48px; padding: 0 15px 0 23px;
+      display: flex; align-items: center; gap: 12px;
+      border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 14px; font-weight: 600; text-align: left;
+    }
+    .records-module-toggle:hover { background: var(--fdd-bg-hover); }
+    .records-caret { margin-left: auto; flex-shrink: 0; color: var(--fdd-ink-3); transition: transform 0.15s; }
+    .records-module.is-collapsed .records-caret { transform: rotate(-90deg); }
+    .records-module.is-collapsed .records-module-body { display: none; }
+    .records-module-body .nav-secondary { padding-left: 59px; }
+
+    .nav-section {
+      margin-top: 8px; padding-top: 8px;
+      position: relative;
+    }
+    .nav-section::before {
+      content: ""; position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
+      background: var(--fdd-line-soft);
+    }
+    .nav-tool {
+      width: 100%; height: 48px; padding: 11px 15px 11px 23px;
+      display: flex; align-items: center; gap: 12px;
+      border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 14px; text-align: left;
+    }
+    .nav-tool:hover { background: var(--fdd-bg-hover); }
+    .nav-tool .badge-new {
+      margin-left: auto; flex-shrink: 0;
+      min-width: 24px; height: 20px; padding: 0 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-sizing: border-box;
+      border-radius: 2px; background: rgba(28, 43, 51, 0.08);
+      color: var(--fdd-ink-2); font-size: 11px; font-weight: 500;
+      line-height: 1; text-align: center;
+    }
+
+    /* —— Main（扁平内容区，无装饰渐变） —— */
+    .contracts-page-content {
+      flex: 1; min-width: 0; background: #fff;
+    }
+    .contracts-workspace {
+      position: relative;
+      width: calc(100% - 80px); max-width: 1448px;
+      margin: 0 auto; padding: 32px 0 24px;
+    }
+    .contracts-titlebar {
+      height: 40px; display: flex; align-items: center;
+      margin-bottom: 24px;
+    }
+    .contracts-titlebar h1 {
+      margin: 0; font-size: 32px; font-weight: 400; line-height: 40px;
+      letter-spacing: -0.32px; color: var(--fdd-ink);
+    }
+    .title-meta { display: none; }
+
+    .envelope-controls {
+      display: flex; flex-wrap: nowrap; align-items: center; gap: 0;
+      margin-bottom: 8px; min-height: 44px;
+      position: relative; z-index: 5;
+    }
+    .envelope-search {
+      position: relative;
+      width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
+      display: flex; align-items: center; gap: 8px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff;
+    }
+    .envelope-search:focus-within { border-color: var(--fdd-brand); outline: 2px solid var(--fdd-brand-soft); outline-offset: 0; }
+    .envelope-search input {
+      flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: 14px;
+    }
+    .envelope-search input::-webkit-search-cancel-button { appearance: none; }
+    .envelope-search__clear {
+      display: none; flex-shrink: 0;
+      width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%;
+      background: transparent; color: var(--fdd-ink-3); font-size: 14px; line-height: 1; cursor: pointer;
+    }
+    .envelope-search__clear:not([hidden]) { display: grid; place-items: center; }
+    .envelope-search__clear:hover { color: var(--fdd-ink); }
+    .envelope-filters {
+      display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; flex: 1; min-width: 0;
+    }
+    .filter-triggers { display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; }
+    /* 折叠态：隐藏的触发器完全占位 */
+    .filter-field.is-collapsed { display: none !important; }
+    .filter-collapse-btn { flex-shrink: 0; }
+    /* hidden 属性强制隐藏（.filter-trigger 的 display:flex 会覆盖默认 [hidden]） */
+    #filterSummaryBtn[hidden] { display: none !important; }
+    .filter-chips {
+      display: none; align-items: center; flex-wrap: wrap; gap: 0;
+    }
+    .filter-chips:not(:empty) { display: inline-flex; }
+    .filter-chips:not(:empty) + .filter-sep { display: block; }
+    .filter-chip {
+      height: 32px; margin-right: 0;
+      display: inline-flex; align-items: stretch;
+      border-radius: var(--fdd-radius); overflow: hidden;
+      background: var(--fdd-bg-muted); color: var(--fdd-ink); font-size: 14px; white-space: nowrap;
+    }
+    .filter-chip + .filter-chip { margin-left: 8px; }
+    .filter-chip__label {
+      display: inline-flex; align-items: center; padding: 0 8px 0 12px;
+      font-weight: 500;
+    }
+    .filter-chip__remove {
+      width: 32px; border: 0; background: transparent; color: var(--fdd-ink);
+      display: grid; place-items: center; cursor: pointer; font-size: 16px; line-height: 1;
+    }
+    .filter-chip__remove:hover { background: var(--fdd-bg-hover-strong, #e8ebef); }
+    .filter-sep {
+      display: none; width: 1px; height: 26px; margin: 0 8px 0 8px;
+      background: var(--fdd-line); flex-shrink: 0;
+    }
+    .filter-triggers {
+      display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    }
+    .filter-field {
+      position: relative;
+    }
+    .filter-field[hidden] { display: none !important; }
+    .filter-trigger {
+      height: 32px; padding: 0 10px 0 12px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 14px; white-space: nowrap;
+      cursor: pointer;
+    }
+    .filter-trigger:hover { background: var(--fdd-bg-hover); }
+    .filter-field.is-open .filter-trigger {
+      background: var(--fdd-bg-muted); border-color: var(--fdd-line-strong);
+    }
+    .filter-trigger .aip-icon { color: var(--fdd-ink-2); }
+    /* 已应用：触发按钮变灰底 chip（对齐典型页"状态：所选值 ×"） */
+    .filter-field.is-applied .filter-trigger {
+      border-color: transparent; background: var(--fdd-bg-muted); font-weight: 500;
+      gap: 0; padding: 0;
+    }
+    .filter-field.is-applied .filter-trigger__label { padding: 0 10px 0 12px; }
+    /* 文案与清除 × 之间的竖向分割线（对齐典型页） */
+    .filter-trigger__clear {
+      display: inline-grid; place-items: center;
+      width: 32px; height: 100%; margin-left: 0;
+      border-radius: 0; color: var(--fdd-ink); font-size: 16px; line-height: 1;
+      cursor: pointer;
+      border-left: 1px solid var(--fdd-line);
+    }
+    .filter-trigger__clear:hover { background: var(--fdd-bg-hover-strong, #e8ebef); color: var(--fdd-ink); }
+    .filter-trigger__clear[hidden] { display: none !important; }
+    .filter-trigger .aip-icon[hidden] { display: none !important; }
+    /* 已应用筛选与未应用下拉之间的竖向分割线 */
+    .filter-sep-applied {
+      display: inline-block; width: 1px; height: 22px; margin: 0 8px 0 0;
+      background: var(--fdd-line); align-self: center; flex-shrink: 0;
+    }
+    .filter-popover {
+      position: absolute; top: calc(100% + 10px); left: 0; z-index: 50;
+      width: 248px; padding: 14px 14px 10px;
+      border-radius: 6px; background: #fff;
+      box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+      color: var(--fdd-ink);
+    }
+    .filter-popover[hidden] { display: none !important; }
+    .filter-popover::before {
+      content: ""; position: absolute; top: -6px; left: 28px;
+      width: 10px; height: 10px;
+      background: #fff;
+      border-left: 1px solid rgba(28, 43, 51, 0.08);
+      border-top: 1px solid rgba(28, 43, 51, 0.08);
+      transform: rotate(45deg);
+    }
+    .filter-popover__title {
+      margin: 0; font-size: 16px; font-weight: 700; line-height: 22px;
+    }
+    .filter-popover__sub {
+      margin: 2px 0 10px; font-size: 12px; color: var(--fdd-ink-3); line-height: 16px;
+    }
+    .filter-popover__op {
+      width: 72px; height: 32px; margin-bottom: 10px; padding: 0 8px;
+      display: inline-flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; font-size: 14px; color: var(--fdd-ink);
+    }
+    .filter-popover__options {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;
+    }
+    .filter-popover__options label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; cursor: pointer; line-height: 20px;
+    }
+    .filter-popover__options input {
+      width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand);
+    }
+    .filter-popover__actions {
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .filter-popover__cancel {
+      height: 32px; padding: 0 14px; border: 0; border-radius: var(--fdd-radius);
+      background: var(--fdd-bg-muted); color: var(--fdd-ink); font-size: 14px; font-weight: 600;
+    }
+    .filter-popover__cancel:hover { background: var(--fdd-bg-hover-strong, #e8ebef); }
+    .filter-popover__apply {
+      height: 32px; padding: 0 14px; border: 0; border-radius: var(--fdd-radius);
+      background: var(--fdd-brand); color: #fff; font-size: 14px; font-weight: 600;
+    }
+    .filter-popover__apply:hover { background: var(--fdd-brand-hover); }
+    .filter-popover__clear {
+      height: 32px; padding: 0 10px; margin-right: auto; border: 0; background: transparent;
+      color: var(--fdd-brand); font-size: 13px; cursor: pointer;
+    }
+    .filter-popover__clear:hover { text-decoration: underline; }
+    .filter-popover__options--scroll { max-height: 264px; overflow: auto; padding-right: 4px; }
+
+    /* —— AIP 0.1：范围选择器 / 应用条件行 / 导出刷新 / 批量工具条 —— */
+    .contracts-titlebar .scope-switch { margin-left: auto; }
+    .scope-switch {
+      padding: 2px;
+      display: inline-flex; align-items: center; gap: 2px;
+      border-radius: var(--fdd-radius); background: var(--fdd-bg-muted);
+    }
+    .scope-switch[hidden] { display: none !important; }
+    .scope-switch button {
+      height: 28px; padding: 0 12px; border: 0; border-radius: 3px;
+      background: transparent; color: var(--fdd-ink-2);
+      font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer;
+    }
+    .scope-switch button.is-on {
+      background: #fff; color: var(--fdd-ink); font-weight: 600;
+      box-shadow: 0 1px 2px rgba(28, 43, 51, 0.12);
+    }
+    .toolbar-icon-btn {
+      width: 32px; height: 32px; margin-left: 4px;
+      display: inline-grid; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2);
+    }
+    .toolbar-icon-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .toolbar-icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .export-menu {
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 50;
+      width: 184px; padding: 4px;
+      border: 1px solid var(--fdd-line); border-radius: 6px;
+      background: #fff; box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+    }
+    .export-menu[hidden] { display: none !important; }
+    .export-menu button {
+      width: 100%; height: 32px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      text-align: left; font-size: 13px; color: var(--fdd-ink);
+    }
+    .export-menu button:hover { background: var(--fdd-bg-hover); }
+    .export-menu button:disabled { color: var(--fdd-ink-3); cursor: not-allowed; background: transparent; }
+    .export-wrap { position: relative; display: inline-flex; }
+
+    .applied-row {
+      display: none; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin: 8px 0 12px; font-size: 13px; color: var(--fdd-ink-3);
+    }
+    .applied-row:not(:empty) { display: flex; }
+    .applied-row .filter-chip { height: 28px; }
+    .applied-row .filter-chip__remove { width: 28px; }
+    .applied-chip--fixed .filter-chip__remove { display: none; }
+    .applied-clearall {
+      height: 28px; padding: 0 4px; border: 0; background: transparent;
+      color: var(--fdd-brand); font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .applied-clearall:hover { text-decoration: underline; }
+
+    /* 批量操作：悬浮在列表上方的同风格投影卡片 */
+    /* 批量操作：出现在表头上方的横条（DocuSign 式），替换筛选行 */
+    .batch-bar {
+      display: none; align-items: center; gap: 8px;
+      position: absolute; bottom: calc(100% + 8px); left: 0; right: 0;
+      z-index: 30;
+      padding: 8px 14px;
+      border: 1px solid var(--fdd-line); border-radius: 10px;
+      background: #fff; color: var(--fdd-ink); font-size: 13px;
+      box-shadow: var(--fdd-shadow-menu);
+      animation: nsBatchIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes nsBatchIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .batch-bar.is-on { display: flex; }
+    /* 批量条出现时，表格下移让出空间（批量条出现在表头上方，与筛选行并存） */
+    .envelope-table-shell:has(.batch-bar.is-on) { margin-top: 56px; }
+    #batchCount { color: var(--fdd-ink-2); font-weight: 500; margin-right: 4px; }
+    .batch-bar button {
+      height: 30px; padding: 0 12px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 13px; font-weight: 500;
+    }
+    .batch-bar button:hover { background: var(--fdd-bg-hover); }
+    .batch-bar .batch-primary {
+      border-color: var(--fdd-brand); background: var(--fdd-brand); color: #fff;
+    }
+    .batch-bar .batch-primary:hover { background: var(--fdd-brand-hover); border-color: var(--fdd-brand-hover); }
+
+    /* —— AIP 0.1：状态列待办 / 等待 / 进度 —— */
+    .envelope-state { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
+    .todo-text {
+      padding: 0; border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 12px; line-height: 17px;
+    }
+    .todo-text--mine { color: var(--fdd-brand); font-weight: 600; }
+    .todo-text--waiting {
+      color: var(--fdd-brand);
+      border-bottom: 1px dashed rgba(0, 89, 239, 0.5); cursor: pointer;
+    }
+    .todo-text--plain { color: var(--fdd-ink-2); }
+    .envelope-progress-label {
+      display: flex; justify-content: space-between; width: 100%;
+      color: var(--fdd-ink-3); font-size: 11px; line-height: 14px;
+    }
+    .envelope-state.is-completed .status-check {
+      flex-shrink: 0; width: 20px; height: 20px; color: var(--fdd-success);
+    }
+    .envelope-state.is-completed .todo-text { border-bottom: 0; font-size: 14px; line-height: 20px; }
+
+    /* —— AIP 0.1：行内浮层（收件人名单 / 等待名单） —— */
+    .pop-wrap { position: relative; display: inline-block; max-width: 100%; z-index: 5; }
+    .mini-popover {
+      position: fixed; z-index: 95;
+      width: 264px; padding: 12px 0 8px;
+      border: 1px solid var(--fdd-line); border-radius: 6px;
+      background: #fff; box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+      animation: nsPopoverIn 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-origin: top left;
+    }
+    @keyframes nsPopoverIn {
+      from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .mini-popover[hidden] { display: none !important; }
+    .mini-popover__head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px 8px; border-bottom: 1px solid var(--fdd-line-soft);
+      font-size: 13px; font-weight: 600; color: var(--fdd-ink);
+    }
+    .mini-popover__close {
+      width: 24px; height: 24px; border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink-3); font-size: 14px; cursor: pointer;
+    }
+    .mini-popover__close:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .mini-popover__list {
+      max-height: 260px; overflow: auto; padding: 8px 12px 0;
+      scrollbar-width: thin; scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
+    }
+    .mini-popover__item { padding: 6px 0; border-bottom: 1px solid var(--fdd-line-soft); }
+    .mini-popover__item:last-child { border-bottom: 0; }
+    .mini-popover__item .p-name { display: block; color: var(--fdd-ink); font-size: 13px; line-height: 18px; }
+    .mini-popover__item .p-time { display: block; color: var(--fdd-ink-3); font-size: 12px; line-height: 16px; margin-top: 2px; }
+    .party-more-btn {
+      padding: 0 2px; border: 0; background: transparent;
+      color: var(--fdd-brand); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .party-more-btn:hover { text-decoration: underline; }
+    .folder-link {
+      padding: 0; border: 0; background: transparent;
+      color: var(--fdd-ink-2); font-size: 14px; cursor: pointer;
+    }
+    .folder-link:hover { color: var(--fdd-brand); text-decoration: underline; }
+
+    /* —— AIP 0.1：筛选汇总模态 / 选择收件人 / 原有页面承载 —— */
+    body.is-modal-open { overflow: hidden; }
+    .envelope-table-shell.is-pop-locked { overflow: hidden !important; }
+    .ns-modal-mask {
+      position: fixed; inset: 0; z-index: 80;
+      display: grid; place-items: center;
+      background: rgba(28, 43, 51, 0.42);
+      animation: nsMaskIn 0.16s ease;
+    }
+    .ns-modal-mask[hidden] { display: none !important; }
+    @keyframes nsMaskIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .ns-modal {
+      width: 560px; max-width: calc(100vw - 48px); max-height: calc(100vh - 96px);
+      display: flex; flex-direction: column;
+      border-radius: 8px; background: #fff;
+      box-shadow: 0 12px 40px rgba(28, 43, 51, 0.24);
+      animation: nsModalIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes nsModalIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .ns-modal--wide { width: 640px; }
+    .ns-modal__head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px 12px;
+    }
+    .ns-modal__head h2 { margin: 0; font-size: 18px; font-weight: 700; line-height: 26px; }
+    .ns-modal__close {
+      width: 28px; height: 28px; border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink-3); font-size: 16px; cursor: pointer;
+    }
+    .ns-modal__close:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .ns-modal__body { flex: 1; min-height: 0; overflow: auto; padding: 0 20px 8px; }
+    .ns-modal__foot {
+      display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+      padding: 12px 20px 16px; border-top: 1px solid var(--fdd-line-soft);
+    }
+    .ns-modal__foot--split { justify-content: space-between; }
+    .ns-modal__foot-right { display: inline-flex; gap: 8px; }
+    .ns-modal__foot .btn-ghost {
+      height: 32px; padding: 0 14px; border: 0; border-radius: var(--fdd-radius);
+      background: var(--fdd-bg-muted); color: var(--fdd-ink); font-size: 14px; font-weight: 600;
+    }
+    .ns-modal__foot .btn-ghost:hover { background: var(--fdd-bg-hover-strong, #e8ebef); }
+    .ns-modal__foot .btn-solid {
+      height: 32px; padding: 0 14px; border: 0; border-radius: var(--fdd-radius);
+      background: var(--fdd-brand); color: #fff; font-size: 14px; font-weight: 600;
+    }
+    .ns-modal__foot .btn-solid:hover { background: var(--fdd-brand-hover); }
+    .ns-modal__foot .btn-solid:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .ns-modal--filter { width: 480px; }
+    .filter-applied-card {
+      margin-bottom: 14px; padding: 12px 14px;
+      border-radius: 8px; background: var(--fdd-bg-muted);
+    }
+    .filter-applied-card__head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; font-size: 14px; font-weight: 600; color: var(--fdd-ink);
+    }
+    .filter-applied-card__clearall {
+      height: 30px; padding: 0 12px;
+      display: inline-flex; align-items: center; gap: 5px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 13px; cursor: pointer;
+    }
+    .filter-applied-card__clearall:hover { background: var(--fdd-bg-hover-strong, #e8ebef); }
+    .filter-applied-card__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-applied-chip {
+      height: 30px; padding: 0 0 0 10px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: var(--fdd-radius); background: #fff;
+      border: 1px solid var(--fdd-line); color: var(--fdd-ink); font-size: 13px;
+      overflow: hidden;
+    }
+    .filter-applied-chip button {
+      width: 28px; height: 100%; border: 0; border-radius: 0;
+      background: transparent; color: var(--fdd-ink); font-size: 14px; cursor: pointer;
+      display: grid; place-items: center;
+      border-left: 1px solid var(--fdd-line);
+    }
+    .filter-applied-chip button:hover { background: var(--fdd-bg-hover-strong, #e8ebef); color: var(--fdd-ink); }
+    .filter-avail-row {
+      width: 100%; padding: 8px 10px;
+      display: flex; align-items: center; gap: 14px;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      text-align: left; cursor: pointer;
+    }
+    .filter-avail-row:hover { background: var(--fdd-bg-hover); }
+    .filter-avail-row__pill {
+      flex-shrink: 0; height: 32px; padding: 0 10px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 13px;
+    }
+    .filter-avail-row__pill .aip-icon { color: var(--fdd-ink-2); }
+    .filter-avail-row__desc { color: var(--fdd-ink-3); font-size: 13px; }
+    /* 筛选面板内层编辑浮层 */
+    .filter-inner-pop {
+      position: absolute; z-index: 20;
+      min-width: 240px; padding: 14px 14px 10px;
+      border: 1px solid var(--fdd-line); border-radius: 8px;
+      background: #fff; box-shadow: 0 8px 28px rgba(28, 43, 51, 0.2);
+      animation: nsPopoverIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .filter-inner-pop[hidden] { display: none !important; }
+    .filter-inner-pop__title { margin: 0 0 10px; font-size: 15px; font-weight: 700; }
+    .filter-inner-pop .filter-popover__options { margin-bottom: 12px; }
+    .filter-inner-pop__input {
+      width: 100%; height: 34px; padding: 0 10px; box-sizing: border-box;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      font-size: 14px; color: var(--fdd-ink); outline: none; margin-bottom: 12px;
+    }
+    .filter-inner-pop__input:focus { border-color: var(--fdd-brand); box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
+    .filter-inner-pop__actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .filter-inner-pop__actions button {
+      height: 30px; padding: 0 12px; border: 0; border-radius: var(--fdd-radius);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .filter-inner-pop__cancel { background: var(--fdd-bg-muted); color: var(--fdd-ink); }
+    .filter-inner-pop__apply { background: var(--fdd-brand); color: #fff; }
+    .filter-inner-pop__apply:hover { background: var(--fdd-brand-hover); }
+    .filter-modal-search {
+      position: relative; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+      height: 34px; padding: 0 10px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+    }
+    .filter-modal-search input { flex: 1; border: 0; outline: 0; background: transparent; font-size: 14px; }
+    .filter-modal-group { margin-bottom: 12px; }
+    .filter-modal-group > h3 {
+      margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--fdd-ink-3);
+    }
+    .filter-modal-item {
+      width: 100%; min-height: 34px; height: auto; padding: 6px 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      color: var(--fdd-ink); font-size: 14px; text-align: left; cursor: pointer;
+    }
+    .filter-modal-item:hover { background: var(--fdd-bg-hover); }
+    .filter-modal-item .val { color: var(--fdd-ink-3); font-size: 13px; }
+    .filter-modal-empty { margin: 24px 0; text-align: center; color: var(--fdd-ink-3); font-size: 13px; }
+    .filter-modal-clearall {
+      border: 0; background: transparent; color: var(--fdd-brand);
+      font-size: 13px; cursor: pointer; padding: 0;
+    }
+    .filter-modal-clearall:hover { text-decoration: underline; }
+
+    .party-dialog-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .party-dialog-table th, .party-dialog-table td {
+      padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--fdd-line-soft);
+    }
+    .party-dialog-table th { color: var(--fdd-ink-3); font-weight: 500; }
+    .party-dialog-table input { width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand); }
+    .party-dialog-scroll { max-height: 320px; overflow: auto; }
+
+    .legacy-page {
+      display: none; padding: 64px 0; text-align: center;
+    }
+    body[data-page-mode="legacy"] .contracts-workspace { display: none; }
+    .legacy-page.is-on { display: block; }
+    .legacy-page h2 { margin: 0 0 8px; font-size: 24px; font-weight: 600; color: var(--fdd-ink); }
+    .legacy-page p { margin: 0 auto 20px; max-width: 520px; color: var(--fdd-ink-3); font-size: 14px; line-height: 22px; }
+    .legacy-page .legacy-back {
+      height: 32px; padding: 0 14px; border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 14px; font-weight: 600;
+    }
+    .legacy-page .legacy-back:hover { background: var(--fdd-bg-hover); }
+    #pageTotal { color: var(--fdd-ink-3); margin-right: 8px; }
+    /* —— 列设置（PRD 5.6） —— */
+    .col-settings-th { text-align: right; }
+    .col-settings-btn {
+      width: 32px; height: 32px; margin-left: auto;
+      display: inline-grid; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2);
+      cursor: pointer;
+    }
+    .col-settings-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .ns-modal--col { width: 460px; }
+    .col-modal-tip { margin: 0 0 12px; color: var(--fdd-ink-3); font-size: 13px; line-height: 20px; }
+    .ns-modal--sm { width: 420px; }
+    .ns-field { display: block; margin-bottom: 14px; }
+    .ns-field__label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--fdd-ink-2); }
+    .ns-field__input {
+      width: 100%; height: 36px; padding: 0 10px; box-sizing: border-box;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      font-size: 14px; color: var(--fdd-ink); background: #fff; outline: none;
+    }
+    .ns-field__input:focus { border-color: var(--fdd-brand); box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
+    .ns-field__error { margin: 4px 0 0; color: var(--fdd-danger); font-size: 12px; }
+    .folder-picker-tree {
+      max-height: 300px; overflow: auto; padding: 4px 0;
+      scrollbar-width: thin; scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
+    }
+    .folder-picker-item {
+      width: 100%; height: 36px; padding: 0 8px;
+      display: flex; align-items: center; gap: 8px;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      color: var(--fdd-ink); font-size: 14px; text-align: left; cursor: pointer;
+    }
+    .folder-picker-item:hover { background: var(--fdd-bg-hover); }
+    .folder-picker-item.is-selected { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); font-weight: 600; }
+    .folder-picker-item .aip-icon { color: var(--fdd-ink-3); flex-shrink: 0; }
+    .folder-picker-item.is-selected .aip-icon { color: var(--fdd-brand); }
+    .folder-picker-empty { padding: 24px 0; text-align: center; color: var(--fdd-ink-3); font-size: 13px; }
+    .col-modal-search { margin-bottom: 10px; }
+    .col-modal-list { list-style: none; margin: 0; padding: 0; }
+    .col-modal-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 40px; padding: 0 8px;
+      border-radius: var(--fdd-radius);
+    }
+    .col-modal-item:hover { background: var(--fdd-bg-hover); }
+    .col-modal-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand); }
+    .col-modal-item .col-name { flex: 1; font-size: 14px; color: var(--fdd-ink); }
+    .col-modal-item .col-fixed-note { font-size: 12px; color: var(--fdd-ink-3); }
+    .col-modal-drag {
+      width: 24px; height: 24px; margin-left: auto; flex-shrink: 0;
+      display: inline-grid; place-items: center;
+      border: 0; background: transparent; color: var(--fdd-ink-3);
+      cursor: grab; border-radius: var(--fdd-radius);
+      touch-action: none;
+    }
+    .col-modal-item:hover .col-modal-drag { color: var(--fdd-ink); }
+    .col-modal-drag:active { cursor: grabbing; }
+    .col-modal-item.is-dragging { opacity: 0.35; }
+    .col-modal-item.is-drop-target { box-shadow: inset 0 2px 0 0 var(--fdd-brand); }
+    .col-modal-item.is-drop-target-below { box-shadow: inset 0 -2px 0 0 var(--fdd-brand); }
+    /* 禁止文本/链接被当成拖拽内容（避免文字重影） */
+    .col-modal-item, .col-modal-item * { user-select: none; -webkit-user-drag: none; }
+    .col-modal-item[draggable="true"] { -webkit-user-drag: element; }
+    .col-modal-reset {
+      padding: 0; border: 0; background: transparent;
+      color: var(--fdd-brand); font-size: 13px; cursor: pointer;
+    }
+    .col-modal-reset:hover { text-decoration: underline; }
+    .col-aux { color: var(--fdd-ink-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 160px; }
+    th.is-sortable { cursor: pointer; user-select: none; }
+    th .sort-ico { display: inline-block; width: 12px; font-size: 10px; color: var(--fdd-ink-3); }
+
+    /* —— Table：贴合 DocuSign 列表，无投影、无卡片圆角 —— */
+    .envelope-table-shell {
+      position: relative;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      box-shadow: none;
+      overflow: auto;
+      max-height: clamp(300px, calc(100vh - 320px), 620px);
+      border-bottom: 1px solid var(--fdd-line);
+    }
+    .envelope-table {
+      width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0;
+      background: #fff; font-size: 14px; line-height: 19.6px;
+    }
+    .envelope-table thead { position: sticky; top: 0; z-index: 2; background: #fff; }
+    .envelope-table th,
+    .envelope-table td {
+      padding: 0 16px; text-align: left;
+      border-bottom: 1px solid var(--fdd-line);
+      vertical-align: middle;
+    }
+    .envelope-table thead tr { height: var(--fdd-table-head-h); }
+    .envelope-table tbody tr { height: var(--fdd-table-row-h); }
+    /* 行 hover：整行作为一个整体浮起（底色 + 投影），操作区随行一起 */
+    .envelope-table tbody tr { transition: background-color 0.12s, box-shadow 0.12s; }
+    .envelope-table tbody tr:hover {
+      background: var(--fdd-bg-hover);
+    }
+    .envelope-table tbody tr:hover td:last-child { background: transparent; }
+    .envelope-table th {
+      font-weight: 500; color: var(--fdd-table-head-color, var(--fdd-ink)); background: #fff;
+    }
+    .envelope-table th:first-child,
+    .envelope-table td:first-child { width: 48px; min-width: 48px; }
+    /* 操作列固定吸附右侧，内容区横向滚动 */
+    .envelope-table th:last-child,
+    .envelope-table td:last-child {
+      width: 130px; min-width: 130px; text-align: right;
+      position: sticky; right: 0;
+      background: #fff;
+    }
+    /* 操作列左侧用渐变遮罩自然过渡（替代生硬投影），滚动时才显现 */
+    .envelope-table th:last-child::before,
+    .envelope-table td:last-child::before {
+      content: ""; position: absolute; top: 0; bottom: 0; left: -16px; width: 16px;
+      background: linear-gradient(to right, rgba(255,255,255,0), #fff);
+      pointer-events: none;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .envelope-table-shell.is-scrolled-x .envelope-table th:last-child::before,
+    .envelope-table-shell.is-scrolled-x .envelope-table td:last-child::before { opacity: 1; }
+    .envelope-table thead th:last-child { background: #fff; z-index: 3; }
+    .envelope-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .envelope-table td:nth-child(2) { white-space: normal; }
+
+    .envelope-name {
+      max-width: 100%; padding: 0; border: 0; background: transparent;
+      color: var(--fdd-ink); font-weight: 500; text-align: left;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .envelope-name:hover { text-decoration: underline; }
+    .envelope-table td small {
+      display: block; margin-top: 2px;
+      color: var(--fdd-ink-muted); font-size: 13px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .envelope-state { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
+    .envelope-track {
+      position: relative; width: 100%; height: var(--fdd-progress-h);
+      border-radius: var(--fdd-progress-radius); background: rgba(28, 43, 51, 0.24); overflow: hidden;
+    }
+    .envelope-track i {
+      position: absolute; inset: 0 auto 0 0; background: var(--fdd-brand);
+    }
+    .envelope-state button {
+      padding: 0; border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 12px; line-height: 17px;
+      border-bottom: 1px dashed rgba(28, 43, 51, 0.5);
+    }
+    .time-cell span { display: block; }
+    .time-cell small { margin-top: 0; }
+    .row-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 0; }
+    /* 默认：空心（催办 / 继续编辑 / 查看） */
+    .resend-button {
+      height: 32px; padding: 0 12px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-weight: 600; font-size: 14px;
+    }
+    .resend-button:hover { background: var(--fdd-bg-hover); }
+    /* 仅「处理」：实心主按钮 */
+    .resend-button.is-solid {
+      border-color: var(--fdd-brand);
+      background: var(--fdd-brand); color: #fff;
+    }
+    .resend-button.is-solid:hover { background: var(--fdd-brand-hover); border-color: var(--fdd-brand-hover); }
+    /* 状态列：已完成（对齐 agreements.html：绿勾 + 文案，无进度条） */
+    .envelope-state.is-completed {
+      flex-direction: row; align-items: center; gap: 8px;
+    }
+    .envelope-state.is-completed .status-check {
+      flex-shrink: 0; width: 20px; height: 20px; color: var(--fdd-success);
+    }
+    .envelope-state.is-completed button {
+      border-bottom: 0; font-size: 14px; line-height: 20px; font-weight: 400;
+    }
+    .more-wrap { position: relative; }
+    .more-button {
+      width: 32px; height: 32px; margin-left: 4px;
+      display: inline-grid; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink);
+    }
+    .more-button:hover { background: var(--fdd-bg-hover); }
+    .row-menu {
+      position: fixed; z-index: 90;
+      width: 168px; padding: 4px;
+      border: 1px solid var(--fdd-line); border-radius: 6px;
+      background: #fff;
+      box-shadow: var(--fdd-shadow-menu);
+      animation: nsPopoverIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .row-menu button {
+      width: 100%; height: 32px; padding: 0 10px;
+      display: flex; align-items: center; gap: 8px;
+      border: 0; border-radius: var(--fdd-radius); background: transparent;
+      text-align: left; font-size: 13px;
+    }
+    .row-menu button:hover { background: #f1f4f6; }
+    .row-menu button.danger { color: var(--fdd-danger); }
+
+    .envelope-pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 48px; color: var(--fdd-ink); font-size: 13px;
+    }
+    /* 分页下拉：缩小，放左侧 */
+    .page-size {
+      position: relative; display: inline-flex; align-items: center; order: 0;
+    }
+    .page-size-trigger {
+      appearance: none; -webkit-appearance: none;
+      height: 28px; min-width: 84px; margin: 0;
+      padding: 0 28px 0 10px;
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink);
+      font-size: 13px; font-weight: 400; line-height: 20px;
+      white-space: nowrap; cursor: pointer; text-align: left;
+    }
+    .page-size-trigger:hover { border-color: var(--fdd-ink); }
+    .page-size-trigger:focus-visible {
+      outline: 2px solid var(--fdd-brand); outline-offset: 2px;
+    }
+    .page-size > .caret {
+      position: absolute; right: 6px; top: 50%;
+      width: 16px; height: 16px; margin-top: -8px;
+      color: var(--fdd-ink); pointer-events: none;
+    }
+    .page-size.is-open .page-size-trigger {
+      border-color: var(--fdd-brand);
+      box-shadow: var(--fdd-shadow-dropdown);
+    }
+    .page-size-menu {
+      position: absolute; left: 0; right: auto; bottom: calc(100% + 4px); z-index: 30;
+      min-width: 100%; padding: 4px 0;
+      border: 1px solid var(--fdd-line); border-radius: var(--fdd-radius);
+      background: #fff;
+      box-shadow: var(--fdd-shadow-menu);
+      display: none;
+    }
+    .page-size.is-open .page-size-menu { display: block; }
+    .page-size-menu button {
+      width: 100%; height: 28px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; background: transparent;
+      color: var(--fdd-ink); font-size: 13px; line-height: 20px; text-align: left;
+      white-space: nowrap; cursor: pointer;
+    }
+    .page-size-menu button:hover { background: var(--fdd-brand-soft); }
+    .page-size-menu button.is-selected { background: var(--fdd-brand-soft); font-weight: 500; }
+    .pager-btns { display: inline-flex; gap: 4px; align-items: center; order: 0; margin-left: auto; }
+    .pager-btns button {
+      width: 28px; height: 28px; border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink);
+    }
+    .pager-btns button:disabled { opacity: 0.25; cursor: not-allowed; }
+    .pager-btns button:not(:disabled):hover { background: var(--fdd-bg-hover); }
+
+    .toast {
+      position: fixed; right: 24px; bottom: 24px; z-index: 50;
+      padding: 10px 14px; border-radius: var(--fdd-radius);
+      border: 1px solid var(--fdd-line);
+      background: #fff; color: var(--fdd-ink); font-size: 13px;
+      box-shadow: var(--fdd-shadow-menu); opacity: 0; transform: translateY(6px);
+      transition: 0.15s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: none; }
+
+    /* —— 皮肤比对切换器 —— */
+    /* —— 皮肤 / 场景切换：吸附屏幕左缘的把手，悬浮滑出面板 —— */
+    .dev-switchers {
+      position: fixed; left: 0; bottom: 88px; z-index: 60;
+    }
+    .dev-handle {
+      width: 22px; height: 64px;
+      display: grid; place-items: center;
+      border: 1px solid var(--fdd-line); border-left: 0;
+      border-radius: 0 8px 8px 0;
+      background: #fff; color: var(--fdd-ink-3);
+      box-shadow: 2px 2px 12px rgba(28, 43, 51, 0.10); cursor: pointer;
+      transition: color 0.15s;
+    }
+    .dev-handle:hover { color: var(--fdd-brand); }
+    .dev-handle svg { display: block; }
+    .dev-panel {
+      position: absolute; left: 0; bottom: -8px;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--fdd-line); border-left: 0;
+      border-radius: 0 10px 10px 0;
+      background: #fff;
+      box-shadow: 4px 4px 20px rgba(28, 43, 51, 0.14);
+      transform: translateX(calc(-100% - 24px));
+      transition: transform 0.18s ease;
+      pointer-events: none;
+    }
+    .dev-switchers:hover .dev-panel,
+    .dev-switchers:focus-within .dev-panel {
+      transform: translateX(22px);
+      pointer-events: auto;
+    }
+    .skin-switcher {
+      display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+      font-size: 12px; color: var(--fdd-ink-2);
+    }
+    .skin-switcher strong { color: var(--fdd-ink); font-weight: 600; margin-right: 2px; min-width: 28px; flex-shrink: 0; }
+    .skin-switcher button {
+      height: 28px; padding: 0 10px; border: 1px solid var(--fdd-line);
+      border-radius: 4px; background: #fff; color: var(--fdd-ink); font-size: 12px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .skin-switcher button.is-on {
+      border-color: var(--fdd-brand); background: var(--fdd-brand); color: #fff;
+    }
+    /* 首页（#home）不显示切换器 */
+    body[data-view="home"] .dev-switchers { display: none; }
+
+    /*
+     * LibraTech 风：DocuSign 结构不变（字号 / 行高 / 布局尺寸保持），
+     * 侧栏改为 app.libratech.ai 的「悬浮卡片」风格：
+     * sunken 底色 + 圆角卡片 + 白底按钮卡 + 无左侧选中色条 + 通栏圆角选中。
+     * 仅视觉层（padding / 圆角 / 颜色 / 阴影），不改任何 font-size 与结构。
+     */
+    html[data-skin="notasign"] {
+      /* LibraTech 骨架 + 蓝调灰阶（灰中融一丝蓝，整体与法大大蓝和谐） */
+      --fdd-brand: #161a1b;
+      --fdd-brand-hover: #2f2b24;
+      --fdd-brand-deep: #161a1b;
+      --fdd-brand-soft: #f3f5f8;
+      --fdd-accent: #04d79b;
+      --fdd-ink: #14181d;                 /* 近黑带一点蓝 */
+      --fdd-ink-2: #4e5560;
+      --fdd-ink-3: #9aa1ab;
+      --fdd-ink-muted: #7d8590;
+      --fdd-line: #e6e9ee;
+      --fdd-line-soft: #eef1f5;
+      --fdd-line-strong: #d6dbe3;
+      --fdd-bg: #ffffff;
+      --fdd-bg-sidebar: #fafbfc;          /* 卡片底色：白中带一点蓝 */
+      --fdd-bg-hover: #f3f5f8;            /* sunken：冷调浅灰蓝 */
+      --fdd-bg-active: rgba(0, 89, 239, 0.1);
+      --fdd-bg-muted: #f3f5f8;
+      --fdd-danger: #e6555e;
+      --fdd-success: #1b9275;
+      --fdd-radius: 8px;
+      --fdd-radius-pill: 9999px;
+      --fdd-progress-h: 4px;
+      --fdd-progress-radius: 17px;
+      --fdd-shadow-dropdown: 0 0 0 1px #161a1b0d, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
+      --fdd-shadow-menu: 0 0 0 1px #161a1b0d, 0 18px 47px 0 #161a1b08, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
+      --lt-shadow-sm: 0 1px 2px 0 #161a1b0f;
+      --lt-shadow-button: 0 0 0 1px #161a1b0d, 0 18px 47px 0 #161a1b08, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
+    }
+    /* —— LibraTech 卡片式骨架（结构不动，灰阶全部带蓝调） —— */
+    html[data-skin="notasign"] .page-shell { background: #f3f5f8; }
+    html[data-skin="notasign"] .contract-sidebar {
+      margin: 6px 0 24px 10px;
+      background: #fafbfc;
+      border: 1px solid #e6e9ee;
+      border-radius: 12px;
+      box-shadow: var(--lt-shadow-sm);
+      overflow: hidden;
+      min-height: calc(100vh - var(--fdd-header-h) - 30px);
+      align-self: stretch;
+    }
+    html[data-skin="notasign"] .contract-side-inner { height: 100%; }
+    html[data-skin="notasign"] .contract-nav-scroll { padding: 0 10px; }
+    html[data-skin="notasign"] .contract-start { height: 64px; flex-basis: 64px; padding: 12px 10px 8px; }
+    html[data-skin="notasign"] .contract-launch { border-radius: 8px; font-weight: 600; }
+    html[data-skin="notasign"] .nav-btn,
+    html[data-skin="notasign"] .nav-tool { border-radius: 8px; }
+    html[data-skin="notasign"] .nav-btn.active { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); }
+    html[data-skin="notasign"] .nav-btn.active .aip-icon { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .nav-btn.active .aip-icon__svg,
+    html[data-skin="notasign"] .folder-module-head.is-active .aip-icon__svg,
+    html[data-skin="notasign"] .folder-tree-row.active .aip-icon__svg {
+      filter: invert(18%) sepia(99%) saturate(7000%) hue-rotate(217deg) brightness(96%) contrast(101%);
+    }
+    html[data-skin="notasign"] .nav-btn.active::before,
+    html[data-skin="notasign"] .folder-tree-row.active::before,
+    html[data-skin="notasign"] .folder-module-head.is-active::before,
+    html[data-skin="notasign"] .folder-item.active::before { display: none; }
+    html[data-skin="notasign"] .nav-secondary.active { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); }
+    html[data-skin="notasign"] .nav-section::before { left: 4px; right: 4px; background: #eef1f5; }
+    html[data-skin="notasign"] .folder-module-head { border-radius: 8px; }
+    html[data-skin="notasign"] .folder-module-head.is-active { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); }
+    html[data-skin="notasign"] .folder-tree-row { border-radius: 8px; }
+    html[data-skin="notasign"] .folder-tree-row.active { background: rgba(0, 89, 239, 0.1); }
+    html[data-skin="notasign"] .folder-tree-row.active .folder-tree-item { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .records-module-toggle { border-radius: 8px; }
+    html[data-skin="notasign"] .folder-more-menu,
+    html[data-skin="notasign"] .export-menu,
+    html[data-skin="notasign"] .row-menu,
+    html[data-skin="notasign"] .mini-popover,
+    html[data-skin="notasign"] .filter-popover {
+      border-color: #e6e9ee;
+      border-radius: 10px;
+      box-shadow: var(--lt-shadow-button);
+    }
+    html[data-skin="notasign"] .ns-modal { border-radius: 12px; }
+    html[data-skin="notasign"] .contracts-page-content {
+      margin: 6px 10px 24px 8px;
+      background: #fff;
+      border: 1px solid #e6e9ee;
+      border-radius: 10px;
+      box-shadow: var(--lt-shadow-sm);
+      align-self: flex-start;
+      min-height: calc(100vh - var(--fdd-header-h) - 30px);
+    }
+    html[data-skin="notasign"] .envelope-track { background: #e6e9ee; }
+    html[data-skin="notasign"] .scope-switch { background: #f3f5f8; }
+    html[data-skin="notasign"] .resend-button { border-radius: 8px; }
+    html[data-skin="notasign"] .filter-trigger,
+    html[data-skin="notasign"] .envelope-search { border-radius: 8px; }
+    html[data-skin="notasign"] .filter-chip { border-radius: 8px; }
+    html[data-skin="notasign"] .filter-popover__cancel,
+    html[data-skin="notasign"] .filter-popover__apply,
+    html[data-skin="notasign"] .ns-modal__foot .btn-ghost,
+    html[data-skin="notasign"] .ns-modal__foot .btn-solid,
+    html[data-skin="notasign"] .batch-bar button,
+    html[data-skin="notasign"] .page-size-trigger { border-radius: 8px; }
+    html[data-skin="notasign"] .envelope-search:focus-within { outline: none; box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
+
+    html[data-skin="notasign"] {
+      --fdd-brand: #0059ef;
+      --fdd-brand-hover: #004ed6;
+      --fdd-brand-deep: #174ea6;
+      --fdd-brand-soft: #e8f1ff;
+    }
+    /* LibraTech + 蓝色点缀：发起签署 / 实心按钮 / Tab / 进度条 / 强调链接走法大大蓝，其余保持蓝调灰 */
+    html[data-skin="notasign"] .contract-launch {
+      background: var(--fdd-brand); color: #fff;
+      border: 1px solid var(--fdd-brand);
+      box-shadow: var(--lt-shadow-button);
+    }
+    html[data-skin="notasign"] .contract-launch:hover { background: var(--fdd-brand-hover); border-color: var(--fdd-brand-hover); }
+    /* LibraTech：顶栏直接复用 DocuSign 风格（通栏底条），仅"协议"选中项显示 */
+    html[data-skin="notasign"] .header-tabs button::after { background: transparent; }
+    html[data-skin="notasign"] .header-tabs button.active::after,
+    html[data-skin="notasign"] .header-tabs button[aria-current="page"]::after { background: var(--fdd-brand); }
+    html[data-skin="notasign"] .header-tabs button.active,
+    html[data-skin="notasign"] .header-tabs button[aria-current="page"] { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .btn-upgrade {
+      background: var(--fdd-brand); border-color: var(--fdd-brand);
+    }
+    html[data-skin="notasign"] .btn-upgrade:hover { background: var(--fdd-brand-hover); border-color: var(--fdd-brand-hover); }
+    html[data-skin="notasign"] .resend-button.is-solid {
+      border-color: var(--fdd-brand); background: var(--fdd-brand);
+    }
+    html[data-skin="notasign"] .resend-button.is-solid:hover { background: var(--fdd-brand-hover); border-color: var(--fdd-brand-hover); }
+    html[data-skin="notasign"] .filter-popover__apply { background: var(--fdd-brand); }
+    html[data-skin="notasign"] .filter-popover__apply:hover { background: var(--fdd-brand-hover); }
+    html[data-skin="notasign"] .ns-modal__foot .btn-solid { background: var(--fdd-brand); }
+    html[data-skin="notasign"] .ns-modal__foot .btn-solid:hover { background: var(--fdd-brand-hover); }
+    html[data-skin="notasign"] .envelope-track i { background: var(--fdd-brand); }
+    html[data-skin="notasign"] .todo-text--mine { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .todo-text--waiting { color: var(--fdd-brand); border-bottom-color: rgba(0, 89, 239, 0.45); }
+    html[data-skin="notasign"] .party-more-btn { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .folder-link:hover { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .envelope-name:hover { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .applied-clearall,
+    html[data-skin="notasign"] .filter-popover__clear,
+    html[data-skin="notasign"] .filter-modal-clearall { color: var(--fdd-brand); }
+    html[data-skin="notasign"] .envelope-search:focus-within {
+      border-color: var(--fdd-brand);
+      box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16);
+    }
+    html[data-skin="notasign"] .filter-popover__options input,
+    html[data-skin="notasign"] .party-dialog-table input { accent-color: var(--fdd-brand); }
+    html[data-skin="notasign"] .ns-modal__foot .btn-ghost { background: #f3f5f8; }
+    html[data-skin="notasign"] .ns-modal__foot .btn-ghost:hover { background: #e8ebef; }
+    html[data-skin="notasign"] .batch-bar { background: var(--fdd-brand-soft); }
+    html[data-skin="notasign"] .avatar { background: var(--fdd-brand-soft); color: var(--fdd-brand-deep); }
+    /* 顶栏 Tab 与页头按钮同步 LibraTech 深灰 */
+    /* Tab / 升级按钮已在上方品牌蓝块定义 */
+    /* 表格内实心按钮 / 图标 / 翻页选中 */
+    html[data-skin="notasign"] .page-size-menu button:hover,
+    html[data-skin="notasign"] .page-size-menu button.is-selected { background: #f3f5f8; }
+
+    @media (max-width: 960px) {
+      .contract-sidebar { display: none; }
+      .contracts-workspace { width: calc(100% - 32px); }
+      .envelope-search { width: 100%; margin-right: 0; }
+      .header-tabs { display: none; }
+    }
+  </style>
+</head>
+<body data-view="contracts">
+  <div class="dev-switchers">
+    <div class="dev-handle" id="devFab" aria-label="皮肤与场景切换">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+    <div class="dev-panel" id="devPanel">
+      <div class="skin-switcher" id="skinSwitcher" role="group" aria-label="视觉版本比对">
+        <strong>皮肤</strong>
+        <button type="button" data-skin-set="docusign" class="is-on">DocuSign 风</button>
+        <button type="button" data-skin-set="notasign">LibraTech 风</button>
+      </div>
+      <div class="skin-switcher" id="scenarioSwitcher" role="group" aria-label="原型场景比对">
+        <strong>场景</strong>
+        <button type="button" data-scenario="mine-all" class="is-on">我的签署</button>
+        <button type="button" data-scenario="corp-progress">全部签署</button>
+        <button type="button" data-scenario="folder">任务文件夹</button>
+        <button type="button" data-scenario="multi-party">选择收件人</button>
+      </div>
+    </div>
+  </div>
+  <header class="app-header">
+    <div class="header-left">
+      <a class="brand" href="signing-tasks.html#home" aria-label="法大大首页" data-view-link="home">
+        <img src="assets/fadada-logo.png" alt="法大大" width="58" height="29" />
+      </a>
+      <nav aria-label="主导航">
+        <ul class="header-tabs" id="headerTabs">
+          <li><button type="button" data-view="home">首页</button></li>
+          <li><button type="button" data-view="contracts" class="active" aria-current="page">协议</button></li>
+          <li><button type="button" data-toast="演示：进入模板（原有页面）">模板</button></li>
+          <li><button type="button" data-toast="演示：进入自动化（原有页面）">自动化</button></li>
+          <li><button type="button" data-toast="演示：进入洞察（原有页面）">洞察</button></li>
+          <li><button type="button" data-toast="演示：进入管理（原有页面）">管理</button></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="header-right">
+      <button class="btn-upgrade" type="button">升级</button>
+      <button class="icon-btn" type="button" aria-label="搜索">
+        <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="m22 20.66-5.72-5.72A7.96 7.96 0 0 0 18 10c0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8a7.9 7.9 0 0 0 4.94-1.72L20.66 22zM10 16.1c-3.36 0-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9s6.1 2.74 6.1 6.1-2.74 6.1-6.1 6.1"/></svg>
+      </button>
+      <button class="icon-btn" type="button" aria-label="任务">
+        <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4.43 10.77 2 8.34 3.34 7 5 8.66 8.66 5 10 6.34l-4.43 4.43c-.16.16-.37.23-.57.23s-.41-.07-.57-.23M22 7H12v2h10zM5 19c.21 0 .41-.07.57-.23L10 14.34 8.66 13 5 16.66 3.34 15 2 16.34l2.43 2.43c.16.16.37.23.57.23m17-4H12v2h10z"/></svg>
+      </button>
+      <button class="icon-btn" type="button" aria-label="帮助">
+        <svg class="ico" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.9c3.36 0 6.1 2.74 6.1 6.1s-2.74 6.1-6.1 6.1-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9M10 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8m1 11H9v2h2zm0-8H9c-1.1 0-2 .9-2 2v1h2V7h2v2H9v3h2v-1c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2"/></svg>
+      </button>
+      <div class="avatar-wrap" id="avatarWrap">
+        <button class="avatar" type="button" id="avatarBtn" aria-label="用户 CX" aria-haspopup="menu" aria-expanded="false">CX</button>
+        <div class="avatar-menu" id="avatarMenu" hidden role="menu" aria-label="用户菜单">
+          <div class="avatar-menu__head">
+            <span class="avatar avatar--lg">CX</span>
+            <div class="avatar-menu__info">
+              <b>CX</b>
+              <small>cx@fadada.com · 法大大产品部</small>
+            </div>
+          </div>
+          <div class="avatar-menu__list">
+            <button type="button" role="menuitem" data-toast="演示：个人资料（原有页面）">个人资料</button>
+            <button type="button" role="menuitem" data-toast="演示：偏好设置（原有页面）">偏好设置</button>
+            <button type="button" role="menuitem" data-toast="演示：切换企业（原有企业切换器）">切换企业</button>
+          </div>
+          <div class="avatar-menu__foot">
+            <button type="button" role="menuitem" data-toast="演示：退出登录">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="view-home" id="viewHome" data-aip-home data-lazy></div>
+
+  <div class="page-shell" id="viewContracts">
+    <aside class="contract-sidebar" aria-label="合同侧栏">
+      <div class="contract-side-inner">
+        <div class="contract-start">
+          <div class="launch-wrap" id="launchWrap">
+            <button class="contract-launch" type="button" id="launchBtn" aria-haspopup="menu" aria-expanded="false">
+              发起签署
+              <svg class="launch-caret" width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+            </button>
+            <div class="launch-menu" id="launchMenu" role="menu" aria-label="发起方式">
+              <button type="button" role="menuitem" data-launch="direct">
+                <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope.svg" alt="" /></span>
+                <span class="launch-item-text"><b>直接创建</b><small>上传文件发起签署</small></span>
+              </button>
+              <button type="button" role="menuitem" data-launch="template">
+                <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/squares-four.svg" alt="" /></span>
+                <span class="launch-item-text"><b>模板创建</b><small>选择签署模板快速发起</small></span>
+              </button>
+              <button type="button" role="menuitem" data-launch="batch">
+                <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
+                <span class="launch-item-text"><b>批量创建</b><small>按模板批量发起多份任务</small></span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="contract-nav-scroll">
+          <button class="nav-btn nav-primary active" type="button" data-nav="all">
+            <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="envelope-simple">
+              <img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" />
+            </span>
+            全部任务
+          </button>
+          <div class="contract-secondary-items">
+            <button class="nav-btn nav-secondary" type="button" data-nav="draft">草稿</button>
+            <button class="nav-btn nav-secondary" type="button" data-nav="active">进行中</button>
+            <button class="nav-btn nav-secondary" type="button" data-nav="completed">已完成</button>
+          </div>
+
+          <div class="nav-section">
+            <!-- 任务文件夹：是否显示只取原任务文件夹展示权限，与访问范围资格无关（PRD 3.5 / 6.2） -->
+            <div class="folder-module" id="folderModule">
+              <div class="folder-module-head" id="folderModuleHead">
+                <button class="folder-module-toggle" type="button" id="folderModuleToggle" aria-expanded="false" aria-controls="folderModuleBody">
+                  <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="folder">
+                    <img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" />
+                  </span>
+                  任务文件夹
+                </button>
+                <button class="folder-module-more" type="button" aria-label="文件夹操作" id="folderMoreBtn">
+                  <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="dots-three">
+                    <img class="aip-icon__svg" src="assets/icons/phosphor/regular/dots-three.svg" alt="" />
+                  </span>
+                </button>
+                <div class="folder-more-menu" id="folderMoreMenu" hidden role="menu" aria-label="文件夹操作">
+                  <button type="button" role="menuitem" data-toast="演示：全部收起">全部收起</button>
+                  <button type="button" role="menuitem" data-toast="演示：新建文件夹（原有流程）">新建文件夹</button>
+                  <button type="button" role="menuitem" id="folderSearchBtn">查找文件夹</button>
+                </div>
+              </div>
+              <div class="folder-search" id="folderSearch" hidden>
+                <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+                <input type="search" id="folderSearchInput" placeholder="搜索有权文件夹" aria-label="搜索有权文件夹" />
+              </div>
+              <div class="folder-module-body" id="folderModuleBody"></div>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <!-- 合同库 / 协议集：沿用典型页面原有入口（不在本期 PRD 改版范围，保留原页面） -->
+            <button class="nav-tool" type="button" data-toast="演示：进入合同库（原有页面）">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
+                <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
+              </span>
+              合同库
+            </button>
+            <button class="nav-tool" type="button" data-toast="演示：进入协议集（原有页面）">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="cards">
+                <img class="aip-icon__svg" src="assets/icons/phosphor/regular/cards.svg" alt="" />
+              </span>
+              协议集
+            </button>
+          </div>
+
+          <div class="nav-section">
+            <!-- 记录与处理：五项原页面入口，站内导航、主内容区承载（PRD 2.1 / 3.7 / FR-AIP-014） -->
+            <div class="records-module" id="recordsModule">
+              <button class="records-module-toggle" type="button" id="recordsModuleToggle" aria-expanded="true" aria-controls="recordsModuleBody">
+                <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="files">
+                  <img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" />
+                </span>
+                记录与处理
+                <svg class="records-caret" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+              </button>
+              <div class="records-module-body" id="recordsModuleBody">
+                <button class="nav-btn nav-secondary" type="button" data-record="receiving">待我接收</button>
+                <button class="nav-btn nav-secondary" type="button" data-record="batch">批量发送记录</button>
+                <button class="nav-btn nav-secondary" type="button" data-record="scan">扫码签记录</button>
+                <button class="nav-btn nav-secondary" type="button" data-record="processing">处理中心</button>
+                <button class="nav-btn nav-secondary" type="button" data-record="statistics">数据统计</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="contracts-page-content">
+      <div class="contracts-workspace">
+        <div class="contracts-titlebar">
+          <h1 id="pageTitle">全部任务</h1>
+          <div class="scope-switch" id="scopeSwitch" role="group" aria-label="访问范围">
+            <button type="button" data-scope="mine" class="is-on">我的签署</button>
+            <button type="button" data-scope="corp">全部签署</button>
+          </div>
+        </div>
+
+        <div class="envelope-controls">
+          <label class="envelope-search">
+            <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="magnifying-glass">
+              <img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" />
+            </span>
+            <input id="searchInput" type="search" placeholder="搜索签署任务" aria-label="搜索签署任务" />
+            <button class="envelope-search__clear" type="button" id="searchClear" aria-label="清空搜索" hidden>×</button>
+          </label>
+          <div class="envelope-filters" id="envelopeFilters" role="group" aria-label="筛选条件">
+            <div class="filter-triggers" id="filterTriggers">
+              <div class="filter-field" data-filter="date" data-views="all draft active completed folder pending">
+                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+                  日期
+                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+                </button>
+                <div class="filter-popover" hidden role="dialog" aria-label="日期筛选">
+                  <h3 class="filter-popover__title">日期</h3>
+                  
+                  <div class="filter-popover__op" aria-hidden="true"><span>=</span><span>▾</span></div>
+                  <div class="filter-popover__options" role="radiogroup" aria-label="日期范围">
+                    <label><input type="radio" name="filter-date" value="12m" data-label="过去 12 个月" /> 过去 12 个月</label>
+                    <label><input type="radio" name="filter-date" value="6m" data-label="过去 6 个月" checked /> 过去 6 个月</label>
+                    <label><input type="radio" name="filter-date" value="30d" data-label="过去 30 天" /> 过去 30 天</label>
+                    <label><input type="radio" name="filter-date" value="7d" data-label="过去 7 天" /> 过去 7 天</label>
+                    <label><input type="radio" name="filter-date" value="24h" data-label="过去 24 小时" /> 过去 24 小时</label>
+                  </div>
+                  <div class="filter-popover__actions">
+                    <button type="button" class="filter-popover__cancel">取消</button>
+                    <button type="button" class="filter-popover__apply">应用</button>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-field" data-filter="status" data-views="all folder pending">
+                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+                  状态
+                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+                </button>
+                <div class="filter-popover" hidden role="dialog" aria-label="状态筛选">
+                  <h3 class="filter-popover__title">状态</h3>
+                  
+                  <div class="filter-popover__options filter-popover__options--scroll" role="radiogroup" aria-label="状态">
+                    <label><input type="radio" name="filter-status" value="progress-set" data-label="进行中" /> 进行中</label>
+                    <label><input type="radio" name="filter-status" value="creating" data-label="创建中" /> 创建中</label>
+                    <label><input type="radio" name="filter-status" value="created" data-label="已创建" /> 已创建</label>
+                    <label><input type="radio" name="filter-status" value="filling" data-label="填写中" /> 填写中</label>
+                    <label><input type="radio" name="filter-status" value="to-finalize" data-label="待定稿" /> 待定稿</label>
+                    <label><input type="radio" name="filter-status" value="finalizing" data-label="定稿中" /> 定稿中</label>
+                    <label><input type="radio" name="filter-status" value="finalize-failed" data-label="定稿失败" /> 定稿失败</label>
+                    <label><input type="radio" name="filter-status" value="finalized" data-label="已定稿" /> 已定稿</label>
+                    <label><input type="radio" name="filter-status" value="signing" data-label="签署中" /> 签署中</label>
+                    <label><input type="radio" name="filter-status" value="signed" data-label="已签署" /> 已签署</label>
+                    <label><input type="radio" name="filter-status" value="completed" data-label="已完成" /> 已完成</label>
+                    <label><input type="radio" name="filter-status" value="overdue" data-label="已逾期" /> 已逾期</label>
+                    <label><input type="radio" name="filter-status" value="revoked" data-label="已撤销" /> 已撤销</label>
+                    <label><input type="radio" name="filter-status" value="terminated" data-label="已终止" /> 已终止</label>
+                    <label><input type="radio" name="filter-status" value="voiding" data-label="作废中" /> 作废中</label>
+                    <label><input type="radio" name="filter-status" value="voided" data-label="已作废" /> 已作废</label>
+                  </div>
+                  <div class="filter-popover__actions">
+                    <button type="button" class="filter-popover__cancel">取消</button>
+                    <button type="button" class="filter-popover__apply">应用</button>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-field" data-filter="sender" data-views="all active completed pending">
+                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+                  发起人
+                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+                </button>
+                <div class="filter-popover" hidden role="dialog" aria-label="发起人筛选">
+                  <h3 class="filter-popover__title">发起人</h3>
+                  
+                  <div class="filter-popover__options" role="radiogroup" aria-label="发起人">
+                    <label data-scope-opt="mine"><input type="radio" name="filter-sender" value="me-created" data-label="我创建的" /> 我创建的</label>
+                    <label data-scope-opt="mine"><input type="radio" name="filter-sender" value="me-received" data-label="我收到的" /> 我收到的</label>
+                    <label data-scope-opt="corp"><input type="radio" name="filter-sender" value="corp-sent" data-label="我方发起的" /> 我方发起的</label>
+                    <label data-scope-opt="corp"><input type="radio" name="filter-sender" value="corp-received" data-label="我方收到的" /> 我方收到的</label>
+                  </div>
+                  <div class="filter-popover__actions">
+                    <button type="button" class="filter-popover__cancel">取消</button>
+                    <button type="button" class="filter-popover__apply">应用</button>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-field" data-filter="quick" data-views="all active">
+                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+                  快捷筛选
+                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+                </button>
+                <div class="filter-popover" hidden role="dialog" aria-label="快捷筛选">
+                  <h3 class="filter-popover__title">快捷筛选</h3>
+                  
+                  <div class="filter-popover__options" role="radiogroup" aria-label="快捷视图">
+                    <label data-scope-opt="mine"><input type="radio" name="filter-quick" value="todo-me" data-label="待我处理" /> 待我处理</label>
+                    <label data-scope-opt="mine"><input type="radio" name="filter-quick" value="todo-others" data-label="待他人处理" /> 待他人处理</label>
+                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-corp" data-label="待我方处理" /> 待我方处理</label>
+                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-other-side" data-label="待他方处理" /> 待他方处理</label>
+                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-add-member" data-label="待添加成员" /> 待添加成员</label>
+                    <label><input type="radio" name="filter-quick" value="due-soon" data-label="即将截止" /> 即将截止</label>
+                  </div>
+                  <div class="filter-popover__actions">
+                    <button type="button" class="filter-popover__cancel">取消</button>
+                    <button type="button" class="filter-popover__apply">应用</button>
+                  </div>
+                </div>
+              </div>
+              <button class="filter-trigger filter-collapse-btn" type="button" id="filterCollapseBtn" aria-haspopup="dialog" hidden>
+                <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
+                筛选条件 <b id="filterCollapseCount" hidden></b>
+              </button>
+              <button class="filter-trigger" type="button" id="filterSummaryBtn" aria-haspopup="dialog">
+                筛选 <b id="filterSummaryCount" hidden></b>
+                <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="funnel"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/funnel.svg" alt="" /></span>
+              </button>
+            </div>
+          </div>
+          <span class="export-wrap">
+            <button class="toolbar-icon-btn" type="button" id="exportBtn" aria-label="导出" aria-haspopup="menu" aria-expanded="false">
+              <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+            </button>
+            <span class="export-menu" id="exportMenu" hidden role="menu" aria-label="导出">
+              <button type="button" role="menuitem" id="exportFiltered">导出当前筛选结果</button>
+              <button type="button" role="menuitem" id="exportSelected" disabled>导出选中任务</button>
+            </span>
+          </span>
+          <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新列表">
+            <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
+          </button>
+        </div>
+
+        <div class="applied-row" id="appliedRow"></div>
+        <div class="envelope-table-shell">
+          <div class="batch-bar" id="batchBar">
+            <span id="batchCount">已选择 0 条</span>
+            <button type="button" class="batch-primary" data-toast="演示：批量签署（原有批量流程）">批量签署</button>
+            <button type="button" data-toast="演示：批量下载（原有批量流程）">下载</button>
+            <button type="button" data-toast="演示：批量催办（原有批量流程）">催办</button>
+            <button type="button" data-toast="演示：更多批量操作（原有批量菜单）">更多批量操作</button>
+          </div>
+
+          <table class="envelope-table">
+            <thead id="taskHead"></thead>
+            <tbody id="taskBody"></tbody>
+          </table>
+        </div>
+
+        <div class="envelope-pagination">
+          <div class="page-size" id="pageSize">
+            <button class="page-size-trigger" type="button" id="pageSizeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="每页结果数">
+              <span id="pageSizeLabel">25 / 页</span>
+            </button>
+            <svg class="caret" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+            <div class="page-size-menu" id="pageSizeMenu" role="listbox">
+              <button type="button" role="option" data-value="5">5 / 页</button>
+              <button type="button" role="option" data-value="10">10 / 页</button>
+              <button type="button" role="option" data-value="25" class="is-selected" aria-selected="true">25 / 页</button>
+              <button type="button" role="option" data-value="50">50 / 页</button>
+            </div>
+          </div>
+          <div class="pager-btns">
+            <span id="pageTotal">共 0 条</span>
+            <span id="pageInfo">第 1 页</span>
+            <button type="button" id="pagePrev" disabled aria-label="上一页">‹</button>
+            <button type="button" id="pageNext" disabled aria-label="下一页">›</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 记录与处理 / 发起签署：原页面站内承载（PRD 3.7：Demo 仅显示"原有页面"） -->
+      <div class="legacy-page" id="legacyPage">
+        <h2 id="legacyTitle">原有页面</h2>
+        <p id="legacyDesc"></p>
+        <button type="button" class="legacy-back" id="legacyBack">返回来源列表</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新建文件夹 -->
+  <div class="ns-modal-mask" id="newFolderModal" hidden>
+    <div class="ns-modal ns-modal--sm" role="dialog" aria-modal="true" aria-label="新建文件夹">
+      <div class="ns-modal__head">
+        <h2>新建文件夹</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭">×</button>
+      </div>
+      <div class="ns-modal__body">
+        <label class="ns-field">
+          <span class="ns-field__label">上级目录</span>
+          <select id="newFolderParent" class="ns-field__input">
+            <option value="">（根目录）</option>
+          </select>
+        </label>
+        <label class="ns-field">
+          <span class="ns-field__label">文件夹名称</span>
+          <input type="text" id="newFolderName" class="ns-field__input" placeholder="请输入文件夹名称" maxlength="30" />
+        </label>
+        <p class="ns-field__error" id="newFolderError" hidden></p>
+      </div>
+      <div class="ns-modal__foot">
+        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="btn-solid" id="newFolderSave" disabled>保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查找文件夹：选择要查看的文件夹 -->
+  <div class="ns-modal-mask" id="folderPickerModal" hidden>
+    <div class="ns-modal ns-modal--sm" role="dialog" aria-modal="true" aria-label="选择要查看的文件夹">
+      <div class="ns-modal__head">
+        <h2>选择要查看的文件夹</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭">×</button>
+      </div>
+      <div class="ns-modal__body">
+        <label class="filter-modal-search">
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+          <input type="search" id="folderPickerSearch" placeholder="搜索文件夹" aria-label="搜索文件夹" />
+        </label>
+        <div class="folder-picker-tree" id="folderPickerTree"></div>
+      </div>
+      <div class="ns-modal__foot">
+        <button type="button" class="btn-solid" id="folderPickerConfirm" disabled>查看选定项</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 列设置（PRD 5.6：主题/操作固定，其余列显隐+顺序；草稿式编辑，保存后应用） -->
+  <div class="ns-modal-mask" id="colSettingsModal" hidden>
+<div class="ns-modal ns-modal--col" role="dialog" aria-modal="true" aria-label="设置列表列">
+  <div class="ns-modal__head">
+    <h2>设置列表列</h2>
+    <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭">×</button>
+  </div>
+  <div class="ns-modal__body">
+    <label class="filter-modal-search col-modal-search">
+      <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+      <input type="search" id="colModalSearch" placeholder="搜索列" aria-label="搜索列" />
+    </label>
+    <ul class="col-modal-list" id="colModalList"></ul>
+  </div>
+  <div class="ns-modal__foot ns-modal__foot--split">
+    <button type="button" class="col-modal-reset" id="colModalReset">恢复默认列</button>
+    <span class="ns-modal__foot-right">
+      <button type="button" class="btn-ghost" data-modal-close>取消</button>
+      <button type="button" class="btn-solid" id="colModalSave">保存</button>
+    </span>
+  </div>
+</div>
++  </div>
+  <!-- 筛选条件（PRD 4.5 + DocuSign 筛选面板：已应用 chips + 可用项行内编辑） -->
+  <div class="ns-modal-mask" id="filterSummaryModal" hidden>
+    <div class="ns-modal ns-modal--filter" role="dialog" aria-modal="true" aria-label="筛选条件">
+      <div class="ns-modal__head">
+        <h2>筛选条件</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭">×</button>
+      </div>
+      <div class="ns-modal__body">
+        <label class="filter-modal-search">
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+          <input type="search" id="filterSummarySearch" placeholder="搜索筛选条件" aria-label="搜索筛选条件" />
+        </label>
+        <div class="filter-applied-card" id="filterSummaryAppliedCard" hidden>
+          <div class="filter-applied-card__head">
+            <span id="filterSummaryAppliedCount">已应用的数量 (0)</span>
+            <button type="button" class="filter-applied-card__clearall" id="filterSummaryClearAll">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/></svg>
+              全部清除
+            </button>
+          </div>
+          <div class="filter-applied-card__chips" id="filterSummaryApplied"></div>
+        </div>
+        <div class="filter-modal-group" id="filterSummaryAvailable"></div>
+      </div>
+      <div class="ns-modal__foot">
+        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="btn-solid" id="filterSummarySave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 选择收件人（PRD 5.3：同一任务两个及以上当前可办理参与方时单选） -->
+  <div class="ns-modal-mask" id="partyDialog" hidden>
+    <div class="ns-modal" role="dialog" aria-modal="true" aria-label="选择收件人">
+      <div class="ns-modal__head">
+        <h2>选择收件人</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭">×</button>
+      </div>
+      <div class="ns-modal__body">
+        <p style="margin:0 0 10px;color:var(--fdd-ink-3);font-size:13px" id="partyDialogDesc">当前身份在该任务下有多个可办理参与方，请选择其一进入原办理页面。</p>
+        <div class="party-dialog-scroll">
+          <table class="party-dialog-table">
+            <thead><tr><th style="width:44px">选择</th><th>名称</th><th>角色</th><th>办理类型</th></tr></thead>
+            <tbody id="partyDialogBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ns-modal__foot">
+        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="btn-solid" id="partyDialogSave" disabled>保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="assets/components/fdd-home/home-mount.js"></script>
+  <script>
+    /**
+     * @typedef {{id:string,subject:string,parties:string,statusKey:string,statusText:string,progress:number,date:string,time:string,action:string}} TaskRow
+     */
+
+    const SKIN_KEY = 'contracts-v1-skin';
+
+    /**
+     * 顶栏 Tab：首页 / 合同（首页复用 components/home）
+     * @param {'home'|'contracts'} view
+     * @param {{push?:boolean}} [opts]
+     */
+    function setAppView(view, opts) {
+      const next = view === 'home' ? 'home' : 'contracts';
+      const push = !opts || opts.push !== false;
+      document.body.setAttribute('data-view', next);
+      document.querySelectorAll('#headerTabs [data-view]').forEach((btn) => {
+        const on = btn.getAttribute('data-view') === next;
+        btn.classList.toggle('active', on);
+        if (on) btn.setAttribute('aria-current', 'page');
+        else btn.removeAttribute('aria-current');
+      });
+
+      document.title = next === 'home'
+        ? '首页 · 法大大 AIP'
+        : '协议 · 签署任务列表结构调整 0.1（AIP）';
+
+      if (next === 'home' && window.AipHome) {
+        const host = /** @type {HTMLElement|null} */ (document.querySelector('[data-aip-home]'));
+        if (host) window.AipHome.mount(host);
+      }
+
+      if (push) {
+        const hash = next === 'home' ? '#home' : '#contracts';
+        if (location.hash !== hash) history.pushState({ view: next }, '', hash);
+      }
+    }
+
+    (function bindHeaderTabs() {
+      const tabs = document.getElementById('headerTabs');
+      if (!tabs) return;
+
+      tabs.addEventListener('click', (e) => {
+        const btn = /** @type {HTMLElement} */ (e.target).closest('button');
+        if (!btn || !tabs.contains(btn)) return;
+        const view = btn.getAttribute('data-view');
+        const link = btn.getAttribute('data-view-link');
+        if (view === 'home' || view === 'contracts') {
+          setAppView(/** @type {'home'|'contracts'} */ (view));
+          return;
+        }
+        /* AIP 0.1：其余一级 Tab 为演示占位，提示后停留本页 */
+      });
+
+      document.querySelectorAll('[data-view-link="home"]').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          setAppView('home');
+        });
+      });
+
+      window.addEventListener('popstate', () => {
+        const fromHash = location.hash === '#home' ? 'home' : 'contracts';
+        setAppView(fromHash, { push: false });
+      });
+
+      const initial = location.hash === '#home' ? 'home' : 'contracts';
+      setAppView(initial, { push: false });
+    })();
+
+    /**
+     * 切换 DocuSign 风 / LibraTech 风（同结构，仅视觉层）
+     * @param {'docusign'|'notasign'} skin
+     */
+    function applySkin(skin) {
+      const next = skin === 'notasign' ? 'notasign' : 'docusign';
+      document.documentElement.setAttribute('data-skin', next);
+      try { localStorage.setItem(SKIN_KEY, next); } catch (_) { /* ignore */ }
+      document.querySelectorAll('#skinSwitcher [data-skin-set]').forEach((btn) => {
+        btn.classList.toggle('is-on', btn.getAttribute('data-skin-set') === next);
+      });
+    }
+
+    /* 面板由 CSS :hover 驱动滑出，无需 JS 展开/收起 */
+
+    (function bindSkinSwitcher() {
+      let saved = 'docusign';
+      try { saved = localStorage.getItem(SKIN_KEY) || 'docusign'; } catch (_) { /* ignore */ }
+      applySkin(saved);
+      document.getElementById('skinSwitcher')?.addEventListener('click', (e) => {
+        const btn = /** @type {HTMLElement} */ (e.target).closest('[data-skin-set]');
+        if (!btn) return;
+        applySkin(btn.getAttribute('data-skin-set') || 'docusign');
+      });
+    })();
+
+    /** 列表筛选：触发器 → 浮窗（应用才查询）→ 已应用标签（PRD 4.1/4.3/4.4） */
+    (function bindListFilters() {
+      const root = document.getElementById('envelopeFilters');
+      if (!root) return;
+
+      function closeAll(except) {
+        root.querySelectorAll('.filter-field').forEach((field) => {
+          if (field === except) return;
+          field.classList.remove('is-open');
+          const trigger = field.querySelector('.filter-trigger');
+          const pop = field.querySelector('.filter-popover');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          if (pop) pop.hidden = true;
+        });
+        const exportMenu = document.getElementById('exportMenu');
+        if (exportMenu) exportMenu.hidden = true;
+      }
+      window.__closeFilterPops = closeAll;
+
+      root.querySelectorAll('.filter-field').forEach((field) => {
+        const key = field.getAttribute('data-filter') || '';
+        const trigger = field.querySelector('.filter-trigger');
+        const pop = field.querySelector('.filter-popover');
+        if (!trigger || !pop) return;
+
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = !field.classList.contains('is-open');
+          closeAll(open ? field : null);
+          field.classList.toggle('is-open', open);
+          trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+          pop.hidden = !open;
+          if (open) {
+            const checked = pop.querySelector(`input[name="filter-${key}"]:checked`);
+            const applied = activeFilters[key];
+            if (applied) {
+              const input = pop.querySelector(`input[name="filter-${key}"][value="${applied.value}"]`);
+              if (input) input.checked = true;
+            } else if (checked) checked.checked = false;
+          }
+        });
+
+        pop.addEventListener('click', (e) => e.stopPropagation());
+
+        pop.querySelector('.filter-popover__cancel')?.addEventListener('click', () => closeAll(null));
+        pop.querySelector('.filter-popover__clear')?.addEventListener('click', () => {
+          activeFilters[key] = null;
+          closeAll(null);
+          toast(`已清除「${FILTER_TITLES[key]}」筛选`);
+          render();
+        });
+        pop.querySelector('.filter-popover__apply')?.addEventListener('click', () => {
+          const checked = /** @type {HTMLInputElement|null} */ (pop.querySelector(`input[name="filter-${key}"]:checked`));
+          closeAll(null);
+          if (!checked) return;
+          const label = checked.getAttribute('data-label') || checked.value;
+          activeFilters[key] = { value: checked.value, label: `${FILTER_TITLES[key]}：${label}` };
+          toast(`已应用「${FILTER_TITLES[key]}：${label}」`);
+          selectedIds.clear();
+          render();
+        });
+      });
+
+      document.addEventListener('click', () => closeAll(null));
+    })();
+
+    /** 已应用条件行 + 筛选计数（PRD 4.1：按钮已展示的条件不重复；计数不含关键词与固定条件） */
+    function renderAppliedRow() {
+      const row = document.getElementById('appliedRow');
+      /* 当前视图不支持的附加条件直接清掉（PRD 4.6 切列表规则） */
+      const allowMap = {
+        all: ['date', 'status', 'sender', 'quick'],
+        draft: ['date'],
+        active: ['date', 'sender', 'quick'],
+        completed: ['date', 'sender'],
+        folder: ['date', 'status'],
+      };
+      const allow = allowMap[currentFolder ? 'folder' : currentNav] || ['date'];
+      Object.keys(activeFilters).forEach((key) => {
+        if (!allow.includes(key)) activeFilters[key] = null;
+      });
+      /* 触发按钮直接呈现已应用条件（典型页样式：状态：所选值 ×）；未应用则恢复默认文案 */
+      const defaultLabels = { date: '日期', status: '状态', sender: '发起人', quick: '快捷筛选' };
+      document.querySelectorAll('#filterTriggers .filter-field').forEach((field) => {
+        const key = field.getAttribute('data-filter');
+        const trigger = field.querySelector('.filter-trigger');
+        if (!trigger) return;
+        const applied = activeFilters[key];
+        field.hidden = !allow.includes(key);
+        field.classList.toggle('is-applied', !!applied);
+        let labelEl = trigger.querySelector('.filter-trigger__label');
+        if (!labelEl) {
+          /* 首次：把按钮里原始文字（如"日期"）包进 label span，避免与新 label 并存重复 */
+          const textNode = [...trigger.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+          labelEl = document.createElement('span');
+          labelEl.className = 'filter-trigger__label';
+          if (textNode) {
+            trigger.insertBefore(labelEl, textNode);
+            labelEl.appendChild(textNode);
+          } else {
+            trigger.insertBefore(labelEl, trigger.firstChild);
+          }
+        }
+        labelEl.textContent = applied ? applied.label : defaultLabels[key];
+        let clearEl = trigger.querySelector('.filter-trigger__clear');
+        if (applied) {
+          if (!clearEl) {
+            clearEl = document.createElement('span');
+            clearEl.className = 'filter-trigger__clear';
+            clearEl.setAttribute('role', 'button');
+            clearEl.setAttribute('aria-label', `清除${FILTER_TITLES[key]}`);
+            clearEl.textContent = '×';
+            clearEl.addEventListener('click', (e) => {
+              e.stopPropagation();
+              activeFilters[key] = null;
+              toast(`已清除「${FILTER_TITLES[key]}」筛选`);
+              render();
+            });
+            trigger.appendChild(clearEl);
+          }
+          clearEl.hidden = false;
+          const caret = trigger.querySelector('.aip-icon');
+          if (caret) caret.hidden = true;
+        } else if (clearEl) {
+          clearEl.hidden = true;
+          const caret = trigger.querySelector('.aip-icon');
+          if (caret) caret.hidden = false;
+        }
+      });
+      /* 清除所有：放进筛选行尾部（和典型页一致），有任一条件时出现 */
+      const count = Object.keys(activeFilters).filter((k) => activeFilters[k]).length;
+      let clearAll = document.getElementById('appliedClearAll');
+      if (!clearAll) {
+        clearAll = document.createElement('button');
+        clearAll.type = 'button';
+        clearAll.className = 'applied-clearall';
+        clearAll.id = 'appliedClearAll';
+        clearAll.textContent = '清除所有';
+        document.getElementById('filterTriggers').appendChild(clearAll);
+      }
+      clearAll.hidden = count === 0;
+      if (row) row.innerHTML = '';
+      const badge = document.getElementById('filterSummaryCount');
+      if (badge) {
+        badge.hidden = count === 0;
+        badge.textContent = count ? ` ${count}` : '';
+        badge.style.fontWeight = '600';
+      }
+      /* 已应用筛选与未应用下拉之间插一根分割线（第一个未应用字段前） */
+      let sep = document.getElementById('filterSepApplied');
+      const firstUnapplied = [...document.querySelectorAll('#filterTriggers .filter-field')]
+        .find((f) => !f.hidden && !f.classList.contains('is-applied'));
+      const anyApplied = [...document.querySelectorAll('#filterTriggers .filter-field')]
+        .some((f) => f.classList.contains('is-applied'));
+      if (firstUnapplied && anyApplied) {
+        if (!sep) {
+          sep = document.createElement('span');
+          sep.className = 'filter-sep-applied';
+          sep.id = 'filterSepApplied';
+          sep.setAttribute('aria-hidden', 'true');
+        }
+        firstUnapplied.parentNode.insertBefore(sep, firstUnapplied);
+      } else if (sep) {
+        sep.remove();
+      }
+      /* 布局稳定后检测是否需要折叠（不换行，超宽折进"筛选条件"） */
+      requestAnimationFrame(() => updateFilterCollapse());
+    }
+
+    /** 筛选行超宽时把右侧触发器折叠进"筛选条件"按钮（DocuSign 式）；已应用条件仍保留在按钮上可见 */
+    function updateFilterCollapse() {
+      const collapseBtn = document.getElementById('filterCollapseBtn');
+      const search = document.querySelector('.envelope-search');
+      if (!collapseBtn || !search) return;
+      const fields = [...document.querySelectorAll('#filterTriggers .filter-field')].filter((f) => !f.hidden);
+      /* 筛选组预算 = 行宽 - 搜索框 - 右侧筛选汇总/导出/刷新组（它们由 margin-left:auto 顶到最右，但和触发器共享一行空间） */
+      const controls = document.querySelector('.envelope-controls');
+      const controlsWidth = controls.getBoundingClientRect().width;
+      const searchW = search.getBoundingClientRect().width + 16;
+      /* 右侧固定组：导出 + 刷新图标（筛选汇总按钮在筛选组内，不另占预算） */
+      let rightGroupW = 0;
+      ['exportBtn', 'refreshBtn'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.offsetParent !== null) rightGroupW += el.getBoundingClientRect().width + 8;
+      });
+      const budget = controlsWidth - searchW - rightGroupW - 24;
+      /* 展开全部测量总宽 */
+      fields.forEach((f) => f.classList.remove('is-collapsed'));
+      collapseBtn.hidden = true;
+      const totalW = fields.reduce((sum, f) => sum + f.querySelector('.filter-trigger').getBoundingClientRect().width + 8, 0);
+      if (totalW <= budget) {
+        collapseBtn.hidden = true;
+        const summaryBtn = document.getElementById('filterSummaryBtn');
+        if (summaryBtn) summaryBtn.hidden = false;
+        const cb = document.getElementById('filterCollapseCount');
+        if (cb) cb.hidden = true;
+        return;
+      }
+      /* 需要折叠：显示折叠按钮，并把"筛选汇总"也一起收纳（只留"筛选条件"一个入口） */
+      collapseBtn.hidden = false;
+      const summaryBtn = document.getElementById('filterSummaryBtn');
+      if (summaryBtn) summaryBtn.hidden = true;
+      const budget2 = budget - (collapseBtn.getBoundingClientRect().width + 8);
+      let used = totalW;
+      let collapsed = 0;
+      for (let i = fields.length - 1; i >= 0 && used > budget2; i--) {
+        const w = fields[i].querySelector('.filter-trigger').getBoundingClientRect().width + 8;
+        fields[i].classList.add('is-collapsed');
+        used -= w;
+        collapsed++;
+      }
+      const cb = document.getElementById('filterCollapseCount');
+      if (cb) {
+        cb.hidden = collapsed === 0;
+        cb.textContent = collapsed ? ` ${collapsed}` : '';
+      }
+    }
+
+    window.addEventListener('resize', () => updateFilterCollapse());
+    document.getElementById('filterCollapseBtn').addEventListener('click', () => {
+      document.getElementById('filterSummaryBtn').click();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', () => {
+      openMenuId = null;
+      openPop = null;
+      selectedIds.clear();
+      render();
+    });
+
+    document.addEventListener('click', (e) => {
+      const t = /** @type {HTMLElement} */ (e.target);
+      if (t.closest('#appliedClearAll')) {
+        ['date', 'status', 'sender', 'quick'].forEach((k) => { activeFilters[k] = null; });
+        toast('已清除所有可编辑筛选（保留关键词与当前范围）');
+        render();
+      }
+    });
+
+    /** 搜索框清空按钮显隐（NotaSign 搜索态右侧清空） */
+    (function bindSearchClear() {
+      const input = /** @type {HTMLInputElement|null} */ (document.getElementById('searchInput'));
+      const clearBtn = document.getElementById('searchClear');
+      if (!input || !clearBtn) return;
+
+      function syncClear() {
+        clearBtn.hidden = !input.value.trim();
+      }
+
+      input.addEventListener('input', syncClear);
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        syncClear();
+        input.focus();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      syncClear();
+    })();
+
+    /**
+     * AIP 0.1 mock：每行 = 一个签署任务。
+     * parties 为原授权收件人条目（partyList 显示名）；statusCode 为原业务状态；
+     * todo 为当前待办说明；primary 为行主操作（资格已在服务端裁决，列表只呈现）。
+     */
+    /** @type {Array<any>} */
+    const TASKS = [
+      { id: '1000234567890123456', subject: 'Enterprise SaaS Subscription and Data Processing Agreement',
+        parties: ['ClearCloud Software Ltd.', 'Daniel Chen'], statusCode: 'signing', scope: ['mine', 'corp'],
+        folder: 'sales', todo: { kind: 'mine', type: 'sign', text: '待我签署', action: '签署' },
+        progress: { done: 2, total: 4 }, date: '2026/09/12', time: '16:42', primary: '签署',
+        more: ['催办', '下载', '复制', '撤销'], candidates: null , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/01', deadline: '2026/09/30', approvalStatus: '—', signTemplateId: 'T-88021', batchId: '—' },
+      { id: '1000234567890123457', subject: 'HR Outsourcing Framework Agreement',
+        parties: ['Voyage Human Resources Ltd.'], statusCode: 'filling', scope: ['mine', 'corp'],
+        folder: 'hr', todo: { kind: 'mine', type: 'fill', text: '待我填写', action: '填写' },
+        progress: { done: 1, total: 3 }, date: '2026/09/12', time: '15:28', primary: '填写',
+        more: ['发送', '下载', '复制'],
+        candidates: [
+          { partyId: 'P-001', name: '法大大人力资源部', role: '发起方', actionType: '需要填写' },
+          { partyId: 'P-002', name: 'Voyage Human Resources Ltd.', role: '接收方', actionType: '需要填写' },
+        ], initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/02', deadline: '2026/10/01', approvalStatus: '—', signTemplateId: 'T-88022', batchId: 'B-2026-031' },
+      { id: 'ST-20260912-003', subject: 'Equipment Procurement Framework Agreement',
+        parties: ['SmartEdge Equipment Ltd.', 'Mason Commerce Ltd.'], statusCode: 'to-finalize', scope: ['mine', 'corp'],
+        folder: 'procurement', todo: { kind: 'mine', type: 'finalize', text: '待我定稿', action: '定稿' },
+        progress: { done: 1, total: 4 }, date: '2026/09/12', time: '14:06', primary: '定稿',
+        more: ['下载', '复制', '撤销'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/05', deadline: '2026/09/28', approvalStatus: '审批中', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260911-004', subject: 'Global Marketing Services Agreement',
+        parties: ['Orbit Media Pte. Ltd.', 'Nora Media Ltd.', 'Lena Zhou', 'Kevin Wu', 'Cindy Lau'],
+        statusCode: 'signing', scope: ['mine', 'corp'], folder: 'sales',
+        todo: { kind: 'waiting', text: '等待 Orbit Media 签署',
+          waiting: [
+            { name: 'Orbit Media Pte. Ltd.', time: '2026/09/10 09:12' },
+            { name: 'Nora Media Ltd.', time: '2026/09/10 09:12' },
+          ] },
+        progress: { done: 2, total: 5 }, date: '2026/09/11', time: '11:07', primary: '催办',
+        more: ['下载', '复制', '转交'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/06', deadline: '2026/09/25', approvalStatus: '—', signTemplateId: 'T-88030', batchId: '—' },
+      { id: 'ST-20260911-005', subject: 'Distribution and Reseller Agreement',
+        parties: ['Mason Commerce Ltd.'], statusCode: 'signing', scope: ['mine', 'corp'],
+        folder: 'sales', todo: { kind: 'waiting', text: '等待 3 人',
+          waiting: [
+            { name: 'Mason Chen', time: '2026/09/09 18:02' },
+            { name: 'Mason Chen', time: '2026/09/09 18:02' },
+            { name: 'Ada Li', time: '2026/09/09 18:03' },
+          ] },
+        progress: { done: 1, total: 3 }, date: '2026/09/11', time: '10:15', primary: '催办',
+        more: ['移动到文件夹', '下载', '延期'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/07', deadline: '2026/09/26', approvalStatus: '—', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260910-006', subject: 'Software License and Support Agreement',
+        parties: [], statusCode: 'creating', scope: ['mine'], folder: null,
+        todo: null, progress: null, date: '2026/09/10', time: '17:40', primary: '继续编辑',
+        more: ['删除'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/10', deadline: '长期有效', approvalStatus: '—', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260908-007', subject: 'Annual Consulting Services Agreement',
+        parties: ['Northstar Retail Technology Ltd.'], statusCode: 'creating', scope: ['mine', 'corp'],
+        folder: null, todo: null, progress: null, date: '2026/09/08', time: '16:21', primary: '继续编辑',
+        more: ['删除'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/08', deadline: '长期有效', approvalStatus: '—', signTemplateId: 'T-88035', batchId: '—' },
+      { id: 'ST-20260906-008', subject: 'AuroraCloud Master Subscription Agreement',
+        parties: ['Northstar Retail Technology Ltd.', 'Summit Devices Corporation', 'Tina Zhang', 'Oscar Yu', 'Fiona Gao', 'Bruce Han', 'Mia Qian'],
+        statusCode: 'completed', scope: ['mine', 'corp'], folder: 'compliance',
+        todo: null, progress: { done: 4, total: 4 }, date: '2026/09/06', time: '16:18', primary: '下载',
+        more: ['查看', '复制', '出证', '作废'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/20', deadline: '2027/08/20', approvalStatus: '已通过', signTemplateId: 'T-88040', batchId: '—' },
+      { id: 'ST-20260905-009', subject: 'HarborPoint Facilities Lease Agreement',
+        parties: ['Meadow Retail Group Ltd.'], statusCode: 'completed', scope: ['mine', 'corp'],
+        folder: 'compliance', todo: null, progress: { done: 2, total: 2 }, date: '2026/09/05', time: '14:52', primary: '下载',
+        more: ['查看', '复制', '出证'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/22', deadline: '2027/08/22', approvalStatus: '已通过', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260904-010', subject: 'Meridian Logistics Master Services Agreement',
+        parties: ['Orbit Distribution Services Ltd.'], statusCode: 'overdue', scope: ['mine', 'corp'],
+        folder: 'procurement', todo: null, progress: { done: 1, total: 3 }, date: '2026/09/04', time: '18:06', primary: '延期',
+        more: ['复制', '删除'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/15', deadline: '2026/09/03', approvalStatus: '—', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260902-011', subject: 'CedarBridge Channel Distribution Agreement',
+        parties: ['Summit Devices Corporation', 'Mason Commerce Ltd.'], statusCode: 'revoked', scope: ['mine', 'corp'],
+        folder: 'sales', todo: null, progress: null, date: '2026/09/02', time: '11:24', primary: '复制',
+        more: ['删除'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/18', deadline: '2026/09/15', approvalStatus: '—', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260901-012', subject: 'Q3 Brand Co-building Cooperation Agreement',
+        parties: ['Orbit Media Pte. Ltd.'], statusCode: 'signing', scope: ['corp'],
+        folder: 'sales', todo: { kind: 'add-member', text: '待添加成员' },
+        progress: { done: 1, total: 4 }, date: '2026/09/01', time: '09:40', primary: '催办',
+        more: ['移动到文件夹', '下载', '转交创建者'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/01', deadline: '2026/09/20', approvalStatus: '—', signTemplateId: '—', batchId: 'B-2026-032' },
+      { id: 'ST-20260830-013', subject: '',
+        parties: ['ClearCloud Software Ltd.', 'Daniel Chen'], statusCode: 'completed', scope: ['mine', 'corp'],
+        folder: 'hr', todo: null, progress: { done: 3, total: 3 }, date: '2026/08/30', time: '10:02', primary: '下载',
+        more: ['查看', '复制', '预约出证'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/10', deadline: '长期有效', approvalStatus: '已通过', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260828-014', subject: 'Personal Loan Guarantee Agreement',
+        parties: ['Daniel Chen'], statusCode: 'signing', scope: ['mine'],
+        folder: null, todo: { kind: 'mine', type: 'sign', text: '待我签署', action: '签署' },
+        progress: { done: 1, total: 2 }, date: '2026/08/28', time: '15:36', primary: '签署',
+        more: ['催办', '下载'] , initiatorName: 'Daniel Chen', creator: 'Daniel Chen', createdAt: '2026/08/28', deadline: '2026/09/30', approvalStatus: '—', signTemplateId: '—', batchId: '—' },
+      { id: 'ST-20260826-015', subject: 'Regional Data Processing Addendum',
+        parties: ['Northstar Retail Technology Ltd.'], statusCode: 'voiding', scope: ['corp'],
+        folder: 'compliance', todo: { kind: 'plain', text: '作废审批中' },
+        progress: null, date: '2026/08/26', time: '13:58', primary: '查看',
+        more: ['下载'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/08/26', deadline: '2026/09/18', approvalStatus: '审批中', signTemplateId: '—', batchId: '—' },
+    ];
+
+    /** 任务文件夹树（原服务返回的有权目录；structural 为结构父级，只汇总授权下级） */
+    const FOLDER_TREE = [
+      { id: 'sales', name: '销售与渠道', count: 3, children: [
+        { id: 'sales-east', name: '华东大区', count: 1, children: [] },
+        { id: 'sales-south', name: '华南大区', count: 2, children: [] },
+      ] },
+      { id: 'hr', name: '人力资源', count: 1, children: [] },
+      { id: 'procurement', name: '采购与供应链', count: 1, children: [] },
+      { id: 'group', name: '集团目录（结构父级）', count: 2, structural: true, children: [
+        { id: 'compliance', name: '内部与合规', count: 2, children: [] },
+      ] },
+    ];
+
+    const FOLDER_NAME_MAP = (() => {
+      const map = {};
+      (function walk(nodes) {
+        nodes.forEach((n) => { map[n.id] = n.name; if (n.children) walk(n.children); });
+      })(FOLDER_TREE);
+      return map;
+    })();
+
+    const TITLE_MAP = {
+      all: '全部任务',
+      draft: '草稿',
+      active: '进行中',
+      completed: '已完成',
+    };
+
+    /** 进行中列表固定集合（九种处理中状态，PRD 3.3） */
+    const PROGRESS_CODES = ['created', 'filling', 'to-finalize', 'finalizing', 'finalize-failed', 'finalized', 'signing', 'signed', 'voiding'];
+    const STATUS_TEXT = {
+      'creating': '创建中', 'created': '已创建', 'filling': '填写中', 'to-finalize': '待定稿',
+      'finalizing': '定稿中', 'finalize-failed': '定稿失败', 'finalized': '已定稿',
+      'signing': '签署中', 'signed': '已签署', 'completed': '已完成', 'overdue': '已逾期',
+      'revoked': '已撤销', 'terminated': '已终止', 'voiding': '作废中', 'voided': '已作废',
+      'progress-set': '进行中',
+    };
+    /** 各视图固定状态集合；null = 不限 */
+    const VIEW_STATE_SET = {
+      all: null,
+      draft: ['creating'],
+      active: PROGRESS_CODES,
+      completed: ['completed'],
+      folder: null,
+    };
+    /** 搜索占位随列表变化（PRD 3.1-3.5） */
+    const VIEW_SEARCH_PH = {
+      all: '搜索全部任务', draft: '搜索草稿', active: '搜索进行中',
+      completed: '搜索已完成', folder: '搜索当前文件夹',
+    };
+    /* —— 列设置（PRD 5.6）：主题/操作固定，其余可选可排序；按成员+企业+范围持久保存 —— */
+    const COL_DEFS = [
+      { id: 'subject', label: '任务主题', fixed: true },
+      { id: 'status', label: '状态' },
+      { id: 'updatedAt', label: '更新时间', sortable: true },
+      { id: 'folder', label: '文件夹' },
+      { id: 'taskNo', label: '任务编号' },
+      { id: 'approval', label: '审批状态' },
+      { id: 'initiator', label: '发件人' },
+      { id: 'recipients', label: '收件人' },
+      { id: 'finishedAt', label: '完成时间', sortable: true },
+      { id: 'deadline', label: '截止时间', sortable: true },
+      { id: 'createdAt', label: '发起时间', sortable: true },
+      { id: 'creator', label: '创建者' },
+      { id: 'signTemplateId', label: '关联签署模板 ID' },
+      { id: 'batchId', label: '批量任务 ID' },
+      { id: 'actions', label: '操作', fixed: true },
+    ];
+    const DEFAULT_COL_IDS = ['subject', 'status', 'updatedAt', 'folder', 'actions'];
+    const COL_KEY_PREFIX = 'aip-01-cols-';
+    function colStorageKey() {
+      return COL_KEY_PREFIX + 'member-cx-' + (currentFolder ? 'folder' : currentScope);
+    }
+    /** 当前生效列（有序、含固定首尾） */
+    let activeCols = loadCols();
+    let colDraft = null;
+    function loadCols() {
+      try {
+        const raw = localStorage.getItem(colStorageKey());
+        if (raw) {
+          const ids = JSON.parse(raw);
+          const valid = ids.filter((id) => COL_DEFS.some((d) => d.id === id));
+          if (valid.length && valid[0] === 'subject' && valid[valid.length - 1] === 'actions') return valid;
+        }
+      } catch (_) { /* ignore */ }
+      return DEFAULT_COL_IDS.slice();
+    }
+    function saveCols(ids) {
+      try { localStorage.setItem(colStorageKey(), JSON.stringify(ids)); } catch (_) { /* ignore */ }
+    }
+    /** 排序：{ field, dir } 单字段排序；列显隐不改变排序 */
+    let sortState = { field: 'updatedAt', dir: 'desc' };
+
+    const LEGACY_META = {
+      receiving: ['待我接收', '原页面 /work/task/manage/receiving。原接收状态、搜索、重置、分页保持不变；Demo 仅承载原有页面。'],
+      batch: ['批量发送记录', '原批量发送记录页面。Demo 仅承载原有页面，不重建查询。'],
+      scan: ['扫码签记录', '原扫码签记录页面。Demo 仅承载原有页面，不重建查询。'],
+      processing: ['处理中心', '原处理中心页面，承接导出 / 下载作业结果。Demo 仅承载原有页面。'],
+      statistics: ['数据统计', '原数据统计页面（/work/task/admin/dataStatistics）。Demo 仅承载原有页面。'],
+      launch: ['发起签署', '原认证检查 → 原创建页面。Demo 仅承载原有页面，不模拟创建表单、认证、发送或用印。'],
+    };
+
+    /** @type {'mine'|'corp'} 访问范围（任务文件夹页不携带） */
+    let currentScope = 'mine';
+    /** @type {'all'|'draft'|'active'|'completed'|'folder'} */
+    let currentNav = 'all';
+    /** @type {string|null} 任务文件夹目录标识 */
+    let currentFolder = null;
+    /** @type {string|null} 记录与处理 / 发起签署的原有页面承载 */
+    let currentLegacy = null;
+    /** @type {string|null} */
+    let openMenuId = null;
+    /** @type {{key:string,taskId:string}|null} */
+    let openPop = null;
+    /** 进入任务文件夹前的固定列表范围，用于离开时恢复（PRD 4.6） */
+    let scopeBeforeFolder = 'mine';
+    /** 已应用筛选（模拟已提交条件；关键词不计数） */
+    const activeFilters = { date: null, status: null, sender: null, quick: null };
+    const FILTER_TITLES = { date: '时间', status: '状态', sender: '发起人', quick: '快捷筛选' };
+    /** 当前已选任务（仅本页，不跨页累计） */
+    const selectedIds = new Set();
+    const openFolderIds = new Set();
+    /** 汇总弹窗草稿（内层应用只写草稿，外层保存才提交一次查询） */
+    let summaryDraft = null;
+    /** 选择收件人上下文 */
+    let partyDialogCtx = null;
+    /** 导出资格（mock：有导出资格；无资格时隐藏导出按钮） */
+    const canExport = true;
+
+    /**
+     * @param {string} msg
+     */
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove('show'), 1800);
+    }
+
+    /** 模态锁滚动：任一弹窗打开时 body 加 is-modal-open */
+    function syncModalScrollLock() {
+      const anyOpen = [...document.querySelectorAll('.ns-modal-mask')].some((m) => !m.hidden);
+      document.body.classList.toggle('is-modal-open', anyOpen);
+    }
+
+    /** 侧栏「状态导航」与「任务文件夹 / 记录与处理」互斥选中 */
+    function syncSidebarActive() {
+      document.querySelectorAll('.nav-primary').forEach((el) => {
+        el.classList.toggle('active', !currentFolder && !currentLegacy && currentNav === 'all');
+      });
+      document.querySelectorAll('.contract-secondary-items .nav-secondary').forEach((el) => {
+        el.classList.toggle('active', !currentFolder && !currentLegacy && el.getAttribute('data-nav') === currentNav);
+      });
+      const head = document.getElementById('folderModuleHead');
+      /* 只有目录本身高亮；模块头不因选中目录而高亮（同一时刻只一个选中项） */
+      if (head) head.classList.remove('is-active');
+      document.querySelectorAll('.folder-tree-row').forEach((el) => {
+        const on = !!currentFolder && el.getAttribute('data-folder-row') === currentFolder;
+        el.classList.toggle('active', on);
+      });
+      document.querySelectorAll('[data-record]').forEach((el) => {
+        el.classList.toggle('active', !!currentLegacy && el.getAttribute('data-record') === currentLegacy);
+      });
+    }
+
+    /** 文件夹树渲染（PRD 6.2：层级缩进 20px、结构父级、计数、按需展开） */
+    function renderFolderTree(nodes, container, depth) {
+      nodes.forEach((node) => {
+        const hasKids = node.children && node.children.length > 0;
+        const row = document.createElement('div');
+        row.className = 'folder-tree-row' + (openFolderIds.has(node.id) ? ' is-open' : '');
+        row.setAttribute('data-folder-row', node.id);
+        row.style.paddingLeft = `${23 + depth * 20}px`;
+        row.innerHTML = `
+          <button class="folder-tree-caret${hasKids ? '' : ' is-leaf'}" type="button" aria-label="展开 ${node.name}" data-caret="${node.id}">
+            <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+          </button>
+          <button class="folder-tree-item${node.structural ? ' is-structural' : ''}" type="button" data-folder="${node.id}" title="${node.name}">
+            <span>${node.name}</span><b>${node.count}</b>
+          </button>
+          ${node.structural ? '' : `<button class="folder-node-more" type="button" aria-label="${node.name} 更多操作" data-node-more="${node.id}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
+          </button>`}`;
+        container.appendChild(row);
+        if (hasKids && openFolderIds.has(node.id)) renderFolderTree(node.children, container, depth + 1);
+      });
+    }
+
+    function rebuildFolderTree() {
+      const body = document.getElementById('folderModuleBody');
+      if (!body) return;
+      body.innerHTML = '';
+      renderFolderTree(FOLDER_TREE, body, 0);
+      syncSidebarActive();
+    }
+
+    /** @returns {any[]} */
+    function filteredTasks() {
+      const q = /** @type {HTMLInputElement} */ (document.getElementById('searchInput')).value.trim().toLowerCase();
+      return TASKS.filter((task) => {
+        if (currentFolder) {
+          if (task.folder !== currentFolder && !(currentFolder === 'group' && task.folder === 'compliance')) return false;
+        } else {
+          if (!task.scope.includes(currentScope)) return false;
+          const set = VIEW_STATE_SET[currentNav];
+          if (set && !set.includes(task.statusCode)) return false;
+        }
+        /* 已应用状态条件（全部任务 / 文件夹单选附加状态） */
+        if (activeFilters.status) {
+          if (activeFilters.status.value === 'progress-set') {
+            if (!PROGRESS_CODES.includes(task.statusCode)) return false;
+          } else if (task.statusCode !== activeFilters.status.value) return false;
+        }
+        if (activeFilters.sender) {
+          /* mock：关系条件不拆数据，仅演示计数与标签 */
+        }
+        if (activeFilters.quick) {
+          if (activeFilters.quick.value === 'todo-me' && !(task.todo && task.todo.kind === 'mine')) return false;
+          if (activeFilters.quick.value === 'todo-others' && !(task.todo && task.todo.kind === 'waiting')) return false;
+          if (activeFilters.quick.value === 'todo-corp' && !(task.todo && (task.todo.kind === 'mine' || task.todo.kind === 'waiting'))) return false;
+          if (activeFilters.quick.value === 'todo-add-member' && !(task.todo && task.todo.kind === 'add-member')) return false;
+          if (activeFilters.quick.value === 'due-soon' && task.statusCode !== 'signing') return false;
+        }
+        if (!q) return true;
+        const subject = (task.subject || '').toLowerCase();
+        return subject.includes(q) || task.id.toLowerCase() === q;
+      });
+    }
+
+    /** 收件人摘要：前两名 + 「+N」浮层（PRD 5.1） */
+    function partiesSummaryHtml(task) {
+      const list = task.parties || [];
+      if (!list.length) return '<small>暂无收件人</small>';
+      const first = list.slice(0, 2).join('、');
+      if (list.length <= 2) return `<small>收件人：${first}</small>`;
+      const rest = list.length - 2;
+      return `<small>收件人：${first} <button type="button" class="party-more-btn" data-pop="parties" data-task="${task.id}" aria-haspopup="dialog">+${rest}</button></small>`;
+    }
+
+    /** 状态列：业务状态 + 当前待办说明 + 进度（PRD 5.2/5.3/5.4） */
+    function stateCellHtml(task) {
+      const statusText = STATUS_TEXT[task.statusCode] || '状态更新中';
+      let todoHtml = '';
+      if (task.todo) {
+        if (task.todo.kind === 'mine') {
+          todoHtml = `<span class="todo-text todo-text--mine">${task.todo.text}</span>`;
+        } else if (task.todo.kind === 'waiting') {
+          todoHtml = `<button type="button" class="todo-text todo-text--waiting" data-pop="waiting" data-task="${task.id}">${task.todo.text}</button>`;
+        } else {
+          todoHtml = `<span class="todo-text todo-text--plain">${task.todo.text}</span>`;
+        }
+      }
+      if (task.statusCode === 'completed') {
+        return `<div class="envelope-state is-completed">
+          <svg class="status-check" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="currentColor" focusable="false">
+            <path d="M8.39 12.74 6 10.35l1.34-1.34L9 10.67l3.66-3.66L14 8.35l-4.39 4.39c-.17.17-.39.26-.61.26s-.44-.1-.61-.26"/>
+            <path d="M10 3.9c3.36 0 6.1 2.74 6.1 6.1s-2.74 6.1-6.1 6.1-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9M10 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8"/>
+          </svg>
+          <span class="todo-text">${statusText}</span>
+        </div>`;
+      }
+      const progressHtml = task.progress
+        ? `<span class="envelope-track"><i style="width:${Math.round((task.progress.done / task.progress.total) * 100)}%"></i></span>`
+        : '';
+      const statusLine = task.progress
+        ? `<span class="todo-text todo-text--plain">${statusText} <span style="color:var(--fdd-ink-3)">${task.progress.done}/${task.progress.total}</span></span>`
+        : `<span class="todo-text todo-text--plain">${statusText}</span>`;
+      return `<div class="envelope-state">${statusLine}${progressHtml}${todoHtml}</div>`;
+    }
+
+    /** 文件夹列：点击目录进入对应任务文件夹页；无归属显示未归类（PRD 5.1） */
+    function folderCellHtml(task) {
+      if (!task.folder) return '<span class="todo-text todo-text--plain">未归类</span>';
+      return `<button type="button" class="folder-link" data-goto-folder="${task.folder}">${FOLDER_NAME_MAP[task.folder] || '文件夹'}</button>`;
+    }
+
+    /** 单元格渲染器（除主题/状态/更新/文件夹/操作外的可选列） */
+    function cellHtml(task, colId) {
+      const t = task;
+      switch (colId) {
+        case 'subject':
+          return `<button class="envelope-name" type="button" data-toast="打开任务详情：${t.subject || '未命名签署任务'}（原有详情页）">${t.subject || '未命名签署任务'}</button>${partiesSummaryHtml(t)}`;
+        case 'status': return stateCellHtml(t);
+        case 'updatedAt': return `<span class="time-cell"><span>${t.date}</span><small>${t.time}</small></span>`;
+        case 'folder': return folderCellHtml(t);
+        case 'taskNo': return `<span class="col-aux">${t.id}</span>`;
+        case 'approval': return `<span class="col-aux">${t.approvalStatus || '—'}</span>`;
+        case 'initiator': return `<span class="col-aux">${t.initiatorName || '—'}</span>`;
+        case 'recipients': return `<span class="col-aux">${(t.parties || []).slice(0, 2).join('、') || '—'}${(t.parties || []).length > 2 ? ` +${t.parties.length - 2}` : ''}</span>`;
+        case 'finishedAt': return `<span class="col-aux">${t.statusCode === 'completed' ? t.date : '—'}</span>`;
+        case 'deadline': return `<span class="col-aux">${t.deadline || '长期有效'}</span>`;
+        case 'createdAt': return `<span class="col-aux">${t.createdAt || '—'}</span>`;
+        case 'creator': return `<span class="col-aux">${t.creator || '—'}</span>`;
+        case 'signTemplateId': return `<span class="col-aux">${t.signTemplateId || '—'}</span>`;
+        case 'batchId': return `<span class="col-aux">${t.batchId || '—'}</span>`;
+        case 'actions':
+          return `<div class="row-actions">
+            ${t.primary ? `<button class="resend-button${['签署', '填写', '定稿'].includes(t.primary) ? ' is-solid' : ''}" type="button" data-primary="${t.id}">${t.primary}</button>` : ''}
+            ${(t.more && t.more.length) ? `
+            <span class="more-wrap">
+              <button class="more-button" type="button" aria-label="更多操作" data-more="${t.id}">
+                <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
+              </button>
+
+            </span>` : ''}
+          </div>`;
+        default: return '—';
+      }
+    }
+
+    function renderHead() {
+      const head = document.getElementById('taskHead');
+      const ths = activeCols.map((id) => {
+        const def = COL_DEFS.find((d) => d.id === id);
+        if (id === 'subject') {
+          return `<th><input id="checkAll" type="checkbox" aria-label="选择所有行" /></th><th>${def.label}</th>`;
+        }
+        if (id === 'actions') {
+          return `<th class="col-settings-th" aria-label="操作与列设置">
+            <button type="button" class="col-settings-btn" id="colSettingsBtn" aria-label="设置列表列" aria-haspopup="dialog">
+              <svg class="ico" width="17" height="17" viewBox="0 0 20 20" fill="currentColor"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
+            </button>
+          </th>`;
+        }
+        const sortable = def.sortable;
+        const isSortCol = sortState.field === id;
+        const ico = isSortCol ? (sortState.dir === 'asc' ? '↑' : '↓') : '';
+        const minW = { subject: 220, status: 150, updatedAt: 130, folder: 110, taskNo: 170, approval: 90, initiator: 90, recipients: 150, finishedAt: 110, deadline: 110, createdAt: 110, creator: 90, signTemplateId: 140, batchId: 110 }[id] || 100;
+        return `<th${sortable ? ` data-sort="${id}" class="is-sortable"` : ''} style="min-width:${minW}px">${def.label}${sortable ? ` <span class="sort-ico">${ico}</span>` : ''}</th>`;
+      }).join('');
+      head.innerHTML = `<tr>${ths}</tr>`;
+      /* 表头排序 */
+      head.querySelectorAll('[data-sort]').forEach((th) => {
+        th.addEventListener('click', () => {
+          const field = th.getAttribute('data-sort');
+          if (sortState.field === field) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+          else sortState = { field, dir: 'asc' };
+          selectedIds.clear();
+          render();
+        });
+      });
+      head.querySelector('#colSettingsBtn')?.addEventListener('click', () => openColSettings());
+      head.querySelector('#checkAll')?.addEventListener('change', (e) => {
+        const on = e.target.checked;
+        document.querySelectorAll('#taskBody [data-row-check]').forEach((c) => {
+          c.checked = on;
+          const rid = c.getAttribute('data-row-check');
+          if (on) selectedIds.add(rid); else selectedIds.delete(rid);
+        });
+        syncBatchBar();
+      });
+    }
+
+    function sortRows(rows) {
+      const arr = rows.slice();
+      const { field, dir } = sortState;
+      arr.sort((a, b) => {
+        const va = a[field] || a.date || '';
+        const vb = b[field] || b.date || '';
+        if (va === vb) return a.id < b.id ? -1 : 1;
+        return (va < vb ? -1 : 1) * (dir === 'asc' ? 1 : -1);
+      });
+      return arr;
+    }
+
+    function render() {
+      const rows = sortRows(filteredTasks());
+      const body = document.getElementById('taskBody');
+      let title = TITLE_MAP[currentNav] || '全部任务';
+      if (currentFolder) title = FOLDER_NAME_MAP[currentFolder] || '任务文件夹';
+      document.getElementById('pageTitle').textContent = title;
+
+      /* 范围选择器：任务文件夹页不显示（PRD 2.1） */
+      const scopeSwitch = document.getElementById('scopeSwitch');
+      if (scopeSwitch) {
+        scopeSwitch.hidden = !!currentFolder;
+        scopeSwitch.querySelectorAll('[data-scope]').forEach((b) => {
+          b.classList.toggle('is-on', b.getAttribute('data-scope') === currentScope);
+        });
+      }
+      /* 搜索占位随列表变化 */
+      const searchInput = /** @type {HTMLInputElement} */ (document.getElementById('searchInput'));
+      searchInput.placeholder = currentFolder ? VIEW_SEARCH_PH.folder : (VIEW_SEARCH_PH[currentNav] || '搜索签署任务');
+
+      document.getElementById('pageInfo').textContent = '第 1 页';
+      document.getElementById('pageTotal').textContent = `共 ${rows.length} 条`;
+      syncSidebarActive();
+      renderAppliedRow();
+      syncBatchBar();
+      renderHead();
+
+      body.innerHTML = rows.map((task) => `
+        <tr data-id="${task.id}">
+          ${activeCols.map((id) => {
+            if (id === 'subject') return `<td><input type="checkbox" data-row-check="${task.id}" ${selectedIds.has(task.id) ? 'checked' : ''} aria-label="选择 ${task.subject || '未命名签署任务'}" /></td><td>${cellHtml(task, id)}</td>`;
+            return `<td>${cellHtml(task, id)}</td>`;
+          }).join('')}
+        </tr>
+      `).join('') || `<tr><td colspan="${activeCols.length + 1}" style="text-align:center;color:var(--fdd-ink-3);height:120px">没有符合条件的任务</td></tr>`;
+      /* 行重渲染后同步表头全选勾选态 */
+      const allChecked = rows.length > 0 && rows.every((t) => selectedIds.has(t.id));
+      const headCheck = document.getElementById('checkAll');
+      if (headCheck) headCheck.checked = allChecked;
+    }
+
+    /** 批量选择（PRD 6.1：本页选择，不跨页累计；未勾选不显示提示） */
+    function syncBatchBar() {
+      const bar = document.getElementById('batchBar');
+      if (!bar) return;
+      const n = selectedIds.size;
+      bar.classList.toggle('is-on', n > 0);
+      document.getElementById('batchCount').textContent = `已选择 ${n} 条`;
+      const expSel = document.getElementById('exportSelected');
+      if (expSel) expSel.disabled = n === 0;
+    }
+
+    document.getElementById('taskBody').addEventListener('change', (e) => {
+      const cb = /** @type {HTMLElement} */ (e.target).closest('[data-row-check]');
+      if (!cb) return;
+      const id = cb.getAttribute('data-row-check');
+      if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+      syncBatchBar();
+    });
+
+    /** 列表切换（PRD 4.6：切状态列表保留关键词与日期，清附加状态 / 发起人 / 快捷） */
+    document.querySelectorAll('[data-nav]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-nav') || 'all';
+        if (currentFolder) {
+          /* 从任务文件夹回固定列表：恢复进入前的人员范围（PRD 4.6） */
+          currentScope = scopeBeforeFolder;
+        }
+        currentNav = target;
+        currentFolder = null;
+        currentLegacy = null;
+        document.body.removeAttribute('data-page-mode');
+        openMenuId = null;
+        openPop = null;
+        selectedIds.clear();
+        /* 切列表清空筛选状态（PRD 4.6：主动切换清空旧筛选） */
+        ['date', 'status', 'sender', 'quick'].forEach((k) => { activeFilters[k] = null; });
+        render();
+      });
+    });
+
+    /** 访问范围切换：进入目标范围全部任务，清空旧筛选（PRD 4.6） */
+    document.getElementById('scopeSwitch').addEventListener('click', (e) => {
+      const btn = /** @type {HTMLElement} */ (e.target).closest('[data-scope]');
+      if (!btn) return;
+      const scope = btn.getAttribute('data-scope');
+      if (scope === currentScope) return;
+      currentScope = scope;
+      currentNav = 'all';
+      currentFolder = null;
+      currentLegacy = null;
+      document.body.removeAttribute('data-page-mode');
+      ['date', 'status', 'sender', 'quick'].forEach((k) => { activeFilters[k] = null; });
+      selectedIds.clear();
+      toast(scope === 'corp' ? '已切换：全部签署（清空旧筛选，默认过去 6 个月）' : '已切换：我的签署');
+      render();
+    });
+
+    /** 任务文件夹（PRD 6.2：独立页面，无人员范围；目录切换保留关键词 / 日期 / 状态） */
+    (function bindFolderModule() {
+      const moduleEl = document.getElementById('folderModule');
+      const moduleToggle = document.getElementById('folderModuleToggle');
+      if (!moduleEl || !moduleToggle) return;
+
+      moduleToggle.addEventListener('click', () => {
+        const willOpen = !moduleEl.classList.contains('is-open');
+        moduleEl.classList.toggle('is-open', willOpen);
+        moduleToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        /* 展开 / 收起只改侧栏树状态，不换页（PRD 6.2） */
+      });
+
+      const moreBtn = document.getElementById('folderMoreBtn');
+      const moreMenu = document.getElementById('folderMoreMenu');
+      moreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moreMenu.hidden = !moreMenu.hidden;
+      });
+      document.addEventListener('click', (e) => {
+        if (!moreMenu.hidden && !moreMenu.contains(/** @type {Node} */ (e.target)) && e.target !== moreBtn) moreMenu.hidden = true;
+      });
+
+      /* 全部收起：折叠整棵目录树（保留模块展开） */
+      moreMenu.querySelectorAll('[data-toast="演示：全部收起"]').forEach((b) => {
+        b.removeAttribute('data-toast');
+        b.addEventListener('click', () => {
+          moreMenu.hidden = true;
+          openFolderIds.clear();
+          rebuildFolderTree();
+          toast('已收起全部文件夹');
+        });
+      });
+
+      /* 新建文件夹：打开新建弹窗 */
+      moreMenu.querySelectorAll('[data-toast="演示：新建文件夹（原有流程）"]').forEach((b) => {
+        b.removeAttribute('data-toast');
+        b.addEventListener('click', () => {
+          moreMenu.hidden = true;
+          openNewFolderModal();
+        });
+      });
+
+      /* 查找文件夹：打开"选择要查看的文件夹"弹窗 */
+      document.getElementById('folderSearchBtn').addEventListener('click', () => {
+        moreMenu.hidden = true;
+        openFolderPicker();
+      });
+      document.getElementById('folderSearchInput').addEventListener('input', (e) => {
+        const q = /** @type {HTMLInputElement} */ (e.target).value.trim();
+        const body = document.getElementById('folderModuleBody');
+        if (!q) { rebuildFolderTree(); return; }
+        body.innerHTML = '';
+        const flat = [];
+        (function walk(nodes, path) {
+          nodes.forEach((n) => {
+            const full = path ? `${path} / ${n.name}` : n.name;
+            if (n.name.includes(q)) flat.push({ ...n, full });
+            if (n.children) walk(n.children, full);
+          });
+        })(FOLDER_TREE, '');
+        if (!flat.length) {
+          body.innerHTML = '<p class="folder-tree-empty">没有符合条件的文件夹</p>';
+          return;
+        }
+        flat.forEach((n) => {
+          const row = document.createElement('div');
+          row.className = 'folder-tree-row';
+          row.setAttribute('data-folder-row', n.id);
+          row.style.paddingLeft = '23px';
+          row.innerHTML = `<button class="folder-tree-item" type="button" data-folder="${n.id}" title="${n.full}"><span>${n.full}</span><b>${n.count}</b></button>`;
+          body.appendChild(row);
+        });
+      });
+
+      document.getElementById('folderModuleBody').addEventListener('click', (e) => {
+        const t = /** @type {HTMLElement} */ (e.target);
+        const caret = t.closest('[data-caret]');
+        if (caret) {
+          e.stopPropagation();
+          const id = caret.getAttribute('data-caret');
+          if (openFolderIds.has(id)) openFolderIds.delete(id); else openFolderIds.add(id);
+          rebuildFolderTree();
+          return;
+        }
+        const nodeMore = t.closest('[data-node-more]');
+        if (nodeMore) {
+          e.stopPropagation();
+          openFolderNodeMenu(nodeMore, nodeMore.getAttribute('data-node-more'));
+          return;
+        }
+        const item = t.closest('[data-folder]');
+        if (!item) return;
+        enterFolder(item.getAttribute('data-folder'));
+      });
+
+      /* 节点操作菜单（重命名 / 删除 / 移动 / 新子文件夹） */
+      let openNodeMenu = null;
+      function openFolderNodeMenu(btn, folderId) {
+        closeNodeMenu();
+        const name = FOLDER_NAME_MAP[folderId] || '文件夹';
+        const menu = document.createElement('div');
+        menu.className = 'folder-node-menu';
+        menu.id = 'folderNodeMenu';
+        menu.setAttribute('role', 'menu');
+        menu.innerHTML = `
+          <button type="button" role="menuitem" data-node-act="rename">重命名</button>
+          <button type="button" role="menuitem" data-node-act="delete">删除</button>
+          <button type="button" role="menuitem" data-node-act="move">移动</button>
+          <button type="button" role="menuitem" data-node-act="new-sub">新子文件夹</button>`;
+        document.body.appendChild(menu);
+        const rect = btn.getBoundingClientRect();
+        menu.style.top = `${Math.min(rect.bottom + 4, window.innerHeight - menu.offsetHeight - 12)}px`;
+        menu.style.left = `${Math.min(rect.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - 12)}px`;
+        btn.classList.add('is-open');
+        openNodeMenu = { btn, menu };
+        menu.addEventListener('click', (ev) => {
+          const actBtn = /** @type {HTMLElement} */ (ev.target).closest('[data-node-act]');
+          if (!actBtn) return;
+          const act = actBtn.getAttribute('data-node-act');
+          const labels = { rename: '重命名', delete: '删除', move: '移动', 'new-sub': '新子文件夹' };
+          toast(`演示：${labels[act]}「${name}」（原有目录管理流程，资格由服务端裁决）`);
+          closeNodeMenu();
+        });
+        /* 点外部 / Esc 关闭 */
+        setTimeout(() => {
+          document.addEventListener('click', nodeMenuOutside, { capture: true });
+          document.addEventListener('keydown', nodeMenuEsc);
+        }, 0);
+      }
+      function nodeMenuOutside(ev) {
+        if (openNodeMenu && !openNodeMenu.menu.contains(/** @type {Node} */ (ev.target)) && ev.target !== openNodeMenu.btn && !openNodeMenu.btn.contains(/** @type {Node} */ (ev.target))) {
+          closeNodeMenu();
+        }
+      }
+      function nodeMenuEsc(ev) {
+        if (ev.key === 'Escape') closeNodeMenu();
+      }
+      function closeNodeMenu() {
+        if (!openNodeMenu) return;
+        openNodeMenu.btn.classList.remove('is-open');
+        openNodeMenu.menu.remove();
+        openNodeMenu = null;
+        document.removeEventListener('click', nodeMenuOutside, { capture: true });
+        document.removeEventListener('keydown', nodeMenuEsc);
+      }
+
+      function enterFolder(id) {
+        if (!currentFolder) scopeBeforeFolder = currentScope;
+        currentFolder = id;
+        currentLegacy = null;
+        document.body.removeAttribute('data-page-mode');
+        openMenuId = null;
+        openPop = null;
+        selectedIds.clear();
+        /* 目录切换：保留关键词、日期、状态；人员范围条件由 renderAppliedRow 清除（PRD 4.6） */
+        render();
+      }
+
+      rebuildFolderTree();
+    })();
+
+    /** 记录与处理：原页面站内承载（PRD 3.7 / FR-AIP-014） */
+    (function bindRecordsModule() {
+      const moduleEl = document.getElementById('recordsModule');
+      const toggle = document.getElementById('recordsModuleToggle');
+      toggle.addEventListener('click', () => {
+        const collapsed = moduleEl.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      });
+      document.querySelectorAll('[data-record]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          openLegacy(btn.getAttribute('data-record'));
+        });
+      });
+      document.getElementById('legacyBack').addEventListener('click', () => {
+        currentLegacy = null;
+        currentFolder = null;
+        document.body.removeAttribute('data-page-mode');
+        currentNav = 'all';
+        render();
+      });
+    })();
+
+    function openLegacy(key) {
+      const meta = LEGACY_META[key];
+      if (!meta) return;
+      currentLegacy = key;
+      document.getElementById('legacyTitle').textContent = meta[0];
+      document.getElementById('legacyDesc').textContent = `原有页面 · ${meta[1]}`;
+      document.body.setAttribute('data-page-mode', 'legacy');
+      syncSidebarActive();
+    }
+
+    /** 发起签署：hover 展开原菜单分支（PRD 2.4：直接 / 模板 / 批量创建） */
+    (function bindLaunchMenu() {
+      const wrap = document.getElementById('launchWrap');
+      const btn = document.getElementById('launchBtn');
+      if (!wrap || !btn) return;
+      /* 键盘 / 触屏：点击按钮切换菜单；hover 由 CSS 处理 */
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = wrap.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(/** @type {Node} */ (e.target))) {
+          wrap.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          wrap.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
+        }
+      });
+      /* 菜单项：沿用原入口处理器与去向（Demo 仅承载原有页面） */
+      const LEGACY_LAUNCH = {
+        direct: '直接创建（原文件创建页 /application/task/sign/detail?create=0）',
+        template: '模板创建（原模板列表 /work/template/list）',
+        batch: '批量创建（原"选择签署模板进行批量创建"弹窗）',
+      };
+      wrap.querySelectorAll('[data-launch]').forEach((item) => {
+        item.addEventListener('click', () => {
+          wrap.classList.remove('is-open');
+          const key = item.getAttribute('data-launch');
+          toast(`演示：${LEGACY_LAUNCH[key] || '原有发起流程'}`);
+          openLegacy('launch');
+        });
+      });
+    })();
+
+    /** 行内小浮层（收件人 +N / 等待名单）：fixed 定位，不被行投影遮挡 */
+    let miniPopEl = null;
+    function closeMiniPop() {
+      if (miniPopEl) { miniPopEl.remove(); miniPopEl = null; }
+      openPop = null;
+    }
+    function openMiniPop(btn, key, taskId) {
+      closeMiniPop();
+      openPop = { key, taskId };
+      const task = TASKS.find((x) => x.id === taskId);
+      if (!task) return;
+      let title = '', items = '';
+      if (key === 'parties') {
+        title = '收件人';
+        items = (task.parties || []).map((n) => `<span class="mini-popover__item"><span class="p-name">${n}</span></span>`).join('');
+      } else if (key === 'waiting') {
+        title = '等待处理';
+        items = ((task.todo && task.todo.waiting) || []).map((w) => `<span class="mini-popover__item"><span class="p-name">${w.name}</span><span class="p-time">发送于 ${w.time}</span></span>`).join('');
+      } else return;
+      const pop = document.createElement('span');
+      pop.className = 'mini-popover';
+      pop.setAttribute('role', 'dialog');
+      pop.innerHTML = `
+        <span class="mini-popover__head">${title}
+          <button type="button" class="mini-popover__close" data-pop-close aria-label="关闭">×</button>
+        </span>
+        <span class="mini-popover__list">${items}</span>`;
+      document.body.appendChild(pop);
+      miniPopEl = pop;
+      const rect = btn.getBoundingClientRect();
+      const ph = pop.offsetHeight, pw = pop.offsetWidth;
+      let top = rect.bottom + 6;
+      if (top + ph > window.innerHeight - 12) top = rect.top - ph - 6;
+      let left = rect.left;
+      if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+      pop.style.top = Math.max(12, top) + 'px';
+      pop.style.left = Math.max(12, left) + 'px';
+      pop.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (/** @type {HTMLElement} */ (ev.target).closest('[data-pop-close]')) closeMiniPop();
+      });
+    }
+
+    /** 行更多菜单：fixed 定位锚定 ⋯ 按钮（不被 sticky 操作列遮挡/裁剪） */
+    let rowMenuEl = null;
+    function closeRowMenu() {
+      if (rowMenuEl) { rowMenuEl.remove(); rowMenuEl = null; }
+      openMenuId = null;
+      const shell = document.querySelector('.envelope-table-shell');
+      if (shell) shell.classList.remove('is-pop-locked');
+      document.removeEventListener('click', rowMenuOutside, true);
+      document.removeEventListener('keydown', rowMenuEsc);
+    }
+    function rowMenuOutside(ev) {
+      if (rowMenuEl && !rowMenuEl.contains(/** @type {Node} */ (ev.target)) && !ev.target.closest('[data-more]')) closeRowMenu();
+    }
+    function rowMenuEsc(ev) { if (ev.key === 'Escape') closeRowMenu(); }
+    function openRowMenu(btn, taskId) {
+      closeRowMenu();
+      openMenuId = taskId;
+      const shell = document.querySelector('.envelope-table-shell');
+      if (shell) shell.classList.add('is-pop-locked');
+      const task = TASKS.find((x) => x.id === taskId);
+      if (!task || !task.more || !task.more.length) return;
+      const menu = document.createElement('span');
+      menu.className = 'row-menu';
+      menu.setAttribute('role', 'menu');
+      menu.innerHTML = task.more.map((m) => `<button type="button" class="${m === '删除' ? 'danger' : ''}" data-toast="演示：${m}（原有流程，资格由服务端裁决）">${m}</button>`).join('');
+      document.body.appendChild(menu);
+      rowMenuEl = menu;
+      const rect = btn.getBoundingClientRect();
+      const mh = menu.offsetHeight, mw = menu.offsetWidth;
+      let top = rect.bottom + 4;
+      if (top + mh > window.innerHeight - 12) top = rect.top - mh - 4;
+      menu.style.top = `${Math.max(12, top)}px`;
+      menu.style.left = `${Math.max(12, Math.min(rect.right - mw, window.innerWidth - mw - 12))}px`;
+      menu.addEventListener('click', () => closeRowMenu());
+      setTimeout(() => {
+        document.addEventListener('click', rowMenuOutside, true);
+        document.addEventListener('keydown', rowMenuEsc);
+      }, 0);
+    }
+
+    /** 行内交互统一委托（PRD 5.1/5.3/5.4/5.5） */
+    document.getElementById('taskBody').addEventListener('click', (e) => {
+      const t = /** @type {HTMLElement} */ (e.target);
+      const popBtn = t.closest('[data-pop]');
+      if (popBtn) {
+        e.stopPropagation();
+        const key = popBtn.getAttribute('data-pop');
+        const taskId = popBtn.getAttribute('data-task');
+        if (openPop && openPop.taskId === taskId && openPop.key === key) { closeMiniPop(); }
+        else openMiniPop(popBtn, key, taskId);
+        return;
+      }
+      if (t.closest('[data-pop-close]')) {
+        closeMiniPop();
+        return;
+      }
+      const goto = t.closest('[data-goto-folder]');
+      if (goto) {
+        if (!currentFolder) scopeBeforeFolder = currentScope;
+        currentFolder = goto.getAttribute('data-goto-folder');
+        currentLegacy = null;
+        document.body.removeAttribute('data-page-mode');
+        selectedIds.clear();
+        openFolderIds.add('group');
+        const moduleEl = document.getElementById('folderModule');
+        moduleEl.classList.add('is-open');
+        rebuildFolderTree();
+        render();
+        return;
+      }
+      const moreBtn = t.closest('[data-more]');
+      if (moreBtn) {
+        const id = moreBtn.getAttribute('data-more');
+        if (openMenuId === id) { closeRowMenu(); return; }
+        openRowMenu(moreBtn, id);
+        return;
+      }
+      const primaryBtn = t.closest('[data-primary]');
+      if (primaryBtn) {
+        const id = primaryBtn.getAttribute('data-primary');
+        const task = TASKS.find((x) => x.id === id);
+        if (!task) return;
+        if (task.candidates && task.candidates.length >= 2) {
+          openPartyDialog(task);
+          return;
+        }
+        toast(`${task.primary}：${task.subject || '未命名签署任务'}（原有流程）`);
+        return;
+      }
+      /* 点浮层外部关闭 */
+      if (!t.closest('.mini-popover') && openPop) {
+        closeMiniPop();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (openPop) closeMiniPop();
+      if (openMenuId) closeRowMenu();
+    });
+
+    /** 选择收件人对话框（默认不选、保存禁用；取消不改变列表） */
+    function openPartyDialog(task) {
+      partyDialogCtx = task;
+      const bodyEl = document.getElementById('partyDialogBody');
+      bodyEl.innerHTML = task.candidates.map((c) => `
+        <tr>
+          <td><input type="radio" name="party-candidate" value="${c.partyId}" aria-label="选择 ${c.name}" /></td>
+          <td>${c.name}</td>
+          <td>${c.role || '-'}</td>
+          <td>${c.actionType}</td>
+        </tr>`).join('');
+      document.getElementById('partyDialogSave').disabled = true;
+      document.getElementById('partyDialog').hidden = false;
+      syncModalScrollLock();
+    }
+    document.getElementById('partyDialogBody').addEventListener('change', () => {
+      document.getElementById('partyDialogSave').disabled = false;
+    });
+    document.getElementById('partyDialogSave').addEventListener('click', () => {
+      const checked = /** @type {HTMLInputElement|null} */ (document.querySelector('input[name="party-candidate"]:checked'));
+      if (!checked || !partyDialogCtx) return;
+      const c = partyDialogCtx.candidates.find((x) => x.partyId === checked.value);
+      document.getElementById('partyDialog').hidden = true;
+      syncModalScrollLock();
+      toast(`已选择 ${c.name}，进入其原办理页面（保存前服务端复核资格）`);
+      partyDialogCtx = null;
+    });
+
+    /** 筛选汇总（PRD 4.5：查找筛选项 + 已应用 + 可用项；内层编辑写草稿，外层保存一次查询） */
+    (function bindFilterSummary() {
+      const modal = document.getElementById('filterSummaryModal');
+      const openBtn = document.getElementById('filterSummaryBtn');
+      const appliedCard = document.getElementById('filterSummaryAppliedCard');
+      const appliedBox = document.getElementById('filterSummaryApplied');
+      const appliedCount = document.getElementById('filterSummaryAppliedCount');
+      const availBox = document.getElementById('filterSummaryAvailable');
+
+      /** 各列表允许的汇总字段（PRD 3.1-3.6）；key、显示名、描述 */
+      function availableFields() {
+        const caret = '<span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>';
+        const base = [
+          ['date', '日期', '签署任务日期筛选'],
+          ['status', '状态', '签署任务状态筛选'],
+          ['sender', '发起人', '签署任务发件人筛选'],
+          ['quick', '快捷筛选', '签署任务快捷筛选'],
+          ['created-at', '发起时间', '按发起时间筛选'],
+          ['deadline', '截止时间', '按截止时间筛选'],
+          ['finished-at', '完成时间', '按完成时间筛选'],
+          ['subject', '任务主题', '任务主题包含关键词'],
+          ['task-id', '任务编号', '任务编号完整匹配'],
+          ['biz-type', '业务类型', '按业务类型筛选'],
+          ['recipient', '收件人', '按收件人筛选'],
+          ['creator', '创建成员', '按创建成员 / 姓名筛选'],
+          ['sign-template', '关联签署模板 ID', '签署模板 ID 完整匹配'],
+        ];
+        const caretPill = (label) => `${label} ${caret}`;
+        const rows = base.map(([k, label, desc]) => [k, caretPill(label), desc]);
+        if (currentNav === 'draft' || currentNav === 'completed') {
+          /* 草稿 / 已完成：去掉状态与快捷 */
+          return rows.filter(([k]) => !['status', 'quick'].includes(k));
+        }
+        if (currentNav === 'active') return rows.filter(([k]) => k !== 'status');
+        if (currentNav === 'folder') return rows.filter(([k]) => !['sender', 'quick'].includes(k));
+        return rows;
+      }
+
+      function renderSummary() {
+        const q = /** @type {HTMLInputElement} */ (document.getElementById('filterSummarySearch')).value.trim();
+        /* 已应用 chips */
+        const appliedEntries = Object.keys(summaryDraft).filter((k) => summaryDraft[k]);
+        appliedCard.hidden = appliedEntries.length === 0;
+        appliedCount.textContent = `已应用的数量 (${appliedEntries.length})`;
+        appliedBox.innerHTML = appliedEntries.map((k) => `
+          <span class="filter-applied-chip" data-chip-field="${k}">
+            <span>${summaryDraft[k].label}</span>
+            <button type="button" data-remove-chip="${k}" aria-label="清除${FILTER_TITLES[k] || k}">×</button>
+          </span>`).join('');
+        /* 可用项 */
+        const fields = availableFields().filter(([, pill, desc]) => {
+          if (!q) return true;
+          const text = (pill + desc).replace(/<[^>]+>/g, '');
+          return text.includes(q);
+        });
+        availBox.innerHTML = `<h3 style="margin:0 0 6px;font-size:13px;font-weight:600;color:var(--fdd-ink-3)">可用 (${fields.length})</h3>` + (fields.length
+          ? fields.map(([k, pill, desc]) => `
+            <button type="button" class="filter-avail-row" data-avail-field="${k}">
+              <span class="filter-avail-row__pill">${pill}</span>
+              <span class="filter-avail-row__desc">${desc}</span>
+            </button>`).join('')
+          : '<p class="filter-modal-empty" style="margin:8px 0">没有匹配的筛选项</p>');
+      }
+
+      openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        summaryDraft = JSON.parse(JSON.stringify(activeFilters));
+        document.getElementById('filterSummarySearch').value = '';
+        renderSummary();
+        modal.hidden = false;
+        syncModalScrollLock();
+      });
+
+      document.getElementById('filterSummarySearch').addEventListener('input', renderSummary);
+
+      /* 已应用 chip 单独删除 */
+      appliedBox.addEventListener('click', (e) => {
+        const rm = /** @type {HTMLElement} */ (e.target).closest('[data-remove-chip]');
+        if (!rm) return;
+        const key = rm.getAttribute('data-remove-chip');
+        summaryDraft[key] = null;
+        renderSummary();
+      });
+
+      /* 可用项行点击：打开该字段的内层编辑浮层（应用写入草稿，外层保存统一查询） */
+      let innerPop = null;
+      function closeInnerPop() {
+        if (innerPop) { innerPop.remove(); innerPop = null; }
+      }
+      const FIELD_OPTS = {
+        date: { title: '日期', type: 'radio', opts: [['12m', '过去 12 个月'], ['6m', '过去 6 个月'], ['30d', '过去 30 天'], ['7d', '过去 7 天'], ['24h', '过去 24 小时']] },
+        status: { title: '状态', type: 'radio', opts: [['progress-set', '进行中'], ['creating', '创建中'], ['created', '已创建'], ['filling', '填写中'], ['to-finalize', '待定稿'], ['signing', '签署中'], ['signed', '已签署'], ['completed', '已完成'], ['overdue', '已逾期'], ['revoked', '已撤销']] },
+        sender: { title: '发起人', type: 'radio', scopeOpts: true },
+        quick: { title: '快捷筛选', type: 'radio', quickOpts: true },
+        'created-at': { title: '发起时间', type: 'date' },
+        'deadline': { title: '截止时间', type: 'date' },
+        'finished-at': { title: '完成时间', type: 'date' },
+        'subject': { title: '任务主题', type: 'text', ph: '主题包含关键词' },
+        'task-id': { title: '任务编号', type: 'text', ph: '完整任务编号' },
+        'biz-type': { title: '业务类型', type: 'text', ph: '业务类型' },
+        'recipient': { title: '收件人', type: 'text', ph: '名称 / 手机号 / 证件号' },
+        'creator': { title: '创建成员', type: 'text', ph: '成员姓名' },
+        'sign-template': { title: '关联签署模板 ID', type: 'text', ph: '签署模板 ID' },
+      };
+      function fieldOpts(key) {
+        const f = FIELD_OPTS[key];
+        if (!f) return null;
+        if (f.scopeOpts) {
+          f.opts = currentScope === 'corp' ? [['corp-sent', '我方发起的'], ['corp-received', '我方收到的']] : [['me-created', '我创建的'], ['me-received', '我收到的']];
+        }
+        if (f.quickOpts) {
+          f.opts = currentScope === 'corp'
+            ? [['todo-corp', '待我方处理'], ['todo-other-side', '待他方处理'], ['todo-add-member', '待添加成员'], ['due-soon', '即将截止']]
+            : [['todo-me', '待我处理'], ['todo-others', '待他人处理'], ['due-soon', '即将截止']];
+        }
+        return f;
+      }
+      function openInnerPop(row, key) {
+        closeInnerPop();
+        const f = fieldOpts(key);
+        if (!f) { toast(`编辑「${row.querySelector('.filter-avail-row__desc').textContent}」（原有字段编辑器）`); return; }
+        const pop = document.createElement('div');
+        pop.className = 'filter-inner-pop';
+        const applied = summaryDraft[key];
+        let body = `<h4 class="filter-inner-pop__title">${f.title}</h4>`;
+        if (f.type === 'radio') {
+          body += `<div class="filter-popover__options" role="radiogroup">` + f.opts.map(([v, label]) =>
+            `<label><input type="radio" name="inner-${key}" value="${v}" data-label="${label}" ${applied && applied.value === v ? 'checked' : ''} /> ${label}</label>`).join('') + `</div>`;
+        } else {
+          body += `<input type="text" class="filter-inner-pop__input" id="innerInput" placeholder="${f.ph || ''}" value="${applied ? applied.raw || '' : ''}" />`;
+        }
+        body += `<div class="filter-inner-pop__actions">
+          <button type="button" class="filter-inner-pop__cancel">取消</button>
+          <button type="button" class="filter-inner-pop__apply">应用</button>
+        </div>`;
+        pop.innerHTML = body;
+        pop.style.position = 'fixed';
+        document.body.appendChild(pop);
+        /* 默认出现在行下方（fixed 锚定行位置），空间不够再翻转到上方 */
+        const rect = row.getBoundingClientRect();
+        const pw = 260;
+        pop.style.width = pw + 'px';
+        let top = rect.bottom + 6;
+        pop.style.visibility = 'hidden';
+        pop.style.top = '0px';
+        pop.style.left = '0px';
+        const ph = pop.offsetHeight;
+        if (top + ph > window.innerHeight - 12) top = rect.top - ph - 6;
+        let left = rect.left;
+        if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+        pop.style.top = Math.max(12, top) + 'px';
+        pop.style.left = Math.max(12, left) + 'px';
+        pop.style.visibility = 'visible';
+        innerPop = pop;
+        pop.addEventListener('click', (ev) => ev.stopPropagation());
+        pop.querySelector('.filter-inner-pop__cancel').addEventListener('click', closeInnerPop);
+        pop.querySelector('.filter-inner-pop__apply').addEventListener('click', () => {
+          if (f.type === 'radio') {
+            const checked = pop.querySelector(`input[name="inner-${key}"]:checked`);
+            if (!checked) { closeInnerPop(); return; }
+            const label = checked.getAttribute('data-label');
+            summaryDraft[key] = { value: checked.value, label: `${f.title}：${label}` };
+          } else {
+            const val = pop.querySelector('#innerInput').value.trim();
+            if (!val) { summaryDraft[key] = null; }
+            else summaryDraft[key] = { value: val, raw: val, label: `${f.title}：${val}` };
+          }
+          closeInnerPop();
+          renderSummary();
+        });
+        /* 点外部关闭 */
+        setTimeout(() => document.addEventListener('click', closeInnerPop, { once: true }), 0);
+      }
+      availBox.addEventListener('click', (e) => {
+        const row = /** @type {HTMLElement} */ (e.target).closest('[data-avail-field]');
+        if (!row) return;
+        if (innerPop && row.contains(innerPop)) return;
+        openInnerPop(row, row.getAttribute('data-avail-field'));
+      });
+
+      /* 全部清除 */
+      document.getElementById('filterSummaryClearAll').addEventListener('click', () => {
+        Object.keys(summaryDraft).forEach((k) => { summaryDraft[k] = null; });
+        renderSummary();
+        toast('已清空草稿中的可编辑筛选（保存后生效）');
+      });
+
+      /* 保存：只提交一次查询 */
+      document.getElementById('filterSummarySave').addEventListener('click', () => {
+        ['date', 'status', 'sender', 'quick'].forEach((k) => { activeFilters[k] = summaryDraft[k] || null; });
+        modal.hidden = true;
+        summaryDraft = null;
+        syncModalScrollLock();
+        toast('已保存筛选并查询一次');
+        render();
+      });
+    })();
+
+    /** 列设置弹窗：草稿式编辑（勾选 + 上下移动），保存才应用并持久化（PRD 5.6） */
+    function openColSettings() {
+      colDraft = activeCols.slice();
+      renderColModal();
+      document.getElementById('colSettingsModal').hidden = false;
+      syncModalScrollLock();
+    }
+
+    function renderColModal() {
+      const list = document.getElementById('colModalList');
+      const q = (document.getElementById('colModalSearch').value || '').trim();
+      /* 所有可编辑列位置固定（按当前列顺序），勾选只改选中态不挪动 */
+      const fixedOrder = COL_DEFS.filter((d) => !d.fixed).map((d) => d.id);
+      /* 已选列（colDraft 顺序）在前排？不，保持定义顺序；但要把用户已调过的顺序反映出来 */
+      /* 展示顺序 = 当前生效列顺序（subject/actions 之间）+ 未选的按定义顺序排在其后 */
+      const middle = colDraft.filter((id) => id !== 'subject' && id !== 'actions');
+      const unselected = fixedOrder.filter((id) => !middle.includes(id));
+      let order = [...middle, ...unselected];
+      if (q) order = order.filter((id) => COL_DEFS.find((d) => d.id === id).label.includes(q));
+      const dragSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+      const showFixed = !q;
+      list.innerHTML = `
+        ${showFixed ? `<li class="col-modal-item col-modal-item--fixed">
+          <input type="checkbox" checked disabled aria-label="任务主题（固定）" />
+          <span class="col-name">任务主题</span><span class="col-fixed-note">固定</span>
+        </li>` : ''}
+        ${order.length === 0 ? '<li class="col-modal-empty" style="padding:24px 0;text-align:center;color:var(--fdd-ink-3);font-size:13px">没有匹配的列</li>' : ''}
+        ${order.map((id) => {
+          const def = COL_DEFS.find((d) => d.id === id);
+          const on = colDraft.includes(id);
+          return `<li class="col-modal-item" data-col="${id}" draggable="true">
+            <input type="checkbox" ${on ? 'checked' : ''} aria-label="${def.label}" />
+            <span class="col-name">${def.label}</span>
+            <span class="col-modal-drag" title="拖动排序" aria-hidden="true">${dragSvg}</span>
+          </li>`;
+        }).join('')}
+        ${showFixed ? `<li class="col-modal-item col-modal-item--fixed">
+          <input type="checkbox" checked disabled aria-label="操作（固定）" />
+          <span class="col-name">操作</span><span class="col-fixed-note">固定</span>
+        </li>` : ''}`;
+    }
+
+    document.getElementById('colModalSearch').addEventListener('input', () => renderColModal());
+
+    document.getElementById('colModalList').addEventListener('change', (e) => {
+      const cb = /** @type {HTMLInputElement} */ (e.target).closest('input[type="checkbox"]');
+      if (!cb || cb.disabled) return;
+      const item = /** @type {HTMLElement} */ (cb.closest('[data-col]'));
+      const id = item.getAttribute('data-col');
+      if (cb.checked) {
+        if (!colDraft.includes(id)) colDraft.splice(colDraft.length - 1, 0, id);
+        item.setAttribute('draggable', 'true');
+      } else {
+        colDraft = colDraft.filter((x) => x !== id);
+        item.setAttribute('draggable', 'false');
+      }
+      /* 不重渲染，保持行位置固定 */
+    });
+
+    /* 拖拽排序（HTML5 DnD）：只能拖动可编辑列，落在可编辑区之间 */
+    (function bindColDrag() {
+      const list = document.getElementById('colModalList');
+      let dragId = null;
+
+      list.addEventListener('dragstart', (e) => {
+        const item = /** @type {HTMLElement} */ (e.target).closest('[data-col]');
+        if (!item) { e.preventDefault(); return; }
+        dragId = item.getAttribute('data-col');
+        item.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', dragId);
+        /* 用空 drag image，避免整行半透重影乱飘（指示线已足够表达落点） */
+        const img = document.createElement('span');
+        img.style.cssText = 'position:absolute;top:-9999px;';
+        document.body.appendChild(img);
+        e.dataTransfer.setDragImage(img, 0, 0);
+        setTimeout(() => img.remove(), 0);
+      });
+
+      list.addEventListener('dragend', () => {
+        list.querySelectorAll('.col-modal-item').forEach((el) => el.classList.remove('is-dragging', 'is-drop-target', 'is-drop-target-below'));
+        dragId = null;
+      });
+
+      list.addEventListener('dragover', (e) => {
+        const item = /** @type {HTMLElement} */ (e.target).closest('[data-col]');
+        if (!item || !dragId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        list.querySelectorAll('.col-modal-item').forEach((el) => el.classList.remove('is-drop-target', 'is-drop-target-below'));
+        const rect = item.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        item.classList.add(before ? 'is-drop-target' : 'is-drop-target-below');
+      });
+
+      list.addEventListener('dragleave', (e) => {
+        const item = /** @type {HTMLElement} */ (e.target).closest('[data-col]');
+        if (item) item.classList.remove('is-drop-target', 'is-drop-target-below');
+      });
+
+      list.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const item = /** @type {HTMLElement} */ (e.target).closest('[data-col]');
+        if (!item || !dragId) return;
+        const targetId = item.getAttribute('data-col');
+        if (targetId === dragId) return;
+        const rect = item.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        const editable = colDraft.filter((x) => x !== 'subject' && x !== 'actions');
+        const from = editable.indexOf(dragId);
+        if (from >= 0) editable.splice(from, 1);
+        let to = editable.indexOf(targetId);
+        if (to < 0) to = before ? 0 : editable.length;
+        else if (!before) to += 1;
+        editable.splice(to, 0, dragId);
+        colDraft = ['subject', ...editable, 'actions'];
+        renderColModal();
+      });
+    })();
+
+    document.getElementById('colModalReset').addEventListener('click', () => {
+      colDraft = DEFAULT_COL_IDS.slice();
+      renderColModal();
+      toast('已恢复默认列（保存后生效）');
+    });
+
+    document.getElementById('colModalSave').addEventListener('click', () => {
+      activeCols = colDraft.slice();
+      saveCols(activeCols);
+      colDraft = null;
+      document.getElementById('colSettingsModal').hidden = true;
+      syncModalScrollLock();
+      toast('已保存列设置');
+      render();
+    });
+
+    /** 新建文件夹弹窗 */
+    function openNewFolderModal() {
+      const sel = document.getElementById('newFolderParent');
+      /* 填充上级目录候选（根目录 + 所有非结构目录） */
+      const flat = [];
+      (function walk(nodes, path) {
+        nodes.forEach((n) => {
+          if (!n.structural) flat.push({ id: n.id, name: path ? `${path} / ${n.name}` : n.name });
+          if (n.children) walk(n.children, path ? `${path} / ${n.name}` : n.name);
+        });
+      })(FOLDER_TREE, '');
+      sel.innerHTML = '<option value="">（根目录）</option>' + flat.map((f) => `<option value="${f.id}">${f.name}</option>`).join('');
+      const nameInput = document.getElementById('newFolderName');
+      nameInput.value = '';
+      document.getElementById('newFolderError').hidden = true;
+      document.getElementById('newFolderSave').disabled = true;
+      document.getElementById('newFolderModal').hidden = false;
+      syncModalScrollLock();
+      setTimeout(() => nameInput.focus(), 50);
+    }
+    document.getElementById('newFolderName').addEventListener('input', (e) => {
+      document.getElementById('newFolderSave').disabled = !e.target.value.trim();
+      document.getElementById('newFolderError').hidden = true;
+    });
+    document.getElementById('newFolderSave').addEventListener('click', () => {
+      const name = document.getElementById('newFolderName').value.trim();
+      const parentId = document.getElementById('newFolderParent').value;
+      const err = document.getElementById('newFolderError');
+      if (!name) return;
+      /* 同级重名校验（原规则） */
+      const siblings = parentId ? (findFolderNode(parentId)?.children || []) : FOLDER_TREE;
+      if (siblings.some((n) => n.name === name)) {
+        err.textContent = '同级目录下已存在同名文件夹';
+        err.hidden = false;
+        return;
+      }
+      const newNode = { id: 'folder-' + Date.now(), name, count: 0, children: [] };
+      if (parentId) {
+        const parent = findFolderNode(parentId);
+        if (parent) {
+          parent.children = parent.children || [];
+          parent.children.push(newNode);
+          openFolderIds.add(parentId);
+        }
+      } else {
+        FOLDER_TREE.push(newNode);
+      }
+      document.getElementById('newFolderModal').hidden = true;
+      syncModalScrollLock();
+      const moduleEl = document.getElementById('folderModule');
+      moduleEl.classList.add('is-open');
+      rebuildFolderTree();
+      toast(`已新建文件夹「${name}」`);
+    });
+    function findFolderNode(id) {
+      let found = null;
+      (function walk(nodes) {
+        nodes.forEach((n) => {
+          if (n.id === id) found = n;
+          if (n.children) walk(n.children);
+        });
+      })(FOLDER_TREE);
+      return found;
+    }
+
+    /** 查找文件夹：选择要查看的文件夹弹窗 */
+    let folderPickerSelected = null;
+    function openFolderPicker() {
+      folderPickerSelected = null;
+      document.getElementById('folderPickerSearch').value = '';
+      document.getElementById('folderPickerConfirm').disabled = true;
+      renderFolderPicker();
+      document.getElementById('folderPickerModal').hidden = false;
+      syncModalScrollLock();
+      setTimeout(() => document.getElementById('folderPickerSearch').focus(), 50);
+    }
+    function renderFolderPicker() {
+      const tree = document.getElementById('folderPickerTree');
+      const q = document.getElementById('folderPickerSearch').value.trim();
+      const flat = [];
+      (function walk(nodes, depth, path) {
+        nodes.forEach((n) => {
+          if (!n.structural) flat.push({ id: n.id, name: n.name, depth, full: path ? `${path} / ${n.name}` : n.name });
+          if (n.children) walk(n.children, depth + 1, path ? `${path} / ${n.name}` : n.name);
+        });
+      })(FOLDER_TREE, 0, '');
+      const items = q ? flat.filter((f) => f.name.includes(q) || f.full.includes(q)) : flat;
+      if (!items.length) {
+        tree.innerHTML = '<p class="folder-picker-empty">没有符合条件的文件夹</p>';
+        return;
+      }
+      tree.innerHTML = items.map((f) => `
+        <button type="button" class="folder-picker-item${folderPickerSelected === f.id ? ' is-selected' : ''}" data-pick-folder="${f.id}" style="padding-left:${8 + f.depth * 18}px" title="${f.full}">
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+          <span>${q ? f.full : f.name}</span>
+        </button>`).join('');
+    }
+    document.getElementById('folderPickerSearch').addEventListener('input', renderFolderPicker);
+    document.getElementById('folderPickerTree').addEventListener('click', (e) => {
+      const item = /** @type {HTMLElement} */ (e.target).closest('[data-pick-folder]');
+      if (!item) return;
+      folderPickerSelected = item.getAttribute('data-pick-folder');
+      document.querySelectorAll('.folder-picker-item').forEach((el) => el.classList.toggle('is-selected', el === item));
+      document.getElementById('folderPickerConfirm').disabled = false;
+    });
+    document.getElementById('folderPickerConfirm').addEventListener('click', () => {
+      if (!folderPickerSelected) return;
+      const name = FOLDER_NAME_MAP[folderPickerSelected] || '文件夹';
+      document.getElementById('folderPickerModal').hidden = true;
+      syncModalScrollLock();
+      /* 进入所选目录的独立任务文件夹页 */
+      const moduleEl = document.getElementById('folderModule');
+      moduleEl.classList.add('is-open');
+      /* 展开到该目录的父链 */
+      (function expandPath(nodes, target, trail) {
+        nodes.forEach((n) => {
+          if (n.id === target) trail.forEach((p) => openFolderIds.add(p));
+          if (n.children) expandPath(n.children, target, [...trail, n.id]);
+        });
+      })(FOLDER_TREE, folderPickerSelected, []);
+      rebuildFolderTree();
+      if (!currentFolder) scopeBeforeFolder = currentScope;
+      currentFolder = folderPickerSelected;
+      currentLegacy = null;
+      document.body.removeAttribute('data-page-mode');
+      selectedIds.clear();
+      render();
+      toast(`已进入文件夹「${name}」`);
+    });
+
+    /** 通用模态关闭（取消 / Esc / 点外部放弃草稿） */
+    document.querySelectorAll('.ns-modal-mask').forEach((mask) => {
+      mask.addEventListener('click', (e) => {
+        if (e.target === mask || /** @type {HTMLElement} */ (e.target).closest('[data-modal-close]')) {
+          mask.hidden = true;
+          if (mask.id === 'filterSummaryModal') summaryDraft = null;
+          if (mask.id === 'partyDialog') partyDialogCtx = null;
+          if (mask.id === 'colSettingsModal') colDraft = null;
+          syncModalScrollLock();
+        }
+      });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll('.ns-modal-mask').forEach((mask) => { mask.hidden = true; });
+      syncModalScrollLock();
+    });
+
+    /** 导出（PRD 2.1：零勾选可导出当前筛选结果；选中任务需有有效选择） */
+    (function bindExport() {
+      const btn = document.getElementById('exportBtn');
+      const menu = document.getElementById('exportMenu');
+      if (!btn || !menu) return;
+      if (!canExport) btn.hidden = true;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+        btn.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
+      });
+      document.getElementById('exportFiltered').addEventListener('click', () => {
+        menu.hidden = true;
+        const n = filteredTasks().length;
+        if (n === 0) { toast('当前筛选无结果，无法导出'); return; }
+        toast(`演示：导出当前筛选结果（${n} 条，含全部查询条件，不只当前页）`);
+      });
+      document.getElementById('exportSelected').addEventListener('click', () => {
+        menu.hidden = true;
+        toast(`演示：导出选中任务（${selectedIds.size} 条）`);
+      });
+      document.addEventListener('click', (e) => {
+        if (!menu.hidden && !menu.contains(/** @type {Node} */ (e.target)) && e.target !== btn) menu.hidden = true;
+      });
+    })();
+
+    /* 横向滚动时，操作列左侧渐变遮罩显现 */
+    document.querySelector('.envelope-table-shell').addEventListener('scroll', (e) => {
+      e.currentTarget.classList.toggle('is-scrolled-x', e.currentTarget.scrollLeft > 2);
+    });
+
+    /** 分页大小（对齐典型页：下拉 5/10/25/50，切换回第 1 页清勾选） */
+    (function bindPageSize() {
+      const wrap = document.getElementById('pageSize');
+      const trigger = document.getElementById('pageSizeTrigger');
+      const menu = document.getElementById('pageSizeMenu');
+      const label = document.getElementById('pageSizeLabel');
+      if (!wrap || !trigger || !menu || !label) return;
+      let pageSize = '25';
+      function setOpen(open) {
+        wrap.classList.toggle('is-open', open);
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setOpen(!wrap.classList.contains('is-open'));
+      });
+      menu.querySelectorAll('[data-value]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pageSize = btn.getAttribute('data-value') || '25';
+          label.textContent = `${pageSize} / 页`;
+          menu.querySelectorAll('[data-value]').forEach((el) => {
+            const on = el.getAttribute('data-value') === pageSize;
+            el.classList.toggle('is-selected', on);
+            el.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          setOpen(false);
+          selectedIds.clear();
+          toast(`已切换为每页 ${pageSize} 条（回第 1 页）`);
+          render();
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(/** @type {Node} */ (e.target))) setOpen(false);
+      });
+    })();
+
+    /** 头像浮窗：点击展开，点外部 / Esc 关闭 */
+    (function bindAvatarMenu() {
+      const btn = document.getElementById('avatarBtn');
+      const menu = document.getElementById('avatarMenu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = menu.hidden;
+        menu.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', (e) => {
+        if (!menu.hidden && !menu.contains(/** @type {Node} */ (e.target)) && e.target !== btn) {
+          menu.hidden = true;
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !menu.hidden) {
+          menu.hidden = true;
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
+        }
+      });
+    })();
+
+    /** 刷新列表（保留已应用条件，重算相对日期，回第 1 页并清勾选） */
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      selectedIds.clear();
+      toast('已刷新列表（保留当前筛选与排序）');
+      render();
+    });
+
+    /** 场景切换（原型验收：我的签署-全部任务 / 全部签署-进行中 / 任务文件夹 / 选择收件人） */
+    document.getElementById('scenarioSwitcher').addEventListener('click', (e) => {
+      const btn = /** @type {HTMLElement} */ (e.target).closest('[data-scenario]');
+      if (!btn) return;
+      document.querySelectorAll('#scenarioSwitcher [data-scenario]').forEach((b) => b.classList.toggle('is-on', b === btn));
+      const key = btn.getAttribute('data-scenario');
+      ['date', 'status', 'sender', 'quick'].forEach((k) => { activeFilters[k] = null; });
+      selectedIds.clear();
+      currentLegacy = null;
+      document.body.removeAttribute('data-page-mode');
+      if (key === 'mine-all') {
+        currentScope = 'mine'; currentNav = 'all'; currentFolder = null;
+        render();
+      } else if (key === 'corp-progress') {
+        currentScope = 'corp'; currentNav = 'active'; currentFolder = null;
+        render();
+      } else if (key === 'folder') {
+        scopeBeforeFolder = currentScope;
+        currentFolder = 'sales'; openFolderIds.add('sales');
+        const moduleEl = document.getElementById('folderModule');
+        moduleEl.classList.add('is-open');
+        rebuildFolderTree();
+        render();
+      } else if (key === 'multi-party') {
+        currentScope = 'mine'; currentNav = 'all'; currentFolder = null;
+        render();
+        const task = TASKS.find((x) => x.id === '1000234567890123457');
+        if (task) openPartyDialog(task);
+      }
+    });
+
+    /** 通用 data-toast 提示（整站契约） */
+    document.body.addEventListener('click', (e) => {
+      const t = /** @type {HTMLElement} */ (e.target);
+      const toastBtn = t.closest('[data-toast]');
+      if (toastBtn) toast(toastBtn.getAttribute('data-toast') || '');
+      if (!t.closest('.row-menu') && !t.closest('[data-more]') && openMenuId) {
+        closeRowMenu();
+      }
+    });
+
+    render();
+  </script>
+  <script>
+    /* 防御：主脚本若未能完成首次渲染（缓存/热更导致的状态错乱），自动无缓存重载一次 */
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var rows = document.querySelectorAll('#taskBody tr').length;
+        var headCols = document.querySelectorAll('#taskHead th').length;
+        if (rows === 0 && headCols === 0 && !sessionStorage.getItem('aip-reloaded')) {
+          sessionStorage.setItem('aip-reloaded', '1');
+          location.reload();
+        } else {
+          sessionStorage.removeItem('aip-reloaded');
+        }
+      }, 800);
+    });
+  </script>
+</body>
+</html>

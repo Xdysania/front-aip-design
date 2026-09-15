@@ -1,0 +1,493 @@
+<div class="ds-home">
+    <aside class="ds-homeside" aria-label="对话侧边栏">
+      <div class="ds-homeside__top">
+        <button class="ds-newchat" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11h-8V3h-2v8H3v2h8v8h2v-8h8z"></path></svg>
+          新建对话
+        </button>
+        <button class="ds-homeside__search" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 20.66-5.72-5.72A7.96 7.96 0 0 0 18 10c0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8a7.9 7.9 0 0 0 4.94-1.72L20.66 22zM10 16.1c-3.36 0-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9s6.1 2.74 6.1 6.1-2.74 6.1-6.1 6.1"></path></svg>
+          搜索对话
+        </button>
+      </div>
+
+      <div class="ds-homeside__scroll">
+        <section class="ds-history" aria-label="历史对话">
+          <p class="ds-history__group">今天</p>
+          <button class="ds-history__item is-active" type="button" aria-current="true">整理本周新入库合同</button>
+          <button class="ds-history__item" type="button">识别未来 90 天续订风险</button>
+          <button class="ds-history__item" type="button">总结待处理合同关键条款</button>
+          <p class="ds-history__group">昨天</p>
+          <button class="ds-history__item" type="button">生成本月履约事项清单</button>
+          <button class="ds-history__item" type="button">准备合同签署任务</button>
+          <button class="ds-history__item" type="button">核对 HarborPoint 租约付款条款</button>
+          <button class="ds-history__item" type="button">对比两版 NDA 差异</button>
+          <p class="ds-history__group">过去 7 天</p>
+          <button class="ds-history__item" type="button">汇总待我签署的文件</button>
+          <button class="ds-history__item" type="button">销售渠道合同归档检查</button>
+          <button class="ds-history__item" type="button">起草供应商框架协议要点</button>
+        </section>
+      </div>
+
+      <div class="ds-homeside__foot">
+        <p class="ds-history__group">快捷操作</p>
+        <div class="ds-quickstart" role="group" aria-label="快捷操作">
+          <button class="ds-qs" type="button" onclick="location.href='send-flow.html'">
+            <span class="ds-qs__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18l19-9zm2 10h5v-2H5V6.16L17.33 12 5 17.84z"></path></svg></span>
+            <span class="ds-qs__label">发起签署</span>
+          </button>
+          <button class="ds-qs" type="button" onclick="location.href='templates.html'">
+            <span class="ds-qs__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 2H4v20h16V6zM6 20V4h9v3h3v13zm10-9H8V9h8zm0 4H8v-2h8z"></path></svg></span>
+            <span class="ds-qs__label">创建模板</span>
+          </button>
+          <button class="ds-qs" type="button" onclick="location.href='automations.html'">
+            <span class="ds-qs__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v5h6v2h-6v5h6v2h-7c-.55 0-1-.45-1-1v-6H2v-2h8V5c0-.55.45-1 1-1h7v2zm10-2h-2v2h2zm0 7h-2v2h2zm0 7h-2v2h2z"></path></svg></span>
+            <span class="ds-qs__label">创建工作流</span>
+          </button>
+          <button class="ds-qs" type="button">
+            <span class="ds-qs__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 11h-1.18c.11-.31.18-.65.18-1V7c0-1.66-1.34-3-3-3H5C3.34 4 2 5.34 2 7v3c0 1.66 1.34 3 3 3h1.18c-.11.31-.18.65-.18 1v3c0 1.66 1.34 3 3 3h10c1.66 0 3-1.34 3-3v-3c0-1.66-1.34-3-3-3M4 10V7c0-.55.45-1 1-1h10c.55 0 1 .45 1 1v3c0 .55-.45 1-1 1H5c-.55 0-1-.45-1-1m16 7c0 .55-.45 1-1 1H9c-.55 0-1-.45-1-1v-3c0-.55.45-1 1-1h10c.55 0 1 .45 1 1z"></path></svg></span>
+            <span class="ds-qs__label">生成协议</span>
+          </button>
+          <button class="ds-qs" type="button" aria-haspopup="true">
+            <span class="ds-qs__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11h-8V3h-2v8H3v2h8v8h2v-8h8z"></path></svg></span>
+            <span class="ds-qs__label ds-qs__start">
+              开始
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.32 4.43 4.45c.16.16.37.23.57.23s.41-.07.57-.23L15 7.32 13.68 6 10 9.66 6.32 6z"></path></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="ds-home__main">
+    <div class="ds-hero ds-hero--agent">
+      <div class="ds-agent-title">
+        <h1 class="ds-agent-hello">你好，李斯特</h1>
+        <h1 class="ds-agent-ask">小诺可以帮你处理什么？</h1>
+      </div>
+      <div class="ds-chatbox" role="search" aria-label="法大大助手对话框">
+        <textarea
+          class="ds-chatbox__input"
+          rows="2"
+          placeholder="交给助手一个任务，输入 @ 添加上下文…"
+          aria-label="助手任务输入"
+        ></textarea>
+        <div class="ds-chatbox__bar">
+          <div class="ds-chatbox__tools" role="group" aria-label="助手工具">
+            <button class="ds-chat-btn" type="button" aria-pressed="false">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="file-magnifying-glass">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-45.54-48.85a36.05,36.05,0,1,0-11.31,11.31l11.19,11.2a8,8,0,0,0,11.32-11.32ZM104,148a20,20,0,1,1,20,20A20,20,0,0,1,104,148Z"/></svg>
+              </span>
+              合同检索
+            </button>
+            <button class="ds-chat-btn" type="button">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="calendar-check">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-38.34-85.66a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L116,164.69l42.34-42.35A8,8,0,0,1,169.66,122.34Z"/></svg>
+              </span>
+              履约分析
+            </button>
+            <button class="ds-chat-btn" type="button">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="files">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M213.66,66.34l-40-40A8,8,0,0,0,168,24H88A16,16,0,0,0,72,40V56H56A16,16,0,0,0,40,72V216a16,16,0,0,0,16,16H168a16,16,0,0,0,16-16V200h16a16,16,0,0,0,16-16V72A8,8,0,0,0,213.66,66.34ZM168,216H56V72h76.69L168,107.31v84.53c0,.06,0,.11,0,.16s0,.1,0,.16V216Zm32-32H184V104a8,8,0,0,0-2.34-5.66l-40-40A8,8,0,0,0,136,56H88V40h76.69L200,75.31Zm-56-32a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h48A8,8,0,0,1,144,152Zm0,32a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h48A8,8,0,0,1,144,184Z"/></svg>
+              </span>
+              全部合同库
+              <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+              </span>
+            </button>
+            <button class="ds-chat-btn ds-chat-btn--icon" type="button" aria-label="添加附件">
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="paperclip">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M209.66,122.34a8,8,0,0,1,0,11.32l-82.05,82a56,56,0,0,1-79.2-79.21L147.67,35.73a40,40,0,1,1,56.61,56.55L105,193A24,24,0,1,1,71,159L154.3,74.38A8,8,0,1,1,165.7,85.6L82.39,170.31a8,8,0,1,0,11.27,11.36L192.93,81A24,24,0,1,0,159,47L59.76,147.68a40,40,0,1,0,56.53,56.62l82.06-82A8,8,0,0,1,209.66,122.34Z"/></svg>
+              </span>
+            </button>
+          </div>
+          <div class="ds-chatbox__tools">
+            <button class="ds-chat-btn ds-chat-btn--ghost" type="button">
+              标准
+              <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+              </span>
+            </button>
+            <button class="ds-chat-btn ds-chat-btn--primary" type="button" aria-label="发送" disabled>
+              <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="paper-plane-tilt-fill">
+                <svg class="aip-icon__svg" focusable="false" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M231.4,44.34s0,.1,0,.15l-58.2,191.94a15.88,15.88,0,0,1-14,11.51q-.69.06-1.38.06a15.86,15.86,0,0,1-14.42-9.15L107,164.15a4,4,0,0,1,.77-4.58l57.92-57.92a8,8,0,0,0-11.31-11.31L96.43,148.26a4,4,0,0,1-4.58.77L17.08,112.64a16,16,0,0,1,2.49-29.8l191.94-58.2.15,0A16,16,0,0,1,231.4,44.34Z"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="ds-agent-disclaimer">AI 回答可能包含未确认内容，重要信息请核对合同原文</p>
+
+      <div class="ds-prompts" aria-label="推荐任务">
+        <p class="ds-prompts__heading">推荐任务</p>
+        <div class="ds-prompts__grid">
+          <button type="button" class="ds-prompt" data-prompt="整理本周新入库合同，检查重复文件、缺失字段与归档状态。">
+            <span class="ds-prompt__meta"><span class="ds-prompt__tag">归集</span></span>
+            <span class="ds-prompt__title">整理本周新入库合同</span>
+            <span class="ds-prompt__desc">查重复、补字段、核对归档</span>
+          </button>
+          <button type="button" class="ds-prompt" data-prompt="识别未来 90 天内的续订风险，汇总通知日、金额与负责人。">
+            <span class="ds-prompt__meta"><span class="ds-prompt__tag">续订</span></span>
+            <span class="ds-prompt__title">识别未来 90 天续订风险</span>
+            <span class="ds-prompt__desc">通知日、金额、负责人一览</span>
+          </button>
+          <button type="button" class="ds-prompt" data-prompt="总结待处理合同的关键条款，定位付款、续订与责任限制。">
+            <span class="ds-prompt__meta"><span class="ds-prompt__tag">条款</span></span>
+            <span class="ds-prompt__title">总结待处理合同关键条款</span>
+            <span class="ds-prompt__desc">付款、续订、责任限制</span>
+          </button>
+          <button type="button" class="ds-prompt" data-prompt="生成本月履约事项清单，按负责人汇总收付款与开票节点。">
+            <span class="ds-prompt__meta"><span class="ds-prompt__tag">履约</span></span>
+            <span class="ds-prompt__title">生成本月履约事项清单</span>
+            <span class="ds-prompt__desc">按负责人汇总节点</span>
+          </button>
+          <button type="button" class="ds-prompt" data-prompt="准备一份合同签署任务，核对签署方、顺序与必填字段。">
+            <span class="ds-prompt__meta"><span class="ds-prompt__tag">签署</span></span>
+            <span class="ds-prompt__title">准备合同签署任务</span>
+            <span class="ds-prompt__desc">签署方、顺序、必填项</span>
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="ds-content">
+      <div class="ds-stack">
+        <section class="ds-card">
+          <div class="ds-card__top">
+            <div class="ds-card__title-row">
+              <h2 class="ds-card__title">协议动态</h2>
+              <button class="ds-card__info" type="button" aria-label="关于协议动态">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.9c3.36 0 6.1 2.74 6.1 6.1s-2.74 6.1-6.1 6.1-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9M10 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8m1 4H9v2h2zm0 4H9v4h2z"></path></svg>
+              </button>
+            </div>
+            <button class="ds-viewall" type="button" onclick="location.href='agreements.html'">查看全部</button>
+          </div>
+          <ul class="ds-list">
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">HarborPoint_Facilities_Lease_Agreement.pdf</a>
+                <span class="ds-list__sub">
+                  <!-- AI Spark 渐变（真站 defs） -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M17.677 11.535c-.991-.367-1.727-.707-2.316-1.089a5.598 5.598 0 0 1-1.804-1.803c-.374-.59-.721-1.332-1.089-2.317A.486.486 0 0 0 12.004 6a.485.485 0 0 0-.465.326c-.368.992-.708 1.727-1.09 2.317a5.621 5.621 0 0 1-1.81 1.803c-.59.375-1.331.722-2.316 1.09a.485.485 0 0 0-.326.464c0 .208.124.395.326.465.991.36 1.727.707 2.316 1.089a5.69 5.69 0 0 1 1.81 1.803c.375.597.722 1.332 1.09 2.317a.495.495 0 0 0 .93 0c.367-.992.707-1.727 1.088-2.317a5.598 5.598 0 0 1 1.804-1.803c.596-.375 1.331-.722 2.316-1.09a.495.495 0 0 0 0-.93Z" fill="url(#aiSpark)"></path>
+                    <defs><linearGradient id="aiSpark" x1="6.016" y1="12" x2="18.028" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#42c5ff"/><stop offset="0.501" stop-color="#0059ef"/><stop offset="0.895" stop-color="#174ea6"/></linearGradient></defs>
+                  </svg>
+                  将于 2027/01/08 到期
+                </span>
+              </div>
+              <div class="ds-list__status">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#dc4e00" aria-hidden="true"><path d="M12 3.9c4.47 0 8.1 3.63 8.1 8.1s-3.63 8.1-8.1 8.1-8.1-3.63-8.1-8.1S7.53 3.9 12 3.9M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4 12.65-3.05-3.05V5.99h-1.9v6.39l3.6 3.61L16 14.64Z"></path></svg>
+                即将到期
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">iris-demo-cloud-renewal-2026.pdf</a>
+                <span class="ds-list__sub">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.677 11.535c-.991-.367-1.727-.707-2.316-1.089a5.598 5.598 0 0 1-1.804-1.803c-.374-.59-.721-1.332-1.089-2.317A.486.486 0 0 0 12.004 6a.485.485 0 0 0-.465.326c-.368.992-.708 1.727-1.09 2.317a5.621 5.621 0 0 1-1.81 1.803c-.59.375-1.331.722-2.316 1.09a.485.485 0 0 0-.326.464c0 .208.124.395.326.465.991.36 1.727.707 2.316 1.089a5.69 5.69 0 0 1 1.81 1.803c.375.597.722 1.332 1.09 2.317a.495.495 0 0 0 .93 0c.367-.992.707-1.727 1.088-2.317a5.598 5.598 0 0 1 1.804-1.803c.596-.375 1.331-.722 2.316-1.09a.495.495 0 0 0 0-.93Z" fill="url(#aiSpark)"></path></svg>
+                  将于 2026/11/30 到期
+                </span>
+              </div>
+              <div class="ds-list__status">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#dc4e00" aria-hidden="true"><path d="M12 3.9c4.47 0 8.1 3.63 8.1 8.1s-3.63 8.1-8.1 8.1-8.1-3.63-8.1-8.1S7.53 3.9 12 3.9M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4 12.65-3.05-3.05V5.99h-1.9v6.39l3.6 3.61L16 14.64Z"></path></svg>
+                即将到期
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">AuroraCloud_Master_Subscription_Agreement.pdf</a>
+                <span class="ds-list__sub">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.677 11.535c-.991-.367-1.727-.707-2.316-1.089a5.598 5.598 0 0 1-1.804-1.803c-.374-.59-.721-1.332-1.089-2.317A.486.486 0 0 0 12.004 6a.485.485 0 0 0-.465.326c-.368.992-.708 1.727-1.09 2.317a5.621 5.621 0 0 1-1.81 1.803c-.59.375-1.331.722-2.316 1.09a.485.485 0 0 0-.326.464c0 .208.124.395.326.465.991.36 1.727.707 2.316 1.089a5.69 5.69 0 0 1 1.81 1.803c.375.597.722 1.332 1.09 2.317a.495.495 0 0 0 .93 0c.367-.992.707-1.727 1.088-2.317a5.598 5.598 0 0 1 1.804-1.803c.596-.375 1.331-.722 2.316-1.09a.495.495 0 0 0 0-.93Z" fill="url(#aiSpark)"></path></svg>
+                  将于 2026/11/19 到期
+                </span>
+              </div>
+              <div class="ds-list__status">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#dc4e00" aria-hidden="true"><path d="M12 3.9c4.47 0 8.1 3.63 8.1 8.1s-3.63 8.1-8.1 8.1-8.1-3.63-8.1-8.1S7.53 3.9 12 3.9M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4 12.65-3.05-3.05V5.99h-1.9v6.39l3.6 3.61L16 14.64Z"></path></svg>
+                即将到期
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">请使用法大大签署：产品信息结构模板.docx</a>
+                <span class="ds-list__sub ds-list__sub--plain">4 天前</span>
+              </div>
+              <div class="ds-list__status">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#00875c" aria-hidden="true"><path d="m10.42 15.76-3.41-3.41 1.34-1.34L11 13.66l5.65-5.65 1.34 1.34-6.41 6.41a.82.82 0 0 1-1.16 0M12 3.9c-4.47 0-8.1 3.63-8.1 8.1s3.63 8.1 8.1 8.1 8.1-3.63 8.1-8.1-3.63-8.1-8.1-8.1M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2"></path></svg>
+                已完成
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">请使用法大大完成签署：Nota_Sign_Invoice_ANH_GROUP_NS-0605001.pdf</a>
+                <span class="ds-list__sub ds-list__sub--plain">3 个月前</span>
+              </div>
+              <div class="ds-list__status">
+                <div class="ds-progress">
+                  <div class="ds-progress__track">
+                    <i class="ds-progress__fill" style="width:3%"></i>
+                    <i class="ds-progress__stop"></i>
+                  </div>
+                  <span class="ds-progress__label">等待 aorigenle 签署</span>
+                </div>
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+            <li class="ds-list__row">
+              <div class="ds-list__main">
+                <a class="ds-list__name" href="envelope-detail.html">请使用法大大完成签署：Nota_Sign_Invoice_ANH_GROUP_NS-0605001.pdf</a>
+                <span class="ds-list__sub ds-list__sub--plain">3 个月前</span>
+              </div>
+              <div class="ds-list__status">
+                <div class="ds-progress">
+                  <div class="ds-progress__track">
+                    <i class="ds-progress__fill" style="width:3%"></i>
+                    <i class="ds-progress__stop"></i>
+                  </div>
+                  <span class="ds-progress__label">等待 tianyuehua 签署</span>
+                </div>
+              </div>
+              <button class="ds-list__go" type="button" aria-label="查看详情">
+                <span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8.32 15 4.45-4.43c.16-.16.23-.37.23-.57s-.07-.41-.23-.57L8.32 5 7 6.32 10.66 10 7 13.68z"></path></svg>
+                </span>
+              </button>
+            </li>
+          </ul>
+        </section>
+
+        <section class="ds-card ds-card--tpl">
+          <div class="ds-card__top">
+            <div>
+              <h2 class="ds-card__title">模板</h2>
+              <p class="ds-card__subtitle">使用可定制模板，快速创建并发送下一份协议。</p>
+            </div>
+          </div>
+          <div class="ds-tpl-grid">
+            <article class="ds-tpl">
+              <div class="ds-tpl__preview">
+                <span class="ds-tpl__badge">推荐</span>
+                <img src="../assets/nda.png" alt="保密协议预览" />
+                <div class="ds-tpl__overlay" data-hover-overlay>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--primary" type="button">使用模板发送</button>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--ghost" type="button">自定义模板</button>
+                </div>
+              </div>
+              <div class="ds-tpl__meta">
+                <h3 class="ds-tpl__name">保密协议</h3>
+                <p class="ds-tpl__cat">法务</p>
+              </div>
+            </article>
+            <article class="ds-tpl">
+              <div class="ds-tpl__preview">
+                <span class="ds-tpl__badge">推荐</span>
+                <img src="../assets/w9.png" alt="W-9 表格预览" />
+                <div class="ds-tpl__overlay" data-hover-overlay>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--primary" type="button">使用模板发送</button>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--ghost" type="button">自定义模板</button>
+                </div>
+              </div>
+              <div class="ds-tpl__meta">
+                <h3 class="ds-tpl__name">W-9 表格</h3>
+                <p class="ds-tpl__cat">财务</p>
+              </div>
+            </article>
+            <article class="ds-tpl">
+              <div class="ds-tpl__preview">
+                <span class="ds-tpl__badge">推荐</span>
+                <img src="../assets/lease-agreement.png" alt="租赁协议预览" />
+                <div class="ds-tpl__overlay" data-hover-overlay>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--primary" type="button">使用模板发送</button>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--ghost" type="button">自定义模板</button>
+                </div>
+              </div>
+              <div class="ds-tpl__meta">
+                <h3 class="ds-tpl__name">租赁协议</h3>
+                <p class="ds-tpl__cat">不动产</p>
+              </div>
+            </article>
+            <article class="ds-tpl">
+              <div class="ds-tpl__preview">
+                <span class="ds-tpl__badge">推荐</span>
+                <img src="../assets/invoice.png" alt="发票预览" />
+                <div class="ds-tpl__overlay" data-hover-overlay>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--primary" type="button">使用模板发送</button>
+                  <button class="ds-tpl__overlay-btn ds-tpl__overlay-btn--ghost" type="button">自定义模板</button>
+                </div>
+              </div>
+              <div class="ds-tpl__meta">
+                <h3 class="ds-tpl__name">发票</h3>
+                <p class="ds-tpl__cat">财务</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 为你推荐 — data-qa=recommended-items-container -->
+        <section class="ds-card ds-card--rec" data-qa="recommended-items-container">
+          <div class="ds-card__top">
+            <h2 class="ds-card__title">为你推荐</h2>
+          </div>
+          <div class="ds-rec-grid" data-qa="recommended-items-layout-carousel-page-1">
+            <article class="ds-rec ds-rec--purple" data-qa="recommendation-card-exploreIntegrations">
+              <div class="ds-rec__tag">精选集成</div>
+              <div class="ds-rec__body">
+                <div class="ds-rec__head">
+                  <div class="ds-rec__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="MSDynamics_a" x1="2.17" y1="12.92" x2="18.8" y2="10.16" gradientUnits="userSpaceOnUse">
+                          <stop offset="0" stop-color="#0b53ce"/><stop offset="0.29" stop-color="#2551cb"/><stop offset="0.92" stop-color="#674ec4"/><stop offset="1" stop-color="#714ec4"/>
+                        </linearGradient>
+                        <linearGradient id="MSDynamics_b" x1="13.5" y1="24.04" x2="13.5" y2="9.26" gradientUnits="userSpaceOnUse">
+                          <stop offset="0" stop-color="#2a67e3"/><stop offset="0.17" stop-color="#446ce3"/><stop offset="0.52" stop-color="#867ae3"/><stop offset="0.57" stop-color="#917de4"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M17.67 7.11 6.37 3.06c-.65-.23-1.33.25-1.34.94L5 8.86c0 .43.27.82.68.95l4.65 1.55a.5.5 0 0 0 .66-.47V7.78c0-.36.36-.6.69-.46l1.94.81a2 2 0 0 1 1.37 1.9v5.02a2 2 0 0 1-1.37 1.9l-1.94.81c-.33.14-.69-.1-.69-.46v-2.95c0-.32-.3-.56-.62-.49l-1.7.4a1 1 0 0 0-.68.95v4.85a1 1 0 0 0 1.34.94l8.34-3.03c.79-.29 1.32-1.04 1.32-1.88v-7.1c0-.84-.53-1.6-1.33-1.88Z" fill="url(#MSDynamics_a)"></path>
+                      <path d="M19 9.05c0 .91-.61 1.7-1.48 1.93l-8.77 3.24c-.44.12-.74.51-.74.97v4.87a1 1 0 0 0 1.34.94l8.34-3.03c.79-.29 1.32-1.04 1.32-1.88V9.05Z" fill="url(#MSDynamics_b)" opacity="0.8"></path>
+                    </svg>
+                  </div>
+                  <button class="ds-rec__menu" type="button" aria-label="移除推荐">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 10c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"></path></svg>
+                  </button>
+                </div>
+                <div class="ds-rec__copy">
+                  <h3 class="ds-rec__title">连接 Microsoft Dynamics 365</h3>
+                  <p class="ds-rec__desc">在 Microsoft Dynamics 365 中发送并跟踪协议，自动附上已签署文件，方便销售与服务团队快速取用。</p>
+                </div>
+                <div class="ds-rec__cta-row">
+                  <a class="ds-rec__cta" href="#">连接 Microsoft Dynamics 365</a>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3zm16 2v3H5V5zM5 19v-9h14v9zM7 7H6V6h1zm2 0H8V6h1zm2 0h-1V6h1z"></path></svg>
+                </div>
+              </div>
+            </article>
+
+            <article class="ds-rec ds-rec--teal" data-qa="recommendation-card-resource-plan_esign">
+              <div class="ds-rec__tag">新用户热门</div>
+              <div class="ds-rec__body">
+                <div class="ds-rec__head">
+                  <div class="ds-rec__icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M8 7.32 16.09 12 8 16.68V7.45M6 4v16l14-8z"></path></svg>
+                  </div>
+                  <button class="ds-rec__menu" type="button" aria-label="移除推荐">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 10c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"></path></svg>
+                  </button>
+                </div>
+                <div class="ds-rec__copy">
+                  <h3 class="ds-rec__title">如何发送一份协议？</h3>
+                  <p class="ds-rec__desc">了解从发起到完成的全流程，以及实时状态跟踪如何加速业务闭环。</p>
+                </div>
+                <div class="ds-rec__cta-row">
+                  <a class="ds-rec__cta" href="#">了解更多</a>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3zm16 2v3H5V5zM5 19v-9h14v9zM7 7H6V6h1zm2 0H8V6h1zm2 0h-1V6h1z"></path></svg>
+                </div>
+              </div>
+            </article>
+
+            <article class="ds-rec ds-rec--grey" data-qa="recommendation-card-brand">
+              <div class="ds-rec__tag">账户设置待办</div>
+              <div class="ds-rec__body">
+                <div class="ds-rec__head">
+                  <div class="ds-rec__icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M17 5v3H5V5zm2-2H3v7h16zm3 9.9V5h-2v6.1l-10 1V16H9v6h4v-6h-1v-2.09l10-1Z"></path></svg>
+                  </div>
+                  <button class="ds-rec__menu" type="button" aria-label="移除推荐">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 10c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"></path></svg>
+                  </button>
+                </div>
+                <div class="ds-rec__copy">
+                  <h3 class="ds-rec__title">应用你的品牌</h3>
+                  <p class="ds-rec__desc">自定义 Logo、配色与企业信息，让签署方看到的一切都更贴合品牌、建立信任。</p>
+                </div>
+                <div class="ds-rec__cta-row">
+                  <a class="ds-rec__cta" href="#">自定义品牌</a>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3zm16 2v3H5V5zM5 19v-9h14v9zM7 7H6V6h1zm2 0H8V6h1zm2 0h-1V6h1z"></path></svg>
+                </div>
+              </div>
+            </article>
+
+            <article class="ds-rec ds-rec--grey" data-qa="recommendation-card-inviteYourTeam">
+              <div class="ds-rec__tag">账户设置待办</div>
+              <div class="ds-rec__body">
+                <div class="ds-rec__head">
+                  <div class="ds-rec__icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M12 3.9c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1S8.9 8.71 8.9 7s1.39-3.1 3.1-3.1M12 2C9.24 2 7 4.24 7 7s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5m9 16h-2v-2h-2v2h-2v2h2v2h2v-2h2zm-4.29-3.71A5.94 5.94 0 0 0 13 13h-2c-3.31 0-6 2.69-6 6v3h2v-3c0-2.21 1.79-4 4-4h2c.85 0 1.63.27 2.28.72z"></path></svg>
+                  </div>
+                  <button class="ds-rec__menu" type="button" aria-label="移除推荐">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 10c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"></path></svg>
+                  </button>
+                </div>
+                <div class="ds-rec__copy">
+                  <h3 class="ds-rec__title">邀请你的团队</h3>
+                  <p class="ds-rec__desc">邀请同事协作处理文件、共享模板，把所有协议动态集中在一处。</p>
+                </div>
+                <div class="ds-rec__cta-row">
+                  <a class="ds-rec__cta" href="#">邀请团队</a>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18V3zm16 2v3H5V5zM5 19v-9h14v9zM7 7H6V6h1zm2 0H8V6h1zm2 0h-1V6h1z"></path></svg>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div class="ds-rec-nav">
+            <button type="button" aria-label="上一组推荐" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.65 21-8.42-8.43a.84.84 0 0 1-.24-.55.8.8 0 0 1 .24-.59L14.65 3 16 4.35 8.34 12 16 19.65z"></path></svg>
+            </button>
+            <button type="button" aria-label="下一组推荐">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.35 21 8 19.65 15.66 12 8 4.35 9.35 3l8.42 8.43c.16.16.24.37.24.57s-.08.41-.24.57z"></path></svg>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer — data-qa=personalized-home-footer -->
+      <footer class="ds-footer" data-qa="personalized-home-footer">
+        <div class="ds-footer__left">
+          <p>想参与法大大产品调研吗？例如问卷、访谈，以及新功能与产品想法的体验测试。</p>
+          <a href="#" target="_blank" rel="noopener noreferrer">加入产品体验调研</a>
+        </div>
+        <div class="ds-footer__right">
+          <ul>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.9c4.47 0 8.1 3.63 8.1 8.1s-3.63 8.1-8.1 8.1-8.1-3.63-8.1-8.1S7.53 3.9 12 3.9M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 11.87A3.999 3.999 0 0 0 12 6c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2h-1v3h2zM13 16h-2v2h2z"></path></svg>
+              <a href="#" target="_blank" rel="noopener noreferrer">帮助中心</a>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 15h-2V4.83L17.83 7H6V5h11l3-3h2zm-6-4H4v8.17L6.17 17H16zm2-2v10H7l-3 3H2V9zm-5 4H7v2h6z"></path></svg>
+              <a href="#" target="_blank" rel="noopener noreferrer">社区论坛</a>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.92 7 1.56v6.81c0 2.18-1.18 4.19-3.09 5.24L12 19.7l-3.91-2.17A6.02 6.02 0 0 1 5 12.29V5.48M3 4v8.29c0 2.91 1.58 5.58 4.11 6.99L12 21.99l4.89-2.71A8 8 0 0 0 21 12.29V4l-9-2z"></path></svg>
+              <a href="#" target="_blank" rel="noopener noreferrer">信任中心</a>
+            </li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+    </div>
+  </div>
