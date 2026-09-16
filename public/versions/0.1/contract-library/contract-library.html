@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>协议 · 签署任务列表结构调整 0.1（AIP）</title>
+  <title>合同库 0.1（AIP）</title>
   <!--
-    AIP 0.1 · 签署任务列表结构调整（r21）。
-    在 AIP v1 典型页面基础上实现：一级导航“协议”；全部任务 / 草稿 / 进行中 / 已完成状态入口；
-    访问范围（我的签署 / 全部签署）；日期、状态、发起人、快速视图与筛选汇总；任务文件夹独立页；
-    记录与处理五项原页面归集。本页仅保留 Libra · 顶栏皮肤（data-skin=libra-top）；其余皮肤已注释停用。
+    AIP 0.1 · 合同库（PRD v0.6 / TAPD 1092515）。
+    页面骨架（顶栏/侧栏/弹窗规范/交互脚本）整体复用「全部任务」签署任务页；
+    内容区替换为合同库：列表（搜索/筛选/自定义列/排序/分页）、
+    合同详情抽屉（PDF 预览 + 字段分组 + 文档内搜索 + 字段原文定位 + 附件预览 + 编辑态）、
+    本地上传（选择 → 确认 → 进度 三段式弹窗）、文件上传记录（全屏浮层 + 失败文件弹窗）、
+    合同类型管理与字段管理（全屏浮层 + 新建/编辑弹窗）。
+    来源：FASC 签署任务自动同步 / 本地上传 / 归档初始化。
+    皮肤：仅保留 Libra · 顶栏（data-skin=libra-top），与全部任务一致。
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,6 +51,12 @@
       --fdd-progress-radius: 0;
       --fdd-shadow-dropdown: none;
       --fdd-shadow-menu: none;
+      --fdd-warning: #b25a09;
+      --fdd-warning-soft: #fdf2e3;
+      --fdd-danger-soft: #fbecec;
+      --fdd-success-soft: #e5f4ee;
+      --fdd-shadow-drawer: -8px 0 24px rgba(28, 43, 51, 0.08);
+      --lt-shadow-sm: 0 1px 2px 0 #161a1b0f;
     }
 
     /* —— 全局统一滚动条（Libra 暖灰细款，贴边、无轨道底色） —— */
@@ -582,8 +592,6 @@
       margin-bottom: 8px; min-height: 44px;
       position: relative; z-index: 5;
     }
-    /* 打开筛选浮窗时抬高层级，避免被下方表格 sticky 盖住 */
-    .envelope-controls:has(.filter-field.is-open) { z-index: 70; }
     .envelope-search {
       position: relative;
       width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
@@ -679,7 +687,7 @@
     .filter-trigger__clear[hidden] { display: none !important; }
     .filter-trigger .aip-icon[hidden] { display: none !important; }
     /* 已应用筛选与未应用下拉之间的竖向分割线 */
-    .filter-sep-applied {
+    .aip-lib-filter-sep-applied {
       display: inline-block; width: 1px; height: 22px; margin: 0 8px 0 0;
       background: var(--fdd-line); align-self: center; flex-shrink: 0;
     }
@@ -687,15 +695,12 @@
       position: absolute; top: calc(100% + 10px); left: 0; z-index: 50;
       width: max-content; min-width: 168px; max-width: 320px; padding: 14px 14px 10px;
       border-radius: 6px; background: #fff;
-      /* 紧凑投影：避免大面积半透明 blur 像一层「白遮罩」透出下方表格 */
-      box-shadow: 0 0 0 1px rgba(28, 43, 51, 0.06), 0 8px 24px rgba(28, 43, 51, 0.14);
+      box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
       color: var(--fdd-ink);
-      isolation: isolate;
     }
-    .filter-field.is-open { z-index: 60; }
     .filter-popover[hidden] { display: none !important; }
     .filter-popover::before {
-      content: ""; position: absolute; top: -6px; left: 28px; z-index: 1;
+      content: ""; position: absolute; top: -6px; left: 28px;
       width: 10px; height: 10px;
       background: #fff;
       border-left: 1px solid rgba(28, 43, 51, 0.08);
@@ -1903,17 +1908,11 @@
     html[data-shell="libra"] .folder-more-menu,
     html[data-shell="libra"] .export-menu,
     html[data-shell="libra"] .row-menu,
-    html[data-shell="libra"] .mini-popover {
+    html[data-shell="libra"] .mini-popover,
+    html[data-shell="libra"] .filter-popover {
       border-color: #e6e9ee;
       border-radius: 10px;
       box-shadow: var(--lt-shadow-button);
-    }
-    /* 筛选浮窗勿用 button 大投影（18px/47px blur 会形成半透明白雾遮罩） */
-    html[data-shell="libra"] .filter-popover {
-      border: 1px solid #e6e9ee;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 0 0 1px rgba(22, 26, 27, 0.05), 0 8px 24px rgba(22, 26, 27, 0.12);
     }
     html[data-shell="libra"] .ns-modal { border-radius: 12px; }
     html[data-shell="libra"] .contracts-page-content {
@@ -2263,10 +2262,395 @@
       .header-tabs { display: none; }
       /* html[data-skin="libra-rail"] .contract-sidebar { display: none; } */
     }
+    /* —— 顶栏：复用规范业务组件 .aip-topbar（ui-kit #biz-topbar，样式来自 aip-design-system.css） —— */
+    .aip-topbar { position: sticky; top: 6px; z-index: 40; }
+
+    /* 顶部切换 + 操作行 */
+    .lib-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .lib-switch {
+      display: inline-flex; padding: 2px; gap: 2px;
+      background: #f3f5f8; border-radius: 8px;
+    }
+    .lib-switch button {
+      height: 28px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent;
+      font-size: 13px; font-weight: 500; color: var(--fdd-ink-2); cursor: pointer;
+    }
+    .lib-switch button:hover { color: var(--fdd-ink); }
+    .lib-switch button.active { background: #fff; color: var(--fdd-ink); font-weight: 600; box-shadow: 0 1px 2px rgba(28, 43, 51, 0.12); }
+    .lib-actions { display: flex; align-items: center; gap: 10px; }
+    .aip-lib-btn {
+      height: 32px; padding: 0 14px; border-radius: var(--fdd-radius);
+      font-size: 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+      border: 1px solid transparent; background: transparent; color: var(--fdd-ink);
+      position: relative;
+    }
+    .aip-lib-btn .aip-icon { color: inherit; }
+    .aip-lib-btn-primary { background: var(--fdd-brand); color: #fff; }
+    .aip-lib-btn-primary:hover { background: var(--fdd-brand-hover); }
+    .aip-lib-btn-secondary { border-color: var(--fdd-line-strong); background: #fff; }
+    .aip-lib-btn-secondary:hover { background: var(--fdd-bg-hover); }
+    .aip-lib-btn-danger { background: var(--fdd-danger); color: #fff; }
+    .aip-lib-btn-danger:hover { opacity: 0.9; }
+    .aip-lib-btn-ghost { color: var(--fdd-ink-2); }
+    .aip-lib-btn-ghost:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .aip-lib-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .aip-lib-btn-sm { height: 28px; padding: 0 10px; font-size: 13px; }
+
+    /* 管理菜单 */
+    .aip-lib-menu-wrap { position: relative; }
+    .aip-lib-menu-pop {
+      position: absolute; top: calc(100% + 6px); right: 0; min-width: 180px; z-index: 60;
+      background: #fff; border: 1px solid var(--fdd-line-soft); border-radius: 8px;
+      box-shadow: var(--fdd-shadow-menu); padding: 6px;
+    }
+    .aip-lib-menu-pop button {
+      width: 100%; padding: 8px 12px; border: 0; border-radius: 4px; background: transparent;
+      text-align: left; color: var(--fdd-ink); cursor: pointer; display: flex; align-items: center; gap: 8px;
+    }
+    .aip-lib-menu-pop button:hover { background: var(--fdd-bg-hover); }
+
+    /* —— 工具栏（对齐全部任务 envelope-controls；与全部任务骨架共用规范类，此处仅合同库特有差异） —— */
+    .envelope-controls {
+      display: flex; flex-wrap: nowrap; align-items: center; gap: 0;
+      margin-bottom: 8px; min-height: 44px; position: relative; z-index: 5;
+    }
+    .envelope-search {
+      position: relative; width: 284px; min-width: 160px; flex-shrink: 1;
+      height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
+      display: flex; align-items: center; gap: 8px;
+      border: 1px solid var(--fdd-line-strong); border-radius: 8px; background: #fff;
+    }
+    .envelope-filters { display: flex; flex-wrap: nowrap; align-items: center; gap: 0; flex: 1; min-width: 0; }
+    /* 已应用条件与未应用下拉之间的竖向分隔线 */
+    .aip-lib-filter-sep-applied {
+      display: none; width: 1px; height: 22px; margin: 0 8px 0 0;
+      background: var(--fdd-line); align-self: center; flex-shrink: 0;
+    }
+    .aip-lib-filter-sep-applied.is-on { display: inline-block; }
+    /* 下拉面板（合同库特有位移） */
+    .aip-lib-filter-popover { top: calc(100% + 10px); }
+    .aip-lib-filter-popover__range { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .aip-lib-filter-popover__range input {
+      width: 120px; height: 34px; padding: 0 8px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius); outline: 0; font-size: 13px;
+    }
+    .aip-lib-filter-popover__range input:focus { border-color: var(--fdd-brand); }
+    .aip-lib-filter-popover__err { color: var(--fdd-danger); font-size: 12px; margin: -6px 0 8px; }
+    /* 兼容旧 chip 容器（不再使用，隐藏） */
+    #filterChips { display: none; }
+    .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .aip-lib-toolbar-text-btn {
+      height: 32px; padding: 0 10px 0 12px; margin-left: 4px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--fdd-line-strong); border-radius: 8px;
+      background: #fff; color: var(--fdd-ink); font-size: 14px; white-space: nowrap; cursor: pointer;
+    }
+    .aip-lib-toolbar-text-btn:hover { background: var(--fdd-bg-hover); }
+
+    /* —— 表格（对齐全部任务 envelope-table） —— */
+    .aip-lib-table-shell {
+      position: relative; width: 100%; border: 0; border-radius: 0; background: #fff;
+      box-shadow: none; overflow: auto; max-height: clamp(300px, calc(100vh - 300px), 640px);
+      border-bottom: 1px solid var(--fdd-line);
+    }
+    table.aip-lib-table {
+      width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0;
+      background: #fff; font-size: 14px; line-height: 19.6px;
+    }
+    .aip-lib-table thead { position: sticky; top: 0; z-index: 2; background: #fff; }
+    .aip-lib-table th, .aip-lib-table td {
+      padding: 0 16px; text-align: left; border-bottom: 1px solid var(--fdd-line); vertical-align: middle;
+    }
+    .aip-lib-table thead tr { height: var(--fdd-table-head-h); }
+    .aip-lib-table tbody tr { height: var(--fdd-table-row-h); }
+    .aip-lib-table tbody tr { transition: background-color 0.12s; }
+    .aip-lib-table tbody tr:hover { background: var(--fdd-bg-hover); }
+    .aip-lib-table tbody tr:hover td:last-child { background: #fff; }
+    .aip-lib-table thead th {
+      font-weight: 500; color: var(--fdd-ink); background: #fff; white-space: nowrap; user-select: none;
+    }
+    .aip-lib-table thead th.sortable { cursor: pointer; }
+    .aip-lib-table thead th .sort-mark { display: inline-block; margin-left: 4px; font-size: 11px; color: var(--fdd-brand); }
+    .aip-lib-table th:first-child, .aip-lib-table td:first-child { width: 48px; min-width: 48px; padding-left: 16px; }
+    /* 操作列：sticky 贴右 + 左侧弥散渐变，盖住横向滚出内容 */
+    .aip-lib-table th:last-child, .aip-lib-table td:last-child {
+      width: 96px; min-width: 96px; text-align: right;
+      position: sticky; right: 0; z-index: 2; background: #fff;
+      box-shadow: -10px 0 18px -6px rgba(28, 43, 51, 0.12); overflow: visible;
+    }
+    .aip-lib-table th:last-child::before, .aip-lib-table td:last-child::before {
+      content: ""; position: absolute; top: 0; bottom: 0; left: -20px; width: 20px;
+      background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 55%, #fff);
+      pointer-events: none;
+    }
+    .aip-lib-table thead th:last-child { z-index: 4; }
+    .aip-lib-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aip-lib-table td:nth-child(2) { white-space: normal; }
+
+    /* 名称列（.envelope-name 用骨架规范样式；合同库仅补双行截断与来源/编辑） */
+    .aip-lib-cell-name { display: flex; flex-direction: column; gap: 3px; min-width: 220px; }
+    .aip-lib-cell-name .envelope-name { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .aip-lib-cell-source { font-size: 13px; color: var(--fdd-ink-muted); display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .aip-lib-cell-source a, .aip-lib-link-btn {
+      border: 0; background: none; padding: 0; color: var(--fdd-brand); cursor: pointer; font-size: 13px;
+    }
+    .aip-lib-cell-source a:hover, .aip-lib-link-btn:hover { text-decoration: underline; }
+    .aip-lib-cell-edit {
+      width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent;
+      color: var(--fdd-ink-3); display: inline-grid; place-items: center; cursor: pointer; opacity: 0;
+    }
+    td:hover .aip-lib-cell-edit { opacity: 1; }
+    .aip-lib-cell-edit:hover { background: var(--fdd-brand-soft); color: var(--fdd-brand); }
+    .aip-lib-tag {
+      display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--fdd-radius-pill);
+      font-size: 12px; white-space: nowrap;
+    }
+    .aip-lib-tag--green { background: var(--fdd-success-soft); color: var(--fdd-success); }
+    .aip-lib-tag--orange { background: var(--fdd-warning-soft); color: var(--fdd-warning); }
+    .aip-lib-tag--gray { background: var(--fdd-bg-muted); color: var(--fdd-ink-2); }
+    .aip-lib-tag--red { background: var(--fdd-danger-soft); color: var(--fdd-danger); }
+    .aip-lib-tag--blue { background: var(--fdd-brand-soft); color: var(--fdd-brand); }
+    .aip-lib-tag + .aip-lib-tag { margin-left: 4px; }
+    .aip-lib-tag-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 5px; }
+    .empty-cell { color: var(--fdd-ink-3); }
+    /* 操作列「更多」按钮 */
+    .more-button {
+      width: 32px; height: 32px; display: inline-grid; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink); cursor: pointer;
+    }
+    .more-button:hover { background: var(--fdd-bg-hover); }
+    .aip-lib-more-wrap { position: relative; display: inline-block; }
+
+    /* —— 分页（对齐全部任务：左页大小 / 右翻页钮） —— */
+    .aip-lib-table-foot { display: flex; align-items: center; justify-content: space-between; height: 48px; color: var(--fdd-ink); font-size: 13px; }
+    .aip-lib-pagination { display: flex; align-items: center; gap: 4px; }
+    .aip-lib-pagination button {
+      width: 28px; height: 28px; border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink); cursor: pointer; font-size: 13px;
+    }
+    .aip-lib-pagination button:hover:not([disabled]):not(.active) { background: var(--fdd-bg-hover); }
+    .aip-lib-pagination button.active { background: var(--fdd-brand-soft); color: var(--fdd-brand); font-weight: 600; }
+    .aip-lib-pagination button[disabled] { opacity: 0.25; cursor: not-allowed; }
+
+    /* —— 批量操作条（.batch-bar/.batch-btn 用骨架规范样式；合同库仅补「清除选择」变体） —— */
+    .batch-bar { z-index: 110; }
+    .batch-bar .batch-btn { display: inline-flex; align-items: center; gap: 6px; }
+    .batch-bar .batch-btn--clear { background: transparent; color: var(--fdd-ink-2); }
+    .batch-bar .batch-btn--clear:hover { color: var(--fdd-ink); }
+
+    /* 空态 */
+    .empty-state { text-align: center; padding: 60px 0; color: var(--fdd-ink-3); }
+    .empty-state .aip-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; }
+    .empty-state p { margin: 0 0 6px; font-size: 15px; color: var(--fdd-ink-2); }
+    .empty-state small { font-size: 13px; }
+
+    /* —— 详情抽屉 —— */
+    .drawer-mask, .overlay-mask {
+      position: fixed; inset: 0; z-index: 80; background: rgba(28, 43, 51, 0.4);
+      display: flex; justify-content: flex-end;
+    }
+    .detail-drawer {
+      width: min(1280px, calc(100vw - 80px)); height: 100%; background: #fff;
+      box-shadow: var(--fdd-shadow-drawer); display: flex; flex-direction: column;
+    }
+    .drawer-head {
+      height: 56px; flex-shrink: 0; padding: 0 20px;
+      display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--fdd-line-soft);
+    }
+    .drawer-head h2 { margin: 0; font-size: 16px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .drawer-body { flex: 1; min-height: 0; display: flex; }
+    .pdf-pane {
+      flex: 1.4; min-width: 0; background: #f0f1f2; display: flex; flex-direction: column;
+      border-right: 1px solid var(--fdd-line-soft);
+    }
+    .pdf-searchbar {
+      height: 48px; flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; gap: 10px;
+      background: #fff; border-bottom: 1px solid var(--fdd-line-soft);
+    }
+    .pdf-searchbar input {
+      flex: 1; height: 30px; padding: 0 10px; border: 1px solid var(--fdd-line); border-radius: var(--fdd-radius); outline: 0;
+    }
+    .pdf-searchbar input:focus { border-color: var(--fdd-brand); }
+    .pdf-search-nav { display: flex; align-items: center; gap: 2px; color: var(--fdd-ink-2); font-size: 12px; white-space: nowrap; }
+    .pdf-view { flex: 1; overflow: auto; padding: 24px; }
+    .pdf-page {
+      width: 100%; max-width: 720px; margin: 0 auto 20px; padding: 48px 44px;
+      background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-height: 720px;
+      font-size: 13px; line-height: 1.9; color: #333;
+    }
+    .pdf-page h1 { font-size: 20px; text-align: center; margin: 0 0 24px; }
+    .pdf-page h2 { font-size: 15px; margin: 20px 0 8px; }
+    .pdf-page p { margin: 0 0 10px; text-indent: 2em; }
+    mark.pdf-hit { background: #ffe58f; padding: 0 1px; }
+    mark.pdf-hit.current { background: #ffb84d; }
+    .info-pane { flex: 1; min-width: 380px; display: flex; flex-direction: column; overflow: hidden; }
+    .info-scroll { flex: 1; overflow: auto; padding: 20px 20px 24px; }
+    .info-group { margin-bottom: 8px; border: 1px solid var(--fdd-line-soft); border-radius: 8px; overflow: hidden; }
+    .info-group__head {
+      width: 100%; padding: 12px 14px; border: 0; background: var(--fdd-bg-sidebar);
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--fdd-ink);
+    }
+    .info-group__body { padding: 4px 14px 14px; }
+    .field-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--fdd-line-soft); }
+    .field-row:last-child { border-bottom: 0; }
+    .field-label { width: 96px; flex-shrink: 0; color: var(--fdd-ink-3); font-size: 13px; padding-top: 1px; }
+    .field-value { flex: 1; min-width: 0; color: var(--fdd-ink); font-size: 13px; word-break: break-all; }
+    .field-value .locate-btn {
+      margin-left: 8px; border: 0; background: none; padding: 0;
+      color: var(--fdd-brand); font-size: 12px; cursor: pointer; white-space: nowrap;
+    }
+    .field-value .locate-btn:hover { text-decoration: underline; }
+    .attach-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0; color: var(--fdd-brand); font-size: 13px;
+    }
+    .attach-item button { border: 0; background: none; color: inherit; cursor: pointer; padding: 0; }
+    .attach-item button:hover { text-decoration: underline; }
+    .drawer-foot {
+      flex-shrink: 0; padding: 12px 20px; border-top: 1px solid var(--fdd-line-soft);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .info-pane .drawer-foot { background: #fff; }
+
+    /* 编辑态控件 */
+    .edit-input, .edit-select, .edit-date {
+      width: 100%; height: 30px; padding: 0 8px; border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius); outline: 0; font-size: 13px;
+    }
+    .edit-input:focus, .edit-select:focus, .edit-date:focus { border-color: var(--fdd-brand); box-shadow: 0 0 0 2px var(--fdd-brand-soft); }
+    textarea.edit-input { height: auto; min-height: 56px; padding: 6px 8px; resize: vertical; }
+    .edit-err { color: var(--fdd-danger); font-size: 12px; margin-top: 4px; }
+    .switch { position: relative; width: 36px; height: 20px; display: inline-block; vertical-align: middle; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .slider { position: absolute; inset: 0; border-radius: 20px; background: #ccc; transition: .2s; }
+    .switch .slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; border-radius: 50%; background: #fff; transition: .2s; }
+    .switch input:checked + .slider { background: var(--fdd-brand); }
+    .switch input:checked + .slider::before { transform: translateX(16px); }
+
+    /* —— 弹窗（通用） —— */
+    .aip-lib-modal-mask {
+      position: fixed; inset: 0; z-index: 100; background: rgba(28, 43, 51, 0.4);
+      display: flex; align-items: center; justify-content: center; padding: 40px;
+    }
+    .aip-lib-modal {
+      width: 560px; max-width: 100%; max-height: 100%; background: #fff; border-radius: 12px;
+      display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--fdd-shadow-menu);
+    }
+    .aip-lib-modal--lg { width: 760px; }
+    .aip-lib-modal-head {
+      padding: 18px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    }
+    .aip-lib-modal-head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+    .aip-lib-modal-close {
+      width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent;
+      color: var(--fdd-ink-3); display: grid; place-items: center; cursor: pointer; flex-shrink: 0;
+    }
+    .aip-lib-modal-close:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .aip-lib-modal-body { padding: 16px 24px; overflow: auto; }
+    .aip-lib-modal-foot { padding: 12px 24px 20px; display: flex; justify-content: flex-end; gap: 10px; }
+    .aip-lib-modal-desc { margin: 0 0 16px; color: var(--fdd-ink-2); font-size: 14px; line-height: 1.7; }
+
+    /* 上传弹窗 */
+    .upload-drop {
+      border: 1.5px dashed var(--fdd-line-strong); border-radius: 8px; padding: 48px 24px;
+      text-align: center; color: var(--fdd-ink-2);
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      transition: border-color .15s, background .15s;
+    }
+    .upload-drop.is-drag { border-color: var(--fdd-brand); background: var(--fdd-brand-soft); }
+    .upload-drop .aip-icon { font-size: 40px; width: 40px; height: 40px; color: var(--fdd-ink-3); }
+    .upload-hint { font-size: 12px; color: var(--fdd-ink-3); }
+    .upload-filelist { margin-top: 4px; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
+    .upload-fileitem {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border: 1px solid var(--fdd-line-soft); border-radius: 6px; font-size: 13px;
+    }
+    .upload-fileitem .fname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .upload-fileitem .fsize { color: var(--fdd-ink-3); font-size: 12px; }
+    .upload-fileitem .fremove { border: 0; background: none; color: var(--fdd-ink-3); cursor: pointer; padding: 2px; }
+    .upload-fileitem .fremove:hover { color: var(--fdd-danger); }
+    .upload-summary { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; }
+    .upload-summary .aip-lib-link-btn { font-size: 13px; }
+    .progress-track { height: 8px; border-radius: 4px; background: var(--fdd-bg-muted); overflow: hidden; margin: 12px 0 8px; }
+    .progress-fill { height: 100%; border-radius: 4px; background: var(--fdd-brand); transition: width .3s; }
+    .upload-result { font-size: 13px; color: var(--fdd-ink-2); }
+    .upload-result b { color: var(--fdd-success); }
+    .upload-result .fail { color: var(--fdd-danger); font-weight: 600; }
+
+    /* 全屏浮层（文件上传记录 / 类型管理 / 字段管理） */
+    .sheet-mask {
+      position: fixed; inset: 0; z-index: 90; background: #fff;
+      display: flex; flex-direction: column;
+    }
+    .sheet-head {
+      height: 56px; flex-shrink: 0; padding: 0 24px;
+      display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--fdd-line-soft);
+    }
+    .sheet-head h2 { margin: 0; font-size: 17px; font-weight: 600; }
+    .sheet-head .sheet-back { display: flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--fdd-ink-2); cursor: pointer; font-size: 14px; padding: 6px 8px; border-radius: 4px; }
+    .sheet-head .sheet-back:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .sheet-body { flex: 1; overflow: auto; padding: 24px; }
+    .sheet-wrap { max-width: 1200px; margin: 0 auto; }
+    .sheet-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .sheet-toolbar .search-box { width: 260px; }
+
+    /* 表单行（弹窗内） */
+    .form-row { margin-bottom: 16px; }
+    .form-row label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--fdd-ink-2); }
+    .form-row label .req { color: var(--fdd-danger); margin-left: 2px; }
+    .form-row .edit-input, .form-row .edit-select { height: 34px; }
+    .option-list { display: flex; flex-direction: column; gap: 8px; }
+    .option-item { display: flex; align-items: center; gap: 8px; }
+    .option-item .edit-input { flex: 1; }
+    .option-item .fremove { border: 0; background: none; color: var(--fdd-ink-3); cursor: pointer; padding: 4px; }
+    .option-item .fremove:hover { color: var(--fdd-danger); }
+    .multi-select-box {
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      max-height: 180px; overflow: auto; padding: 6px;
+    }
+    .multi-select-box .ms-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px;
+    }
+    .multi-select-box .ms-item:hover { background: var(--fdd-bg-hover); }
+    .multi-select-box .ms-item.is-added { color: var(--fdd-ink-3); }
+    .multi-select-box .ms-item .added-mark { margin-left: auto; font-size: 12px; color: var(--fdd-ink-3); }
+    .checkbox { width: 15px; height: 15px; accent-color: var(--fdd-brand); }
+
+    /* toast */
+    .aip-lib-toast-root { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    .aip-lib-toast {
+      padding: 10px 16px; border-radius: 6px; background: var(--fdd-ink); color: #fff; font-size: 13px;
+      box-shadow: var(--fdd-shadow-menu); animation: aipLibToastIn .2s ease;
+    }
+    @keyframes aipLibToastIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+    /* 单元格浮层 */
+    .aip-lib-cell-pop {
+      position: absolute; z-index: 120; width: 300px; background: #fff; border-radius: 8px;
+      border: 1px solid var(--fdd-line-soft); box-shadow: var(--fdd-shadow-menu); padding: 14px;
+    }
+    .aip-lib-cell-pop h4 { margin: 0 0 10px; font-size: 13px; color: var(--fdd-ink-2); font-weight: 500; }
+    .aip-lib-cell-pop .aip-lib-cell-pop-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .aip-lib-radio-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; cursor: pointer; }
+
+    /* 自定义列 */
+    .aip-lib-col-panel {
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 60; width: 300px;
+      background: #fff; border: 1px solid var(--fdd-line-soft); border-radius: 8px; box-shadow: var(--fdd-shadow-menu);
+      padding: 12px; max-height: 420px; overflow: auto;
+    }
+    .aip-lib-col-panel h4 { margin: 0 0 8px; font-size: 13px; color: var(--fdd-ink-2); font-weight: 500; }
+    .aip-lib-col-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 4px; font-size: 13px; cursor: grab;
+    }
+    .aip-lib-col-item:hover { background: var(--fdd-bg-hover); }
+    .aip-lib-col-item .drag-handle { color: var(--fdd-ink-3); cursor: grab; }
+    .aip-lib-col-item.is-drag { opacity: 0.4; }
+
+    /* —— ns-modal：筛选条件 / 设置列表列弹窗整体复用骨架规范样式（ns-modal*/col-modal*/filter-*），此处不再重复定义 —— */
   </style>
 </head>
 <body data-view="contracts">
-  <div class="dev-switchers">
+  <div class="dev-switchers" hidden>
     <div class="dev-handle" id="devFab" aria-label="皮肤与场景切换">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </div>
@@ -2374,16 +2758,16 @@
           </div>
         </div>
         <div class="contract-nav-scroll">
-          <button class="nav-btn nav-primary active" type="button" data-nav="all">
+          <button class="nav-btn nav-primary active" type="button" data-href="../signing-task-list/signing-tasks.html">
             <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="envelope-simple">
               <img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" />
             </span>
             全部任务
           </button>
           <div class="contract-secondary-items">
-            <button class="nav-btn nav-secondary" type="button" data-nav="draft">草稿</button>
-            <button class="nav-btn nav-secondary" type="button" data-nav="active">进行中</button>
-            <button class="nav-btn nav-secondary" type="button" data-nav="completed">已完成</button>
+            <button class="nav-btn nav-secondary" type="button" data-href="../signing-task-list/signing-tasks.html">草稿</button>
+            <button class="nav-btn nav-secondary" type="button" data-href="../signing-task-list/signing-tasks.html">进行中</button>
+            <button class="nav-btn nav-secondary" type="button" data-href="../signing-task-list/signing-tasks.html">已完成</button>
           </div>
 
           <div class="nav-section">
@@ -2415,7 +2799,7 @@
 
           <div class="nav-section">
             <!-- 合同库：跳转独立设计稿；本页不再内嵌合同库视图 -->
-            <button class="nav-tool" type="button" data-href="../contract-library/contract-library.html" id="navContractLib">
+            <button class="nav-tool active" type="button" aria-current="page" id="navContractLib">
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
                 <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
               </span>
@@ -2455,243 +2839,96 @@
 
     <div class="app-main" id="appMain">
       <div class="view-home" id="viewHome" data-aip-home data-lazy></div>
-      <main class="contracts-page-content">
       <div class="contracts-workspace">
-        <div class="contracts-titlebar">
-          <h1 id="pageTitle">全部任务</h1>
-          <div class="scope-switch" id="scopeSwitch" role="group" aria-label="访问范围">
-            <button type="button" data-scope="mine" class="is-on">我的签署</button>
-            <button type="button" data-scope="corp">全部签署</button>
+        <!-- 顶部：合同库/签署任务切换 + 上传合同 + 管理 -->
+        <div class="lib-topbar">
+          <div class="lib-switch" role="tablist" aria-label="合同库与签署任务切换">
+            <button type="button" class="active" role="tab" aria-selected="true">合同库</button>
+            <button type="button" role="tab" aria-selected="false" data-nav="../signing-task-list/signing-tasks.html">签署任务</button>
+          </div>
+          <div class="lib-actions">
+            <button class="aip-lib-btn aip-lib-btn-primary" type="button" id="uploadBtn">
+              <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/upload.svg" alt="" /></span>
+              上传合同
+            </button>
+            <div class="aip-lib-menu-wrap">
+              <button class="aip-lib-btn aip-lib-btn-secondary" type="button" id="manageBtn" aria-haspopup="menu" aria-expanded="false">
+                <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
+                管理
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="aip-lib-menu-pop" id="manageMenu" hidden role="menu" aria-label="管理菜单">
+                <button type="button" role="menuitem" id="manageTypeBtn">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/tree-structure.svg" alt="" /></span>
+                  合同类型
+                </button>
+                <button type="button" role="menuitem" id="manageFieldBtn">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/note-pencil.svg" alt="" /></span>
+                  字段管理
+                </button>
+                <button type="button" role="menuitem" id="manageUploadRecordBtn">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
+                  文件上传记录
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- 工具栏：搜索 + 筛选 + 自定义列（对齐全部任务 envelope-controls） -->
         <div class="envelope-controls">
           <label class="envelope-search">
-            <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="magnifying-glass">
-              <img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" />
-            </span>
-            <input id="searchInput" type="search" placeholder="搜索签署任务" aria-label="搜索签署任务" />
-            <button class="envelope-search__clear" type="button" id="searchClear" aria-label="清空搜索" hidden>×</button>
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+            <input type="search" id="searchInput" placeholder="搜索合同名称 / 合同主体，或记录 ID" aria-label="搜索合同" />
+            <button class="envelope-search__clear" type="button" id="searchClear" hidden aria-label="清除搜索">×</button>
           </label>
-          <div class="envelope-filters" id="envelopeFilters" role="group" aria-label="筛选条件">
+          <div class="envelope-filters" role="group" aria-label="筛选条件">
             <div class="filter-chips" id="filterChips" aria-label="已应用的筛选"></div>
-            <span class="filter-sep" id="filterSep" aria-hidden="true"></span>
-            <div class="filter-triggers" id="filterTriggers">
-              <div class="filter-field" data-filter="date" data-views="all draft active completed folder pending">
-                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-                  日期
-                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
-                </button>
-                <div class="filter-popover" hidden role="dialog" aria-label="日期筛选">
-                  <h3 class="filter-popover__title">日期</h3>
-                  <div class="filter-popover__op-wrap" data-date-op-wrap>
-                    <button type="button" class="filter-popover__op" data-date-op-trigger aria-haspopup="listbox" aria-expanded="false">
-                      <span class="filter-popover__op-label" data-date-op-label>=</span>
-                      <span class="filter-popover__op-caret" aria-hidden="true">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                      </span>
-                    </button>
-                    <div class="filter-popover__op-menu" data-date-op-menu hidden role="listbox" aria-label="日期条件">
-                      <button type="button" class="filter-popover__op-item is-selected" role="option" data-op="eq" data-op-label="=" aria-selected="true">
-                        <span>=</span>
-                        <svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg>
-                      </button>
-                      <div class="filter-popover__op-sep" role="separator"></div>
-                      <button type="button" class="filter-popover__op-item" role="option" data-op="between" data-op-label="介于" aria-selected="false"><span>介于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
-                      <button type="button" class="filter-popover__op-item" role="option" data-op="before" data-op-label="早于" aria-selected="false"><span>早于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
-                      <button type="button" class="filter-popover__op-item" role="option" data-op="after" data-op-label="晚于" aria-selected="false"><span>晚于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
-                    </div>
-                  </div>
-                  <div class="filter-popover__options" data-date-pane="eq" role="radiogroup" aria-label="日期范围">
-                    <label><input type="radio" name="filter-date" value="12m" data-label="过去 12 个月" /> 过去 12 个月</label>
-                    <label><input type="radio" name="filter-date" value="6m" data-label="过去 6 个月" checked /> 过去 6 个月</label>
-                    <label><input type="radio" name="filter-date" value="30d" data-label="过去 30 天" /> 过去 30 天</label>
-                    <label><input type="radio" name="filter-date" value="7d" data-label="过去 7 天" /> 过去 7 天</label>
-                    <label><input type="radio" name="filter-date" value="24h" data-label="过去 24 小时" /> 过去 24 小时</label>
-                  </div>
-                  <div class="filter-popover__date-extra" data-date-pane="compare" hidden>
-                    <div class="filter-popover__date-row" data-date-compare-single>
-                      <div class="libra-dp">
-                        <div class="libra-dp__field">
-                          <input class="libra-dp__input" type="text" readonly placeholder="年 / 月 / 日" value="" data-date-one aria-label="选择日期" />
-                          <button type="button" class="libra-dp__cal-ico" aria-label="打开日历">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="filter-popover__date-row filter-popover__date-row--pair" data-date-compare-range hidden>
-                      <div class="libra-dp">
-                        <div class="libra-dp__field">
-                          <input class="libra-dp__input" type="text" readonly placeholder="开始日期" value="" data-date-start aria-label="开始日期" />
-                          <button type="button" class="libra-dp__cal-ico" aria-label="选择开始日期">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-                          </button>
-                        </div>
-                      </div>
-                      <div class="libra-dp">
-                        <div class="libra-dp__field">
-                          <input class="libra-dp__input" type="text" readonly placeholder="结束日期" value="" data-date-end aria-label="结束日期" />
-                          <button type="button" class="libra-dp__cal-ico" aria-label="选择结束日期">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="filter-popover__actions">
-                    <button type="button" class="filter-popover__cancel">取消</button>
-                    <button type="button" class="filter-popover__apply">应用</button>
-                  </div>
-                </div>
-              </div>
-              <div class="filter-field" data-filter="status" data-views="all folder pending">
-                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-                  状态
-                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
-                </button>
-                <div class="filter-popover" hidden role="dialog" aria-label="状态筛选">
-                  <h3 class="filter-popover__title">状态</h3>
-                  
-                  <div class="filter-popover__options filter-popover__options--scroll" role="radiogroup" aria-label="状态">
-                    <label><input type="radio" name="filter-status" value="progress-set" data-label="进行中" /> 进行中</label>
-                    <label><input type="radio" name="filter-status" value="creating" data-label="创建中" /> 创建中</label>
-                    <label><input type="radio" name="filter-status" value="created" data-label="已创建" /> 已创建</label>
-                    <label><input type="radio" name="filter-status" value="filling" data-label="填写中" /> 填写中</label>
-                    <label><input type="radio" name="filter-status" value="to-finalize" data-label="待定稿" /> 待定稿</label>
-                    <label><input type="radio" name="filter-status" value="finalizing" data-label="定稿中" /> 定稿中</label>
-                    <label><input type="radio" name="filter-status" value="finalize-failed" data-label="定稿失败" /> 定稿失败</label>
-                    <label><input type="radio" name="filter-status" value="finalized" data-label="已定稿" /> 已定稿</label>
-                    <label><input type="radio" name="filter-status" value="signing" data-label="签署中" /> 签署中</label>
-                    <label><input type="radio" name="filter-status" value="signed" data-label="已签署" /> 已签署</label>
-                    <label><input type="radio" name="filter-status" value="completed" data-label="已完成" /> 已完成</label>
-                    <label><input type="radio" name="filter-status" value="overdue" data-label="已逾期" /> 已逾期</label>
-                    <label><input type="radio" name="filter-status" value="revoked" data-label="已撤销" /> 已撤销</label>
-                    <label><input type="radio" name="filter-status" value="terminated" data-label="已终止" /> 已终止</label>
-                    <label><input type="radio" name="filter-status" value="voiding" data-label="作废中" /> 作废中</label>
-                    <label><input type="radio" name="filter-status" value="voided" data-label="已作废" /> 已作废</label>
-                  </div>
-                  <div class="filter-popover__actions">
-                    <button type="button" class="filter-popover__cancel">取消</button>
-                    <button type="button" class="filter-popover__apply">应用</button>
-                  </div>
-                </div>
-              </div>
-              <div class="filter-field" data-filter="sender" data-views="all active completed pending">
-                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-                  发起人
-                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
-                </button>
-                <div class="filter-popover" hidden role="dialog" aria-label="发起人筛选">
-                  <h3 class="filter-popover__title">发起人</h3>
-                  
-                  <div class="filter-popover__options" role="radiogroup" aria-label="发起人">
-                    <label data-scope-opt="mine"><input type="radio" name="filter-sender" value="me-created" data-label="我创建的" /> 我创建的</label>
-                    <label data-scope-opt="mine"><input type="radio" name="filter-sender" value="me-received" data-label="我收到的" /> 我收到的</label>
-                    <label data-scope-opt="corp"><input type="radio" name="filter-sender" value="corp-sent" data-label="我方发起的" /> 我方发起的</label>
-                    <label data-scope-opt="corp"><input type="radio" name="filter-sender" value="corp-received" data-label="我方收到的" /> 我方收到的</label>
-                  </div>
-                  <div class="filter-popover__actions">
-                    <button type="button" class="filter-popover__cancel">取消</button>
-                    <button type="button" class="filter-popover__apply">应用</button>
-                  </div>
-                </div>
-              </div>
-              <div class="filter-field" data-filter="quick" data-views="all active">
-                <button class="filter-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-                  快速视图
-                  <span class="aip-icon aip-icon--sm" aria-hidden="true" data-icon-slug="caret-down"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
-                </button>
-                <div class="filter-popover" hidden role="dialog" aria-label="快速视图">
-                  <h3 class="filter-popover__title">快速视图</h3>
-                  
-                  <div class="filter-popover__options" role="radiogroup" aria-label="快速视图">
-                    <label data-scope-opt="mine"><input type="radio" name="filter-quick" value="todo-me" data-label="待我处理" /> 待我处理</label>
-                    <label data-scope-opt="mine"><input type="radio" name="filter-quick" value="todo-others" data-label="待他人处理" /> 待他人处理</label>
-                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-corp" data-label="待我方处理" /> 待我方处理</label>
-                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-other-side" data-label="待他方处理" /> 待他方处理</label>
-                    <label data-scope-opt="corp"><input type="radio" name="filter-quick" value="todo-add-member" data-label="待添加成员" /> 待添加成员</label>
-                    <label><input type="radio" name="filter-quick" value="due-soon" data-label="即将截止" /> 即将截止</label>
-                  </div>
-                  <div class="filter-popover__actions">
-                    <button type="button" class="filter-popover__cancel">取消</button>
-                    <button type="button" class="filter-popover__apply">应用</button>
-                  </div>
-                </div>
-              </div>
-              <button class="filter-trigger filter-collapse-btn" type="button" id="filterCollapseBtn" aria-haspopup="dialog" hidden>
-                <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
-                筛选条件 <b id="filterCollapseCount" hidden></b>
-              </button>
-            </div>
-          </div>
-          <span class="export-wrap">
-            <button class="toolbar-icon-btn" type="button" id="exportBtn" aria-label="导出" aria-haspopup="menu" aria-expanded="false">
-              <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+            <span class="aip-lib-filter-sep-applied" id="filterSepApplied" aria-hidden="true"></span>
+            <div class="filter-triggers" id="filterTriggers"><!-- 筛选字段由 JS 渲染 --></div>
+            <button class="filter-trigger filter-collapse-btn" type="button" id="filterCollapseBtn" aria-haspopup="dialog" hidden>
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
+              筛选条件 <b id="filterCollapseCount" hidden></b>
             </button>
-            <span class="export-menu" id="exportMenu" hidden role="menu" aria-label="导出">
-              <button type="button" role="menuitem" id="exportFiltered">导出当前筛选结果</button>
-              <button type="button" role="menuitem" id="exportSelected" disabled>导出选中任务</button>
-            </span>
-          </span>
-          <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新列表">
-            <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
-          </button>
+          </div>
+          <div class="toolbar-right">
+            <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新列表">
+              <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
+            </button>
+            <button class="toolbar-icon-btn" type="button" id="colBtn" aria-label="自定义列" aria-haspopup="dialog" title="自定义列">
+              <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
+            </button>
+          </div>
         </div>
 
-        <div class="applied-row" id="appliedRow"></div>
-        <div class="batch-bar" id="batchBar" role="region" aria-label="批量操作">
-          <span id="batchCount">0 已选定</span>
-          <div class="batch-bar__actions">
-            <button type="button" class="batch-btn" data-toast="演示：批量签署（原有批量流程）">批量签署</button>
-            <button type="button" class="batch-btn" data-toast="演示：批量下载（原有批量流程）">下载</button>
-            <button type="button" class="batch-btn" data-toast="演示：批量催办（原有批量流程）">催办</button>
-            <span class="batch-more-wrap">
-              <button type="button" class="batch-btn batch-btn--more" id="batchMoreBtn" aria-label="更多批量操作" aria-haspopup="menu" aria-expanded="false">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"/></svg>
-              </button>
-              <span class="batch-more-menu" id="batchMoreMenu" hidden role="menu" aria-label="更多批量操作">
-                <button type="button" role="menuitem" data-toast="演示：批量转发（原有流程）">转发</button>
-                <button type="button" role="menuitem" data-toast="演示：批量移动文件夹（原有流程）">移动到文件夹</button>
-                <button type="button" role="menuitem" data-toast="演示：批量删除（原有流程，资格由服务端裁决）">删除</button>
-              </span>
-            </span>
-          </div>
-        </div>
-        <div class="envelope-table-shell">
-          <table class="envelope-table">
-            <thead id="taskHead"></thead>
-            <tbody id="taskBody"></tbody>
+        <!-- 表格 -->
+        <div class="aip-lib-table-shell">
+          <table class="aip-lib-table" id="contractTable">
+            <thead id="contractHead"></thead>
+            <tbody id="contractBody"></tbody>
           </table>
-        </div>
-
-        <div class="envelope-pagination">
-          <div class="page-size" id="pageSize">
-            <button class="page-size-trigger" type="button" id="pageSizeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="每页结果数">
-              <span id="pageSizeLabel">25 / 页</span>
-            </button>
-            <svg class="caret" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
-            <div class="page-size-menu" id="pageSizeMenu" role="listbox">
-              <button type="button" role="option" data-value="5">5 / 页</button>
-              <button type="button" role="option" data-value="10">10 / 页</button>
-              <button type="button" role="option" data-value="25" class="is-selected" aria-selected="true">25 / 页</button>
-              <button type="button" role="option" data-value="50">50 / 页</button>
-            </div>
-          </div>
-          <div class="pager-btns">
-            <span id="pageTotal">共 0 条</span>
-            <span id="pageInfo">第 1 页</span>
-            <button type="button" id="pagePrev" disabled aria-label="上一页">‹</button>
-            <button type="button" id="pageNext" disabled aria-label="下一页">›</button>
+          <div class="aip-lib-empty-state" id="emptyState" hidden>
+            <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-magnifying-glass.svg" alt="" /></span>
+            <p>未找到匹配的合同</p>
+            <small>试试调整搜索关键词或筛选条件</small>
           </div>
         </div>
-      </div>
-
-      <!-- 记录与处理 / 发起签署：原页面站内承载（PRD 3.7：Demo 仅显示"原有页面"） -->
-      <div class="legacy-page" id="legacyPage">
-        <h2 id="legacyTitle">原有页面</h2>
-        <p id="legacyDesc"></p>
-        <button type="button" class="legacy-back" id="legacyBack">返回来源列表</button>
+        <div class="aip-lib-table-foot">
+          <span id="totalText">共 0 份合同</span>
+          <div class="aip-lib-pagination" id="aip-lib-pagination"></div>
+        </div>
+        <div class="batch-bar" id="batchBar">
+          <span id="batchCount">已选 0 份</span>
+          <button type="button" class="batch-btn" id="batchDownload">
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+            下载文件
+          </button>
+          <button type="button" class="batch-btn" id="batchRemove">
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/trash.svg" alt="" /></span>
+            移除
+          </button>
+          <button type="button" class="batch-btn batch-btn--clear" id="batchClear">清除选择</button>
+        </div>
       </div>
     </main>
     </div>
@@ -2727,7 +2964,7 @@
         <p class="ns-field__error" id="newFolderError" hidden></p>
       </div>
       <div class="ns-modal__foot">
-        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
         <button type="button" class="btn-solid" id="newFolderSave" disabled>保存</button>
       </div>
     </div>
@@ -2770,7 +3007,7 @@
   <div class="ns-modal__foot ns-modal__foot--split">
     <button type="button" class="col-modal-reset" id="colModalReset">恢复默认列</button>
     <span class="ns-modal__foot-right">
-      <button type="button" class="btn-ghost" data-modal-close>取消</button>
+      <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
       <button type="button" class="btn-solid" id="colModalSave">保存</button>
     </span>
   </div>
@@ -2801,7 +3038,7 @@
         <div class="filter-modal-group" id="filterSummaryAvailable"></div>
       </div>
       <div class="ns-modal__foot">
-        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
         <button type="button" class="btn-solid" id="filterSummarySave">保存</button>
       </div>
     </div>
@@ -2824,7 +3061,7 @@
         </div>
       </div>
       <div class="ns-modal__foot">
-        <button type="button" class="btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
         <button type="button" class="btn-solid" id="partyDialogSave" disabled>保存</button>
       </div>
     </div>
@@ -2832,7 +3069,68 @@
 
   <div class="toast" id="toast" role="status"></div>
 
+  <div class="aip-lib-toast-root" id="toastRoot"></div>
+
+  <!-- 弹层容器：详情抽屉 / 上传 / 全屏浮层 / 弹窗由 JS 渲染 -->
+  <div id="layerRoot"></div>
+
+  <!-- 设置列表列（对齐全部任务 colSettingsModal：搜索 + 拖拽排序 + 恢复默认/保存） -->
+  <div class="ns-modal-mask" id="colSettingsModal" hidden>
+    <div class="ns-modal ns-modal--col" role="dialog" aria-modal="true" aria-label="设置列表列">
+      <div class="ns-modal__head">
+        <h2>设置列表列</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+      </div>
+      <div class="ns-modal__body">
+        <label class="filter-modal-search col-modal-search">
+          <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+          <input type="search" id="colModalSearch" placeholder="搜索列" aria-label="搜索列" />
+        </label>
+        <ul class="col-modal-list" id="colModalList"></ul>
+      </div>
+      <div class="ns-modal__foot ns-modal__foot--split">
+        <button type="button" class="col-modal-reset" id="colModalReset">恢复默认列</button>
+        <span class="ns-modal__foot-right">
+          <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
+          <button type="button" class="btn-solid" id="colModalSave">保存</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选条件（对齐全部任务 filterSummaryModal：搜索 + 已应用 chips 卡 + 可用项 + 保存） -->
+  <div class="ns-modal-mask" id="filterSummaryModal" hidden>
+    <div class="ns-modal ns-modal--filter" role="dialog" aria-modal="true" aria-label="筛选条件">
+      <div class="ns-modal__head">
+        <h2>筛选条件</h2>
+        <button type="button" class="ns-modal__close" data-modal-close aria-label="关闭"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+      </div>
+      <div class="ns-modal__body">
+        <label class="filter-modal-search">
+          <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+          <input type="search" id="filterSummarySearch" placeholder="搜索筛选条件" aria-label="搜索筛选条件" />
+        </label>
+        <div class="filter-applied-card" id="filterSummaryAppliedCard" hidden>
+          <div class="filter-applied-card__head">
+            <span id="filterSummaryAppliedCount">已应用的数量 (0)</span>
+            <button type="button" class="filter-applied-card__clearall" id="filterSummaryClearAll">
+              <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/trash.svg" alt="" /></span>
+              全部清除
+            </button>
+          </div>
+          <div class="filter-applied-card__chips" id="filterSummaryApplied"></div>
+        </div>
+        <div class="filter-modal-group" id="filterSummaryAvailable"></div>
+      </div>
+      <div class="ns-modal__foot">
+        <button type="button" class="aip-lib-btn-ghost" data-modal-close>取消</button>
+        <button type="button" class="btn-solid" id="filterSummarySave">保存</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/components/fdd-home/home-mount.js"></script>
+  <script src="contract-library.js"></script>
   <script>
     /**
      * @typedef {{id:string,subject:string,parties:string,statusKey:string,statusText:string,progress:number,date:string,time:string,action:string}} TaskRow
@@ -3343,7 +3641,7 @@
 
       document.title = next === 'home'
         ? '首页 · 法大大 AIP'
-        : '协议 · 签署任务列表结构调整 0.1（AIP）';
+        : '合同库 0.1（AIP）';
 
       if (next === 'home' && window.AipHome) {
         const host = /** @type {HTMLElement|null} */ (document.querySelector('[data-aip-home]'));
@@ -4378,8 +4676,8 @@
           return `<div class="row-actions">
             ${t.primary ? `<button class="resend-button${['签署', '填写', '定稿'].includes(t.primary) ? ' is-solid' : ''}" type="button" data-primary="${t.id}">${t.primary}</button>` : ''}
             ${(t.more && t.more.length) ? `
-            <span class="more-wrap">
-              <button class="more-button" type="button" aria-label="更多操作" data-more="${t.id}">
+            <span class="aip-lib-more-wrap">
+              <button class="aip-lib-more-button" type="button" aria-label="更多操作" data-more="${t.id}">
                 <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
               </button>
 
@@ -4445,8 +4743,10 @@
     }
 
     function render() {
-      const rows = sortRows(filteredTasks());
       const body = document.getElementById('taskBody');
+      /* 合同库内容区复用本骨架：无任务表格时不渲染任务列表（由 contract-library.js 自行渲染） */
+      if (!body) return;
+      const rows = sortRows(filteredTasks());
       let title = TITLE_MAP[currentNav] || '全部任务';
       if (currentFolder) title = FOLDER_NAME_MAP[currentFolder] || '任务文件夹';
       document.getElementById('pageTitle').textContent = title;
@@ -4526,7 +4826,8 @@
       });
     })();
 
-    document.getElementById('taskBody').addEventListener('change', (e) => {
+    const taskBodyEl = document.getElementById('taskBody');
+    if (taskBodyEl) taskBodyEl.addEventListener('change', (e) => {
       const cb = /** @type {HTMLElement} */ (e.target).closest('[data-row-check]');
       if (!cb) return;
       const id = cb.getAttribute('data-row-check');
@@ -4556,7 +4857,8 @@
     });
 
     /** 访问范围切换：进入目标范围全部任务，清空旧筛选（PRD 4.6） */
-    document.getElementById('scopeSwitch').addEventListener('click', (e) => {
+    const scopeSwitchEl = document.getElementById('scopeSwitch');
+    if (scopeSwitchEl) scopeSwitchEl.addEventListener('click', (e) => {
       const btn = /** @type {HTMLElement} */ (e.target).closest('[data-scope]');
       if (!btn) return;
       const scope = btn.getAttribute('data-scope');
@@ -4784,7 +5086,8 @@
           openLegacy(btn.getAttribute('data-record'));
         });
       });
-      document.getElementById('legacyBack').addEventListener('click', () => {
+      const legacyBackEl = document.getElementById('legacyBack');
+    if (legacyBackEl) legacyBackEl.addEventListener('click', () => {
         currentLegacy = null;
         currentFolder = null;
         document.body.removeAttribute('data-page-mode');
@@ -4927,7 +5230,8 @@
     }
 
     /** 行内交互统一委托（PRD 5.1/5.3/5.4/5.5） */
-    document.getElementById('taskBody').addEventListener('click', (e) => {
+    const taskBodyEl2 = document.getElementById('taskBody');
+    if (taskBodyEl2) taskBodyEl2.addEventListener('click', (e) => {
       const t = /** @type {HTMLElement} */ (e.target);
       const popBtn = t.closest('[data-pop]');
       if (popBtn) {
@@ -5778,13 +6082,15 @@
         menu.hidden = !menu.hidden;
         btn.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
       });
-      document.getElementById('exportFiltered').addEventListener('click', () => {
+      const exportFilteredEl = document.getElementById('exportFiltered');
+      if (exportFilteredEl) exportFilteredEl.addEventListener('click', () => {
         menu.hidden = true;
         const n = filteredTasks().length;
         if (n === 0) { toast('当前筛选无结果，无法导出'); return; }
         toast(`演示：导出当前筛选结果（${n} 条，含全部查询条件，不只当前页）`);
       });
-      document.getElementById('exportSelected').addEventListener('click', () => {
+      const exportSelectedEl = document.getElementById('exportSelected');
+      if (exportSelectedEl) exportSelectedEl.addEventListener('click', () => {
         menu.hidden = true;
         toast(`演示：导出选中任务（${selectedIds.size} 条）`);
       });
@@ -5915,11 +6221,14 @@
       }
     });
 
-    render();
+    /* 合同库内容区复用本骨架：任务列表无数据表格，初始化仅保留侧栏/顶栏交互，跳过任务表格渲染 */
+    /* render(); */
   </script>
   <script>
-    /* 防御：主脚本若未能完成首次渲染（缓存/热更导致的状态错乱），自动无缓存重载一次 */
+    /* 防御：任务表格不存在时跳过自动重载（合同库由 contract-library.js 自行渲染） */
     window.addEventListener('load', function () {
+      /* 合同库页无 #taskBody/#taskHead，直接跳过本防御逻辑 */
+      if (!document.getElementById('taskBody') || !document.getElementById('taskHead')) return;
       setTimeout(function () {
         var rows = document.querySelectorAll('#taskBody tr').length;
         var headCols = document.querySelectorAll('#taskHead th').length;

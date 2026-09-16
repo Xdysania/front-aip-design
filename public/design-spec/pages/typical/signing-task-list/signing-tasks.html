@@ -8,11 +8,13 @@
     AIP 0.1 · 签署任务列表结构调整（r21）。
     在 AIP v1 典型页面基础上实现：一级导航“协议”；全部任务 / 草稿 / 进行中 / 已完成状态入口；
     访问范围（我的签署 / 全部签署）；日期、状态、发起人、快速视图与筛选汇总；任务文件夹独立页；
-    记录与处理五项原页面归集。本页仅保留 Libra · 顶栏皮肤（data-skin=libra-top）；其余皮肤已注释停用。
+    记录与处理五项原页面归集。唯一视觉：Libra · 顶栏（悬浮顶栏卡 + Libra 侧栏/内容卡 + 法大大蓝）。
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" />
+  <!-- AIP 规范令牌 / 基础·业务组件 class（SSOT）；页内 :root 与皮肤覆写仍可过渡覆盖 --fdd-* -->
+  <link rel="stylesheet" href="../../../aip-design-system.css" />
   <link rel="stylesheet" href="assets/components/fdd-home/home.css" />
   <style>
     :root {
@@ -383,7 +385,7 @@
       flex: 1; min-width: 0; height: 100%; padding: 0 4px 0 23px;
       display: inline-flex; align-items: center; gap: 12px;
       border: 0; background: transparent;
-      color: var(--fdd-ink); font-size: 14px; font-weight: 400; text-align: left;
+      color: var(--fdd-ink); font-size: 14px; font-weight: 600; text-align: left;
     }
     .folder-module-toggle:hover { background: transparent; }
     .folder-module-more {
@@ -525,7 +527,7 @@
       width: 100%; height: 48px; padding: 0 15px 0 23px;
       display: flex; align-items: center; gap: 12px;
       border: 0; background: transparent;
-      color: var(--fdd-ink); font-size: 14px; font-weight: 400; text-align: left;
+      color: var(--fdd-ink); font-size: 14px; font-weight: 600; text-align: left;
     }
     .records-module-toggle:hover { background: var(--fdd-bg-hover); }
     .records-caret { margin-left: auto; flex-shrink: 0; color: var(--fdd-ink-3); transition: transform 0.15s; }
@@ -582,8 +584,6 @@
       margin-bottom: 8px; min-height: 44px;
       position: relative; z-index: 5;
     }
-    /* 打开筛选浮窗时抬高层级，避免被下方表格 sticky 盖住 */
-    .envelope-controls:has(.filter-field.is-open) { z-index: 70; }
     .envelope-search {
       position: relative;
       width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
@@ -687,15 +687,12 @@
       position: absolute; top: calc(100% + 10px); left: 0; z-index: 50;
       width: max-content; min-width: 168px; max-width: 320px; padding: 14px 14px 10px;
       border-radius: 6px; background: #fff;
-      /* 紧凑投影：避免大面积半透明 blur 像一层「白遮罩」透出下方表格 */
-      box-shadow: 0 0 0 1px rgba(28, 43, 51, 0.06), 0 8px 24px rgba(28, 43, 51, 0.14);
+      box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
       color: var(--fdd-ink);
-      isolation: isolate;
     }
-    .filter-field.is-open { z-index: 60; }
     .filter-popover[hidden] { display: none !important; }
     .filter-popover::before {
-      content: ""; position: absolute; top: -6px; left: 28px; z-index: 1;
+      content: ""; position: absolute; top: -6px; left: 28px;
       width: 10px; height: 10px;
       background: #fff;
       border-left: 1px solid rgba(28, 43, 51, 0.08);
@@ -1566,8 +1563,7 @@
       width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0;
       background: #fff; font-size: 14px; line-height: 19.6px;
     }
-    /* 表头纵向置顶，层级必须高于操作列 sticky，避免上下滚动时操作按钮盖过表头 */
-    .envelope-table thead { position: sticky; top: 0; z-index: 5; background: #fff; }
+    .envelope-table thead { position: sticky; top: 0; z-index: 2; background: #fff; }
     .envelope-table th,
     .envelope-table td {
       padding: 0 16px; text-align: left;
@@ -1576,60 +1572,36 @@
     }
     .envelope-table thead tr { height: var(--fdd-table-head-h); }
     .envelope-table tbody tr { height: var(--fdd-table-row-h); }
-    /* 行 hover：整行（含 sticky 操作列）统一浅底 */
+    /* 行 hover：数据区浅底；操作列保持白底盖住下层，避免重叠 */
     .envelope-table tbody tr { transition: background-color 0.12s; }
-    .envelope-table tbody tr:hover td,
-    .envelope-table tbody tr:hover td:last-child {
+    .envelope-table tbody tr:hover {
       background: var(--fdd-bg-hover);
     }
+    .envelope-table tbody tr:hover td:last-child { background: #fff; }
     .envelope-table th {
       font-weight: 500; color: var(--fdd-table-head-color, var(--fdd-ink)); background: #fff;
     }
     .envelope-table th:first-child,
     .envelope-table td:first-child { width: 48px; min-width: 48px; }
-    /*
-     * 操作列 sticky：左侧立面用 ::before。
-     * 注意：tbody td 默认 overflow:hidden 会裁掉伸出的 ::before，故操作列必须 visible，
-     * 否则「投影」只在表头（th 无 overflow:hidden）看得见。
-     */
+    /* 操作列：永远贴右、白底、左侧弥散投影，盖住横向滚出的单元格 */
     .envelope-table th:last-child,
     .envelope-table td:last-child {
       width: 148px; min-width: 148px; max-width: 200px; text-align: right;
       position: sticky; right: 0;
+      z-index: 2;
       background: #fff;
-      box-shadow: none;
+      box-shadow: -10px 0 18px -6px rgba(28, 43, 51, 0.12);
       overflow: visible;
-    }
-    .envelope-table td:last-child { z-index: 1; }
-    .envelope-table th:last-child {
-      z-index: 6;
-      box-shadow: 0 1px 0 var(--fdd-line);
     }
     .envelope-table th:last-child::before,
     .envelope-table td:last-child::before {
-      content: "";
-      position: absolute;
-      top: -1px;
-      bottom: -1px;
-      left: -12px;
-      width: 12px;
-      background: linear-gradient(to right, rgba(28, 43, 51, 0), rgba(28, 43, 51, 0.1));
+      content: ""; position: absolute; top: 0; bottom: 0; left: -20px; width: 20px;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.85) 55%, #fff);
       pointer-events: none;
-      z-index: 0;
-    }
-    .envelope-table-shell:not(.is-scrolled-x) .envelope-table th:last-child::before,
-    .envelope-table-shell:not(.is-scrolled-x) .envelope-table td:last-child::before {
-      opacity: 0.35;
-    }
-    .envelope-table-shell.is-scrolled-x .envelope-table th:last-child::before,
-    .envelope-table-shell.is-scrolled-x .envelope-table td:last-child::before {
       opacity: 1;
     }
+    .envelope-table thead th:last-child { background: #fff; z-index: 4; }
     .envelope-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .envelope-table td:last-child {
-      overflow: visible;
-      text-overflow: clip;
-    }
     .envelope-table td:nth-child(2) { white-space: normal; }
 
     .envelope-name {
@@ -1774,8 +1746,7 @@
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-    /* —— 皮肤比对切换器 —— */
-    /* —— 皮肤 / 场景切换：吸附屏幕左缘的把手，悬浮滑出面板 —— */
+    /* —— 场景切换：吸附屏幕左缘的把手，悬浮滑出面板（无皮肤切换） —— */
     .dev-switchers {
       position: fixed; left: 0; bottom: 88px; z-index: 60;
     }
@@ -1903,17 +1874,11 @@
     html[data-shell="libra"] .folder-more-menu,
     html[data-shell="libra"] .export-menu,
     html[data-shell="libra"] .row-menu,
-    html[data-shell="libra"] .mini-popover {
+    html[data-shell="libra"] .mini-popover,
+    html[data-shell="libra"] .filter-popover {
       border-color: #e6e9ee;
       border-radius: 10px;
       box-shadow: var(--lt-shadow-button);
-    }
-    /* 筛选浮窗勿用 button 大投影（18px/47px blur 会形成半透明白雾遮罩） */
-    html[data-shell="libra"] .filter-popover {
-      border: 1px solid #e6e9ee;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 0 0 1px rgba(22, 26, 27, 0.05), 0 8px 24px rgba(22, 26, 27, 0.12);
     }
     html[data-shell="libra"] .ns-modal { border-radius: 12px; }
     html[data-shell="libra"] .contracts-page-content {
@@ -2137,12 +2102,11 @@
       min-height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap));
     }
 
-    /* [停用] Libra · 侧栏皮肤样式
     /*
      * Libra · 侧栏（data-skin=libra-rail）：
      * 顶栏收纳进左侧悬浮卡——Logo / 一级导航落侧栏顶，升级与用户区落侧栏底；
      * 主区只留内容卡，对齐 LibraTech 真源左右形态（无通栏顶栏）。
-     * /
+     */
     html[data-skin="libra-rail"] {
       --fdd-header-h: 0px;
     }
@@ -2182,7 +2146,7 @@
       padding: 0 10px 8px;
     }
     html[data-skin="libra-rail"] .libra-rail-primary > nav {
-      /* 一级导航改由下拉承载，原 Tab 列表隐藏但保留 DOM 供逻辑复用 * /
+      /* 一级导航改由下拉承载，原 Tab 列表隐藏但保留 DOM 供逻辑复用 */
       position: absolute; width: 1px; height: 1px; overflow: hidden;
       clip: rect(0, 0, 0, 0); white-space: nowrap;
     }
@@ -2254,30 +2218,199 @@
       align-self: stretch;
     }
 
-    */
-
     @media (max-width: 960px) {
       .contract-sidebar { display: none; }
       .contracts-workspace { width: calc(100% - 32px); }
       .envelope-search { width: 100%; margin-right: 0; }
       .header-tabs { display: none; }
-      /* html[data-skin="libra-rail"] .contract-sidebar { display: none; } */
+      html[data-skin="libra-rail"] .contract-sidebar { display: none; }
     }
+
+    /* —— UI Kit 业务组件嵌入：只露指定模块（与典型页同一 DOM/样式） —— */
+    html[data-kit-embed] .dev-switchers { display: none !important; }
+    html[data-kit-embed="task-list"] .app-header,
+    html[data-kit-embed="task-list"] .contract-sidebar,
+    html[data-kit-embed="task-list"] .view-home,
+    html[data-kit-embed="task-list"] .legacy-page { display: none !important; }
+    html[data-kit-embed="task-list"] body { background: #f3f5f8; }
+    html[data-kit-embed="task-list"] .page-shell {
+      display: block; min-height: 100vh; background: #f3f5f8;
+    }
+    html[data-kit-embed="task-list"] .app-main {
+      width: 100%; margin: 0; padding: 0; align-self: stretch;
+    }
+    html[data-kit-embed="task-list"] .contracts-page-content {
+      margin: 6px !important;
+      min-height: calc(100vh - 12px) !important;
+    }
+
+    html[data-kit-embed="sidebar"] .app-header,
+    html[data-kit-embed="sidebar"] .app-main,
+    html[data-kit-embed="sidebar"] .dev-switchers { display: none !important; }
+    html[data-kit-embed="sidebar"],
+    html[data-kit-embed="sidebar"] body {
+      height: 100%;
+      margin: 0;
+      padding: 0 !important;
+      background: #fafbfc;
+      overflow: hidden;
+    }
+    html[data-kit-embed="sidebar"] .page-shell {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+    html[data-kit-embed="sidebar"] .contract-sidebar {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      max-width: none !important;
+      flex: none !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      border-left: 0 !important;
+      border-right: 0 !important;
+      box-shadow: none !important;
+      height: 100% !important;
+      max-height: none !important;
+      position: relative !important;
+      top: 0 !important;
+      align-self: stretch !important;
+      box-sizing: border-box !important;
+    }
+    html[data-kit-embed="sidebar"] .contract-side-inner {
+      width: 100% !important;
+      max-width: none !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    html[data-kit-embed="sidebar"] .contract-start,
+    html[data-kit-embed="sidebar"] .contract-nav-scroll,
+    html[data-kit-embed="sidebar"] .launch-wrap,
+    html[data-kit-embed="sidebar"] .contract-launch,
+    html[data-kit-embed="sidebar"] .nav-btn,
+    html[data-kit-embed="sidebar"] .folder-module-head,
+    html[data-kit-embed="sidebar"] .nav-secondary,
+    html[data-kit-embed="sidebar"] .records-module-toggle {
+      width: 100%;
+      max-width: none;
+      box-sizing: border-box;
+    }
+    html[data-kit-embed="sidebar"] .contract-nav-scroll {
+      scroll-margin-top: 0;
+    }
+
+    html[data-kit-embed="topbar"] .page-shell,
+    html[data-kit-embed="topbar"] .dev-switchers { display: none !important; }
+    html[data-kit-embed="topbar"] body { background: #f3f5f8; min-height: 100vh; padding: 6px; box-sizing: border-box; }
+    html[data-kit-embed="topbar"] .app-header {
+      display: flex !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      width: auto !important;
+      margin: 0 !important;
+    }
+
+    /* Modal 基础组件嵌入：只露典型页真实弹窗 */
+    html[data-kit-embed^="modal-"] .app-header,
+    html[data-kit-embed^="modal-"] .page-shell,
+    html[data-kit-embed^="modal-"] .dev-switchers,
+    html[data-kit-embed^="modal-"] .legacy-page { display: none !important; }
+    html[data-kit-embed^="modal-"] body {
+      min-height: 100vh;
+      background: #f3f5f8;
+      margin: 0;
+    }
+    html[data-kit-embed^="modal-"] .ns-modal-mask:not([hidden]) {
+      position: fixed !important;
+      inset: 0 !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background: rgba(28, 43, 51, 0.35);
+      z-index: 80;
+    }
+
+    /* —— UI Kit 基本元素/基础组件展台（典型页真实 class，禁止 Kit 自造） —— */
+    #kitBasicsGallery { display: none; }
+    html[data-kit-embed="basics"] .app-header,
+    html[data-kit-embed="basics"] .page-shell,
+    html[data-kit-embed="basics"] .dev-switchers,
+    html[data-kit-embed="basics"] .ns-modal-mask,
+    html[data-kit-embed="basics"] .legacy-page { display: none !important; }
+    html[data-kit-embed="basics"] body {
+      margin: 0; min-height: 100vh; background: #f3f5f8; padding-top: 0 !important;
+      font-family: var(--fdd-font); color: var(--fdd-ink); font-size: 14px;
+    }
+    html[data-kit-embed="basics"] #kitBasicsGallery {
+      display: block; padding: 20px 16px 48px; max-width: 920px; margin: 0 auto;
+    }
+
+    html[data-kit-embed="basics"][data-kit-sec] .kit-basics__sec { display: none; }
+    html[data-kit-embed="basics"][data-kit-sec="colors"] #kit-sec-colors,
+    html[data-kit-embed="basics"][data-kit-sec="typography"] #kit-sec-typography,
+    html[data-kit-embed="basics"][data-kit-sec="spacing"] #kit-sec-spacing,
+    html[data-kit-embed="basics"][data-kit-sec="radius"] #kit-sec-radius,
+    html[data-kit-embed="basics"][data-kit-sec="shadows"] #kit-sec-shadows,
+    html[data-kit-embed="basics"][data-kit-sec="button"] #kit-sec-button,
+    html[data-kit-embed="basics"][data-kit-sec="search"] #kit-sec-search,
+    html[data-kit-embed="basics"][data-kit-sec="input"] #kit-sec-input,
+    html[data-kit-embed="basics"][data-kit-sec="select"] #kit-sec-select,
+    html[data-kit-embed="basics"][data-kit-sec="checkbox"] #kit-sec-checkbox,
+    html[data-kit-embed="basics"][data-kit-sec="radio"] #kit-sec-radio,
+    html[data-kit-embed="basics"][data-kit-sec="chip"] #kit-sec-chip,
+    html[data-kit-embed="basics"][data-kit-sec="popover"] #kit-sec-popover,
+    html[data-kit-embed="basics"][data-kit-sec="menu"] #kit-sec-menu,
+    html[data-kit-embed="basics"][data-kit-sec="progress"] #kit-sec-progress,
+    html[data-kit-embed="basics"][data-kit-sec="table"] #kit-sec-table { display: block; }
+
+    .kit-basics__sec { margin: 0 0 28px; scroll-margin-top: 16px; }
+    .kit-basics__sec > h2 {
+      margin: 0 0 6px; font-size: 18px; font-weight: 600; color: var(--fdd-ink);
+    }
+    .kit-basics__sec > p {
+      margin: 0 0 12px; font-size: 12px; color: var(--fdd-ink-3);
+    }
+    .kit-basics__box {
+      background: #fff; border: 1px solid #e6e9ee; border-radius: 10px;
+      padding: 20px 16px; box-shadow: var(--lt-shadow-sm, 0 1px 2px 0 #161a1b0f);
+    }
+    .kit-basics__box--subtle { background: #f3f5f8; }
+    .kit-basics__row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .kit-basics__swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+    .kit-basics__sw { border: 1px solid #e6e9ee; border-radius: 8px; overflow: hidden; background: #fff; }
+    .kit-basics__sw i { display: block; height: 48px; }
+    .kit-basics__sw span { display: block; padding: 6px 8px; font-size: 11px; color: var(--fdd-ink-2); word-break: break-all; }
+    .kit-basics__type { border-bottom: 1px dashed #e6e9ee; padding: 10px 0; }
+    .kit-basics__pop-host { position: relative; min-height: 280px; }
   </style>
+  <script>
+    (function () {
+      try {
+        const params = new URLSearchParams(location.search);
+        const embed = params.get('embed');
+        if (embed) document.documentElement.setAttribute('data-kit-embed', embed);
+        const sec = params.get('sec');
+        if (embed === 'basics' && sec) document.documentElement.setAttribute('data-kit-sec', sec);
+      } catch (_) { /* ignore */ }
+    })();
+
+  </script>
 </head>
 <body data-view="contracts">
   <div class="dev-switchers">
-    <div class="dev-handle" id="devFab" aria-label="皮肤与场景切换">
+    <div class="dev-handle" id="devFab" aria-label="场景切换">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </div>
     <div class="dev-panel" id="devPanel">
-      <div class="skin-switcher" id="skinSwitcher" role="group" aria-label="视觉版本比对">
-        <strong>皮肤</strong>
-        <!-- <button type="button" data-skin-set="docusign">DocuSign 风</button> -->
-        <!-- <button type="button" data-skin-set="notasign">LibraTech 风</button> -->
-        <button type="button" data-skin-set="libra-top" class="is-on">Libra · 顶栏</button>
-        <!-- <button type="button" data-skin-set="libra-rail">Libra · 侧栏</button> -->
-      </div>
       <div class="skin-switcher" id="scenarioSwitcher" role="group" aria-label="原型场景比对">
         <strong>场景</strong>
         <button type="button" data-scenario="mine-all" class="is-on">我的签署</button>
@@ -2287,7 +2420,7 @@
       </div>
     </div>
   </div>
-  <header class="app-header">
+  <header class="app-header" data-aip-business="topbar">
     <div class="header-left">
       <a class="brand" href="signing-tasks.html#home" aria-label="法大大首页" data-view-link="home">
         <img src="assets/fadada-logo.png" alt="法大大" width="58" height="29" />
@@ -2338,7 +2471,7 @@
   </header>
 
   <div class="page-shell" id="viewContracts">
-    <aside class="contract-sidebar" aria-label="合同侧栏">
+    <aside class="contract-sidebar" data-aip-business="contract-sidebar" aria-label="合同侧栏">
       <div class="contract-side-inner">
         <div class="libra-rail-head" id="libraRailHead" aria-hidden="true"></div>
         <div class="libra-rail-primary" id="libraRailPrimary" aria-hidden="true">
@@ -2414,8 +2547,8 @@
           </div>
 
           <div class="nav-section">
-            <!-- 合同库：跳转独立设计稿；本页不再内嵌合同库视图 -->
-            <button class="nav-tool" type="button" data-href="../contract-library/contract-library.html" id="navContractLib">
+            <!-- 合同库 / 协议集：沿用典型页面原有入口（不在本期 PRD 改版范围，保留原页面） -->
+            <button class="nav-tool" type="button" data-toast="演示：进入合同库（原有页面）">
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
                 <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
               </span>
@@ -2456,7 +2589,7 @@
     <div class="app-main" id="appMain">
       <div class="view-home" id="viewHome" data-aip-home data-lazy></div>
       <main class="contracts-page-content">
-      <div class="contracts-workspace">
+      <div class="contracts-workspace" data-aip-business="task-list">
         <div class="contracts-titlebar">
           <h1 id="pageTitle">全部任务</h1>
           <div class="scope-switch" id="scopeSwitch" role="group" aria-label="访问范围">
@@ -3389,22 +3522,6 @@
       setAppView(initial, { push: false });
     })();
 
-    /* 合同库同页视图切换已移除：侧栏「合同库」改为 data-href 跳转独立页
-    document.body.addEventListener('click', (e) => {
-      const libBtn = e.target.closest('[data-lib-view]');
-      if (!libBtn) return;
-      const v = libBtn.getAttribute('data-lib-view');
-      if (v === 'contract-lib' || v === 'contracts') {
-        setAppView(v);
-        document.querySelectorAll('.lib-switch [data-lib-view]').forEach((b) => {
-          const on = b.getAttribute('data-lib-view') === v;
-          b.classList.toggle('active', on);
-          b.setAttribute('aria-selected', String(on));
-        });
-      }
-    });
-    */
-
     (function bindRailProductSelect() {
       const trigger = document.getElementById('libraRailProductTrigger');
       const menu = document.getElementById('libraRailProductMenu');
@@ -3538,57 +3655,25 @@
     }
 
     /**
-     * 切换视觉皮肤（同结构，仅视觉层）。
-     * 本页仅启用 libra-top；其余皮肤入口已注释。
-     * // - docusign：DocuSign 风
-     * // - notasign：LibraTech 悬浮卡片，顶栏仍为通栏产品导航
-     * - libra-top：LibraTech 卡片 + 顶栏悬浮条适配（保留一级导航结构）
-     * // - libra-rail：顶栏收纳进左侧，纯左右形态
-     * @param {'libra-top'|string} skin
+     * 规范唯一视觉：Libra · 顶栏（悬浮顶栏卡 + Libra shell）。
+     * 不再提供多皮肤切换；忽略历史 localStorage。
+     * @param {string} [_skin]
      */
-    function applySkin(skin) {
-      /* 仅保留 Libra · 顶栏 */
-      const next = 'libra-top';
+    function applySkin(_skin) {
       const root = document.documentElement;
-      const prev = root.getAttribute('data-skin') || 'libra-top';
+      const prev = root.getAttribute('data-skin') || '';
       if (prev === 'libra-rail') {
         syncLibraRailChrome(false);
       }
-      root.setAttribute('data-skin', next);
+      root.setAttribute('data-skin', 'libra-top');
       root.setAttribute('data-shell', 'libra');
-      /*
-      const allowed = new Set(['docusign', 'notasign', 'libra-top', 'libra-rail']);
-      const next = allowed.has(skin) ? skin : 'docusign';
-      if (next === 'notasign' || next === 'libra-top' || next === 'libra-rail') {
-        root.setAttribute('data-shell', 'libra');
-      } else {
-        root.removeAttribute('data-shell');
-      }
-      if (next === 'libra-rail') {
-        syncLibraRailChrome(true);
-      }
-      */
-      try { localStorage.setItem(SKIN_KEY, next); } catch (_) { /* ignore */ }
-      document.querySelectorAll('#skinSwitcher [data-skin-set]').forEach((btn) => {
-        btn.classList.toggle('is-on', btn.getAttribute('data-skin-set') === next);
-      });
+      try { localStorage.setItem(SKIN_KEY, 'libra-top'); } catch (_) { /* ignore */ }
     }
 
     /* 面板由 CSS :hover 驱动滑出，无需 JS 展开/收起 */
 
-    (function bindSkinSwitcher() {
-      /* 强制 Libra · 顶栏；忽略 localStorage 中的其它皮肤 */
+    (function lockLibraTopSkin() {
       applySkin('libra-top');
-      /*
-      let saved = 'docusign';
-      try { saved = localStorage.getItem(SKIN_KEY) || 'docusign'; } catch (_) {}
-      applySkin(saved);
-      document.getElementById('skinSwitcher')?.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-skin-set]');
-        if (!btn) return;
-        applySkin(btn.getAttribute('data-skin-set') || 'docusign');
-      });
-      */
     })();
 
     /** 列表筛选：触发器 → 浮窗（应用才查询）→ 已应用标签（PRD 4.1/4.3/4.4） */
@@ -5899,12 +5984,6 @@
       }
     });
 
-    /** 通用 data-href 站内跳转（如合同库设计稿） */
-    document.body.addEventListener('click', (e) => {
-      const linkBtn = /** @type {HTMLElement} */ (e.target).closest('[data-href]');
-      if (linkBtn) window.location.href = linkBtn.getAttribute('data-href');
-    });
-
     /** 通用 data-toast 提示（整站契约） */
     document.body.addEventListener('click', (e) => {
       const t = /** @type {HTMLElement} */ (e.target);
@@ -5916,6 +5995,26 @@
     });
 
     render();
+
+    /** UI Kit：嵌入典型页真实 Modal（设置列表列 / 新建文件夹） */
+    (function kitEmbedModals() {
+      const embed = document.documentElement.getAttribute('data-kit-embed') || '';
+      if (embed !== 'modal-col' && embed !== 'modal-folder') return;
+      const open = () => {
+        if (embed === 'modal-col') openColSettings();
+        if (embed === 'modal-folder') openNewFolderModal();
+      };
+      open();
+      /* Kit 预览中禁止关掉弹窗（关掉会只剩灰底） */
+      document.addEventListener('click', (e) => {
+        const t = /** @type {HTMLElement} */ (e.target);
+        if (t.closest('[data-modal-close]') || t.classList.contains('ns-modal-mask')) {
+          e.stopPropagation();
+          e.preventDefault();
+          open();
+        }
+      }, true);
+    })();
   </script>
   <script>
     /* 防御：主脚本若未能完成首次渲染（缓存/热更导致的状态错乱），自动无缓存重载一次 */
@@ -5932,5 +6031,237 @@
       }, 800);
     });
   </script>
+
+  <!-- UI Kit · 基本元素/基础组件展台（典型页真实样式 SSOT） -->
+  <div id="kitBasicsGallery" aria-label="典型页真实控件展台">
+    <section class="kit-basics__sec" data-kit-sec="colors" id="kit-sec-colors">
+      <h2>Colors 色彩</h2>
+      <p>来自典型页 Libra shell 生效令牌（品牌蓝覆写后）</p>
+      <div class="kit-basics__swatches">
+        <div class="kit-basics__sw"><i style="background:#0059ef"></i><span>brand #0059ef</span></div>
+        <div class="kit-basics__sw"><i style="background:#004ed6"></i><span>brand-hover</span></div>
+        <div class="kit-basics__sw"><i style="background:#e8f1ff"></i><span>brand-soft</span></div>
+        <div class="kit-basics__sw"><i style="background:#f3f5f8"></i><span>bg-page / muted</span></div>
+        <div class="kit-basics__sw"><i style="background:#fafbfc"></i><span>bg-card / sidebar</span></div>
+        <div class="kit-basics__sw"><i style="background:#14181d"></i><span>ink #14181d</span></div>
+        <div class="kit-basics__sw"><i style="background:#4e5560"></i><span>ink-2 #4e5560</span></div>
+        <div class="kit-basics__sw"><i style="background:#9aa1ab"></i><span>ink-3 #9aa1ab</span></div>
+        <div class="kit-basics__sw"><i style="background:#e6e9ee"></i><span>line #e6e9ee</span></div>
+        <div class="kit-basics__sw"><i style="background:#d6dbe3"></i><span>line-strong</span></div>
+        <div class="kit-basics__sw"><i style="background:#1b9275"></i><span>success #1b9275</span></div>
+        <div class="kit-basics__sw"><i style="background:#e6555e"></i><span>danger #e6555e</span></div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="typography" id="kit-sec-typography">
+      <h2>Typography 字体</h2>
+      <p>PingFang SC · 正文 14 / 行高 1.4（典型页 body）</p>
+      <div class="kit-basics__box">
+        <div class="kit-basics__type" style="font-size:32px;font-weight:400;letter-spacing:-.32px;line-height:40px">全部任务 · 32/400</div>
+        <div class="kit-basics__type" style="font-size:16px;font-weight:600;line-height:24px">顶栏导航 / 弹窗标题 · 16/600</div>
+        <div class="kit-basics__type" style="font-size:14px;font-weight:400;line-height:20px">正文与控件 · 14/400</div>
+        <div class="kit-basics__type" style="font-size:13px;font-weight:500;color:var(--fdd-ink-2)">辅助 · 13</div>
+        <div class="kit-basics__type" style="font-size:12px;color:var(--fdd-ink-3);border:0">标注 · 12</div>
+      </div>
+    </section>
+
+
+    <section class="kit-basics__sec" data-kit-sec="spacing" id="kit-sec-spacing">
+      <h2>Spacing 间距</h2>
+      <p>典型页常用：4 网格 · 控件高 32 · 顶栏 56 · 侧栏 280</p>
+      <div class="kit-basics__box kit-basics__row" style="align-items:flex-end;gap:20px">
+        <div><div style="height:24px;width:4px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">4</small></div>
+        <div><div style="height:24px;width:8px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">8</small></div>
+        <div><div style="height:24px;width:12px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">12</small></div>
+        <div><div style="height:24px;width:16px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">16</small></div>
+        <div><div style="height:24px;width:20px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">20</small></div>
+        <div><div style="height:24px;width:24px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">24</small></div>
+        <div><div style="height:24px;width:32px;background:#0059ef;border-radius:2px"></div><small style="font-size:11px;color:#9aa1ab">32</small></div>
+      </div>
+    </section>
+    <section class="kit-basics__sec" data-kit-sec="radius" id="kit-sec-radius">
+      <h2>Radius 圆角</h2>
+      <p>Libra shell：控件 --fdd-radius 8 · 卡 10/12 · pill</p>
+      <div class="kit-basics__row">
+        <div style="width:56px;height:56px;background:#e8f1ff;border:1px solid #0059ef;border-radius:8px"></div>
+        <div style="width:56px;height:56px;background:#e8f1ff;border:1px solid #0059ef;border-radius:10px"></div>
+        <div style="width:56px;height:56px;background:#e8f1ff;border:1px solid #0059ef;border-radius:12px"></div>
+        <div style="width:56px;height:56px;background:#e8f1ff;border:1px solid #0059ef;border-radius:9999px"></div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="shadows" id="kit-sec-shadows">
+      <h2>Shadow 阴影</h2>
+      <p>Libra 卡 / 浮层（典型页 --lt-shadow-* / --fdd-shadow-*）</p>
+      <div class="kit-basics__row">
+        <div class="kit-basics__box" style="width:160px;box-shadow:var(--lt-shadow-sm)">shadow-sm 卡</div>
+        <div class="kit-basics__box" style="width:160px;box-shadow:0 4px 16px rgba(28,43,51,.18)">dropdown 浮窗</div>
+        <div class="kit-basics__box" style="width:160px;box-shadow:var(--fdd-shadow-menu)">menu 抬升</div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="button" id="kit-sec-button">
+      <h2>Button 按钮</h2>
+      <p>典型页：.contract-launch / .resend-button / .filter-popover__apply / .btn-solid / .btn-ghost</p>
+      <div class="kit-basics__box kit-basics__row">
+        <button type="button" class="contract-launch" style="width:auto;padding:0 16px">发起签署</button>
+        <button type="button" class="resend-button is-solid">处理</button>
+        <button type="button" class="resend-button">继续编辑</button>
+        <button type="button" class="filter-popover__apply">应用</button>
+        <button type="button" class="filter-popover__cancel">取消</button>
+        <button type="button" class="btn-upgrade">升级</button>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="search" id="kit-sec-search">
+      <h2>Search 搜索框</h2>
+      <p>典型页：.envelope-search</p>
+      <div class="kit-basics__box">
+        <label class="envelope-search" style="margin:0">
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+          <input type="search" placeholder="搜索签署任务" aria-label="搜索签署任务" />
+        </label>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="input" id="kit-sec-input">
+      <h2>Input 输入框</h2>
+      <p>典型页：#newFolderModal .ns-field__input</p>
+      <div class="kit-basics__box" style="max-width:360px">
+        <label class="ns-field" style="display:flex;flex-direction:column;gap:6px">
+          <span class="ns-field__label" style="font-size:13px;font-weight:500">文件夹名称</span>
+          <input type="text" class="ns-field__input" placeholder="请输入文件夹名称" style="height:36px;padding:0 12px;border:1px solid var(--fdd-line-strong);border-radius:var(--fdd-radius);background:#fff" />
+        </label>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="select" id="kit-sec-select">
+      <h2>Select 下拉框</h2>
+      <p>典型页：.filter-trigger / .filter-popover__op</p>
+      <div class="kit-basics__box kit-basics__row">
+        <button type="button" class="filter-trigger">
+          日期
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+        </button>
+        <button type="button" class="filter-trigger">
+          状态
+          <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+        </button>
+        <button type="button" class="filter-popover__op is-open" style="width:168px">
+          <span class="filter-popover__op-label">=</span>
+          <span class="filter-popover__op-caret" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="checkbox" id="kit-sec-checkbox">
+      <h2>Checkbox 勾选框</h2>
+      <p>典型页：列表勾选 / 列设置勾选（accent-color 品牌蓝）</p>
+      <div class="kit-basics__box kit-basics__row">
+        <label style="display:inline-flex;align-items:center;gap:10px;font-size:14px;cursor:pointer"><input type="checkbox" checked style="width:16px;height:16px;margin:0;accent-color:var(--fdd-brand)" /> 全选本页</label>
+        <label style="display:inline-flex;align-items:center;gap:10px;font-size:14px;cursor:pointer"><input type="checkbox" style="width:16px;height:16px;margin:0;accent-color:var(--fdd-brand)" /> 状态</label>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="radio" id="kit-sec-radio">
+      <h2>Radio 单选</h2>
+      <p>典型页：.filter-popover__options 日期相对时间</p>
+      <div class="kit-basics__box">
+        <div class="filter-popover__options" role="radiogroup">
+          <label><input type="radio" name="kit-date" value="12m" /> 过去 12 个月</label>
+          <label><input type="radio" name="kit-date" value="6m" checked /> 过去 6 个月</label>
+          <label><input type="radio" name="kit-date" value="30d" /> 过去 30 天</label>
+          <label><input type="radio" name="kit-date" value="7d" /> 过去 7 天</label>
+          <label><input type="radio" name="kit-date" value="24h" /> 过去 24 小时</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="chip" id="kit-sec-chip">
+      <h2>Chip 筛选芯片</h2>
+      <p>典型页：.filter-chip</p>
+      <div class="kit-basics__box kit-basics__row">
+        <span class="filter-chip"><span class="filter-chip__label">日期：过去 6 个月</span><button type="button" class="filter-chip__remove" aria-label="清除">×</button></span>
+        <span class="filter-chip"><span class="filter-chip__label">状态：进行中</span><button type="button" class="filter-chip__remove" aria-label="清除">×</button></span>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="popover" id="kit-sec-popover">
+      <h2>Popover 浮窗</h2>
+      <p>典型页：.filter-popover（日期筛选）</p>
+      <div class="kit-basics__box kit-basics__box--subtle kit-basics__pop-host">
+        <div class="filter-popover" style="position:relative;top:0;left:0;display:block">
+          <h3 class="filter-popover__title">日期</h3>
+          <div class="filter-popover__options" role="radiogroup">
+            <label><input type="radio" name="kit-pop" checked /> 过去 6 个月</label>
+            <label><input type="radio" name="kit-pop" /> 过去 30 天</label>
+            <label><input type="radio" name="kit-pop" /> 过去 7 天</label>
+          </div>
+          <div class="filter-popover__actions">
+            <button type="button" class="filter-popover__cancel">取消</button>
+            <button type="button" class="filter-popover__apply">应用</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="menu" id="kit-sec-menu">
+      <h2>Menu 菜单</h2>
+      <p>典型页：.filter-popover__op-menu / .launch-menu 项样式</p>
+      <div class="kit-basics__box">
+        <div class="filter-popover__op-menu" style="position:relative;width:200px;display:block">
+          <button type="button" class="filter-popover__op-item is-selected"><span>=</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16" style="opacity:1"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
+          <div class="filter-popover__op-sep"></div>
+          <button type="button" class="filter-popover__op-item"><span>介于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
+          <button type="button" class="filter-popover__op-item"><span>早于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
+          <button type="button" class="filter-popover__op-item"><span>晚于</span><svg class="op-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16"><path d="M5 12.5 9.5 17 19 7.5"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="progress" id="kit-sec-progress">
+      <h2>Progress 进度条</h2>
+      <p>典型页：.envelope-track</p>
+      <div class="kit-basics__box" style="max-width:280px;display:flex;flex-direction:column;gap:14px">
+        <div class="envelope-track"><i style="width:66%"></i></div>
+        <div class="envelope-track"><i style="width:100%"></i></div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="table" id="kit-sec-table">
+      <h2>Table 列表</h2>
+      <p>典型页：.envelope-table（含右侧操作列）</p>
+      <div class="kit-basics__box" style="padding:0;overflow:auto">
+        <table class="envelope-table" style="min-width:640px">
+          <thead>
+            <tr>
+              <th style="width:48px"><input type="checkbox" style="width:16px;height:16px;accent-color:var(--fdd-brand)" aria-label="全选" /></th>
+              <th>任务主题</th>
+              <th>状态</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" style="width:16px;height:16px;accent-color:var(--fdd-brand)" /></td>
+              <td><button type="button" class="envelope-name">劳动合同续签</button><small>张三 · 待签署</small></td>
+              <td><div class="envelope-state"><span class="todo-text todo-text--mine">签署中</span><div class="envelope-track"><i style="width:66%"></i></div></div></td>
+              <td class="time-cell"><span>2026-09-12</span><small>14:20</small></td>
+              <td><div class="row-actions"><button type="button" class="resend-button">催办</button></div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="width:16px;height:16px;accent-color:var(--fdd-brand)" /></td>
+              <td><button type="button" class="envelope-name">采购框架协议</button><small>已完成</small></td>
+              <td><div class="envelope-state is-completed"><span class="todo-text">已完成</span></div></td>
+              <td class="time-cell"><span>2026-09-10</span><small>09:08</small></td>
+              <td><div class="row-actions"><button type="button" class="resend-button">下载</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
 </body>
 </html>

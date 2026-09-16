@@ -1,0 +1,859 @@
+/* ==========================================================================
+   AIP 设计系统（法大大 AI Product）· Libra 风格首版
+   SSOT：本文件 + ui-kit.html
+   基底：签署任务列表典型页（data-shell=libra + 品牌蓝覆写）生效令牌沉淀
+   Kit 基本元素/基础组件演示禁止自造，统一 embed=basics 典型页真实 class
+   令牌前缀：--aip-* ；兼容别名 --fdd-*（典型页过渡期）
+   用法：样式只用 var(--aip-*)，禁止硬编码 Hex/px。
+   ========================================================================== */
+
+:root {
+  /* —— Primitive · 色彩 —— */
+  --aip-brand: #0059ef;
+  --aip-brand-hover: #004ed6;
+  --aip-brand-deep: #174ea6;
+  --aip-brand-soft: #e8f1ff;
+  --aip-accent: #42c5ff;
+
+  --aip-ink: #14181d;
+  --aip-ink-2: #4e5560;
+  --aip-ink-3: #9aa1ab;
+  --aip-ink-muted: #7d8590;
+
+  --aip-line: #e6e9ee;
+  --aip-line-soft: #eef1f5;
+  --aip-line-strong: #d6dbe3;
+
+  --aip-bg: #ffffff;
+  --aip-bg-page: #f3f5f8;
+  --aip-bg-sidebar: #fafbfc;
+  --aip-bg-card: #fafbfc;
+  --aip-bg-hover: #f3f5f8;
+  --aip-bg-active: rgba(0, 89, 239, 0.1);
+  --aip-bg-muted: #f3f5f8;
+
+  --aip-danger: #e6555e;
+  --aip-success: #1b9275;
+  --aip-warning: #f4a317;
+
+  /* —— Semantic · 色彩 —— */
+  --aip-color-text-primary: var(--aip-ink);
+  --aip-color-text-secondary: var(--aip-ink-2);
+  --aip-color-text-hint: var(--aip-ink-3);
+  --aip-color-text-onbrand: #ffffff;
+  --aip-color-brand: var(--aip-brand);
+  --aip-color-border: var(--aip-line);
+  --aip-color-border-strong: var(--aip-line-strong);
+  --aip-color-bg-page: var(--aip-bg-page);
+  --aip-color-bg-surface: var(--aip-bg);
+
+  /* —— 字体 —— */
+  --aip-font: "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", Helvetica, Arial, sans-serif;
+  --aip-font-size-xs: 12px;
+  --aip-font-size-sm: 13px;
+  --aip-font-size-md: 14px;
+  --aip-font-size-lg: 16px;
+  --aip-font-size-xl: 20px;
+  --aip-font-size-display: 32px;
+  --aip-line-height-sm: 16px;
+  --aip-line-height-md: 20px;
+  --aip-line-height-lg: 24px;
+  --aip-font-weight-regular: 400;
+  --aip-font-weight-medium: 500;
+  --aip-font-weight-semibold: 600;
+  --aip-font-weight-bold: 700;
+
+  /* —— 间距 —— */
+  --aip-space-1: 4px;
+  --aip-space-2: 8px;
+  --aip-space-3: 12px;
+  --aip-space-4: 16px;
+  --aip-space-5: 20px;
+  --aip-space-6: 24px;
+  --aip-space-8: 32px;
+
+  /* —— 圆角 —— */
+  --aip-radius-xs: 4px;
+  --aip-radius-sm: 6px;
+  --aip-radius: 8px;
+  --aip-radius-md: 10px;
+  --aip-radius-lg: 12px;
+  --aip-radius-pill: 9999px;
+
+  /* —— 阴影（Libra 卡） —— */
+  --aip-shadow-sm: 0 1px 2px 0 #161a1b0f;
+  --aip-shadow-dropdown: 0 0 0 1px #161a1b0d, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
+  --aip-shadow-menu: 0 0 0 1px #161a1b0d, 0 18px 47px 0 #161a1b08, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
+
+  /* —— 布局壳 —— */
+  --aip-header-h: 56px;
+  --aip-sidebar-w: 280px;
+  --aip-tab-indicator: 3px;
+  --aip-table-head-h: 44px;
+  --aip-table-row-h: 67px;
+  --aip-progress-h: 4px;
+  --aip-control-h: 32px;
+  --aip-control-h-lg: 34px;
+
+  /* —— 兼容别名（典型页过渡，新代码请用 --aip-*） —— */
+  --fdd-brand: var(--aip-brand);
+  --fdd-brand-hover: var(--aip-brand-hover);
+  --fdd-brand-deep: var(--aip-brand-deep);
+  --fdd-brand-soft: var(--aip-brand-soft);
+  --fdd-accent: var(--aip-accent);
+  --fdd-ink: var(--aip-ink);
+  --fdd-ink-2: var(--aip-ink-2);
+  --fdd-ink-3: var(--aip-ink-3);
+  --fdd-ink-muted: var(--aip-ink-muted);
+  --fdd-line: var(--aip-line);
+  --fdd-line-soft: var(--aip-line-soft);
+  --fdd-line-strong: var(--aip-line-strong);
+  --fdd-bg: var(--aip-bg);
+  --fdd-bg-sidebar: var(--aip-bg-sidebar);
+  --fdd-bg-hover: var(--aip-bg-hover);
+  --fdd-bg-active: var(--aip-bg-active);
+  --fdd-bg-muted: var(--aip-bg-muted);
+  --fdd-danger: var(--aip-danger);
+  --fdd-success: var(--aip-success);
+  --fdd-font: var(--aip-font);
+  --fdd-header-h: var(--aip-header-h);
+  --fdd-sidebar-w: var(--aip-sidebar-w);
+  --fdd-radius: var(--aip-radius);
+  --fdd-radius-pill: var(--aip-radius-pill);
+  --fdd-tab-indicator: var(--aip-tab-indicator);
+  --fdd-table-head-h: var(--aip-table-head-h);
+  --fdd-table-row-h: var(--aip-table-row-h);
+  --fdd-progress-h: var(--aip-progress-h);
+  --fdd-progress-radius: 17px;
+  --fdd-shadow-dropdown: var(--aip-shadow-dropdown);
+  --fdd-shadow-menu: var(--aip-shadow-menu);
+  --lt-shadow-sm: var(--aip-shadow-sm);
+  --lt-shadow-button: var(--aip-shadow-menu);
+}
+
+/* —— 基础重置提示 —— */
+.aip-kit-reset,
+html.aip-app body {
+  font-family: var(--aip-font);
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   基础组件（Kit 演示请用典型页真实 class：.contract-launch / .resend-button /
+   .envelope-search / .filter-trigger / .filter-popover / .envelope-table …
+   下列 .aip-* 仅作令牌对齐的过渡别名，不以 Kit 自造 demo 为准）
+   ========================================================================== */
+
+/* ==========================================================================
+   基础组件 · Button
+   ========================================================================== */
+.aip-btn {
+  height: var(--aip-control-h);
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  font-size: var(--aip-font-size-md);
+  font-weight: var(--aip-font-weight-semibold);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.aip-btn--primary {
+  background: var(--aip-brand);
+  color: var(--aip-color-text-onbrand);
+}
+.aip-btn--primary:hover { background: var(--aip-brand-hover); }
+.aip-btn--secondary {
+  background: var(--aip-bg-muted);
+  color: var(--aip-ink);
+}
+.aip-btn--secondary:hover { background: rgba(28, 43, 51, 0.08); }
+.aip-btn--ghost {
+  background: transparent;
+  color: var(--aip-ink-2);
+}
+.aip-btn--ghost:hover { background: var(--aip-bg-hover); color: var(--aip-ink); }
+.aip-btn--pill { border-radius: var(--aip-radius-pill); }
+.aip-btn--block { width: 100%; }
+
+/* ==========================================================================
+   基础组件 · Search / Input
+   ========================================================================== */
+.aip-search,
+.aip-input {
+  height: var(--aip-control-h);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--aip-line-strong);
+  border-radius: var(--aip-radius);
+  background: #fff;
+  box-sizing: border-box;
+}
+.aip-search { width: 284px; min-width: 160px; }
+.aip-search:focus-within,
+.aip-input:focus-within {
+  border-color: var(--aip-brand);
+  box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16);
+}
+.aip-search input,
+.aip-input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--aip-font-size-md);
+  color: var(--aip-ink);
+}
+.aip-search input::placeholder,
+.aip-input input::placeholder { color: var(--aip-ink-3); }
+
+/* ==========================================================================
+   基础组件 · Select / Dropdown trigger
+   ========================================================================== */
+.aip-select {
+  height: var(--aip-control-h);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--aip-line-strong);
+  border-radius: var(--aip-radius);
+  background: #fff;
+  font-size: var(--aip-font-size-md);
+  color: var(--aip-ink);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.aip-select:hover { background: var(--aip-bg-hover); }
+.aip-select.is-open {
+  border-color: var(--aip-brand);
+  box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16);
+}
+
+/* ==========================================================================
+   基础组件 · Checkbox / Radio
+   ========================================================================== */
+.aip-check,
+.aip-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--aip-font-size-md);
+  color: var(--aip-ink);
+  cursor: pointer;
+  line-height: var(--aip-line-height-md);
+}
+.aip-check input,
+.aip-radio input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--aip-brand);
+}
+
+/* ==========================================================================
+   基础组件 · Progress
+   ========================================================================== */
+.aip-progress {
+  height: var(--aip-progress-h);
+  border-radius: 17px;
+  background: #e6e9ee;
+  overflow: hidden;
+}
+.aip-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--aip-brand);
+}
+
+/* ==========================================================================
+   基础组件 · Tag / Chip
+   ========================================================================== */
+.aip-chip {
+  height: var(--aip-control-h);
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--aip-radius);
+  background: var(--aip-bg-muted);
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  font-weight: var(--aip-font-weight-medium);
+}
+
+/* ==========================================================================
+   基础组件 · Popover / Menu
+   ========================================================================== */
+.aip-popover {
+  position: absolute;
+  z-index: 50;
+  min-width: 168px;
+  max-width: 320px;
+  padding: 14px 14px 10px;
+  border-radius: var(--aip-radius-md);
+  background: #fff;
+  box-shadow: var(--aip-shadow-menu);
+  color: var(--aip-ink);
+}
+.aip-popover__title {
+  margin: 0 0 16px;
+  font-size: var(--aip-font-size-lg);
+  font-weight: var(--aip-font-weight-bold);
+  line-height: 22px;
+}
+.aip-popover__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.aip-menu {
+  padding: 4px;
+  border-radius: var(--aip-radius);
+  background: #fff;
+  box-shadow: var(--aip-shadow-dropdown);
+}
+.aip-menu__item {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  text-align: left;
+  cursor: pointer;
+}
+.aip-menu__item:hover { background: var(--aip-bg-hover); }
+.aip-menu__item.is-selected {
+  color: var(--aip-brand);
+  font-weight: var(--aip-font-weight-semibold);
+  background: var(--aip-bg-active);
+}
+
+/* ==========================================================================
+   基础组件 · Modal
+   ========================================================================== */
+.aip-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(28, 43, 51, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.aip-modal {
+  width: 560px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--aip-radius-lg);
+  background: #fff;
+  box-shadow: var(--aip-shadow-menu);
+}
+.aip-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--aip-line-soft);
+}
+.aip-modal__head h2 {
+  margin: 0;
+  font-size: var(--aip-font-size-lg);
+  font-weight: var(--aip-font-weight-bold);
+}
+.aip-modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px;
+}
+.aip-modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--aip-line-soft);
+}
+
+/* ==========================================================================
+   基础组件 · Table（列表骨架）
+   ========================================================================== */
+.aip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--aip-font-size-md);
+}
+.aip-table th {
+  height: var(--aip-table-head-h);
+  padding: 0 12px;
+  text-align: left;
+  font-weight: var(--aip-font-weight-medium);
+  color: var(--aip-ink-2);
+  border-bottom: 1px solid var(--aip-line);
+  background: #fff;
+}
+.aip-table td {
+  height: var(--aip-table-row-h);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--aip-line-soft);
+  color: var(--aip-ink);
+  vertical-align: middle;
+}
+.aip-table tr:hover td { background: var(--aip-bg-hover); }
+
+/* ==========================================================================
+   业务组件 · Topbar（全局顶栏）· 默认即 Libra · 顶栏悬浮卡
+   ========================================================================== */
+.aip-topbar,
+.aip-topbar--libra,
+html[data-aip-shell="libra-top"] .aip-topbar {
+  margin: 6px 10px 0;
+  height: 56px;
+  padding: 0 12px 0 16px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  background: var(--aip-bg-card);
+  border: 1px solid #e6e9ee;
+  border-radius: var(--aip-radius-lg);
+  box-shadow: var(--aip-shadow-sm);
+  box-sizing: border-box;
+}
+.aip-topbar__left,
+.aip-topbar__right {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+}
+.aip-topbar__brand {
+  display: flex;
+  align-items: center;
+  height: 29px;
+  text-decoration: none;
+  transform: scale(0.9);
+  transform-origin: left center;
+}
+.aip-topbar__brand img {
+  height: 29px;
+  width: auto;
+  display: block;
+}
+.aip-topbar__tabs {
+  display: flex;
+  list-style: none;
+  margin: 0 0 0 16px;
+  padding: 0;
+  height: 100%;
+  align-items: center;
+  gap: 2px;
+}
+.aip-topbar__tabs button {
+  position: relative;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  font-size: var(--aip-font-size-md);
+  font-weight: var(--aip-font-weight-medium);
+  cursor: pointer;
+}
+.aip-topbar__tabs button:hover {
+  color: var(--aip-ink);
+  background: var(--aip-bg-hover);
+}
+.aip-topbar__tabs button.is-active {
+  color: var(--aip-brand);
+  background: var(--aip-bg-active);
+}
+.aip-topbar__tabs button.is-active::after { display: none; }
+
+/* 右侧：升级 + 图标入口 + 头像 */
+.aip-topbar__right {
+  gap: 4px;
+  flex-shrink: 0;
+}
+.aip-topbar__upgrade {
+  height: 32px;
+  padding: 0 12px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: var(--aip-brand);
+  color: #fff;
+  font-size: var(--aip-font-size-md);
+  font-weight: var(--aip-font-weight-semibold);
+  cursor: pointer;
+  box-shadow: var(--aip-shadow-menu);
+}
+.aip-topbar__upgrade:hover { background: var(--aip-brand-hover); }
+.aip-topbar__icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  cursor: pointer;
+}
+.aip-topbar__icon-btn:hover {
+  background: var(--aip-bg-hover);
+  color: var(--aip-ink);
+}
+.aip-avatar {
+  width: 32px;
+  height: 32px;
+  margin-left: 4px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--aip-brand-soft);
+  color: var(--aip-brand-deep);
+  font-size: var(--aip-font-size-xs);
+  font-weight: var(--aip-font-weight-semibold);
+  cursor: pointer;
+}
+.aip-avatar:hover { filter: brightness(0.97); }
+
+/* ==========================================================================
+   业务组件 · Contract Sidebar（协议侧栏）· 自典型页抽取 · Libra 悬浮卡
+   ========================================================================== */
+.aip-contract-sidebar,
+.aip-contract-sidebar--libra,
+html[data-aip-shell="libra"] .aip-contract-sidebar {
+  width: var(--aip-sidebar-w);
+  flex: 0 0 var(--aip-sidebar-w);
+  margin: 6px 0 24px 10px;
+  background: var(--aip-bg-card);
+  border: 1px solid #e6e9ee;
+  border-radius: var(--aip-radius-lg);
+  box-shadow: var(--aip-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.aip-contract-sidebar__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.aip-contract-sidebar__start {
+  flex: 0 0 64px;
+  height: 64px;
+  padding: 12px 10px 8px;
+  box-sizing: border-box;
+}
+.aip-launch {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.aip-contract-sidebar__launch {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: var(--aip-brand);
+  color: #fff;
+  font-size: var(--aip-font-size-lg);
+  font-weight: var(--aip-font-weight-semibold);
+  cursor: pointer;
+  box-shadow: var(--aip-shadow-menu);
+}
+.aip-contract-sidebar__launch:hover { background: var(--aip-brand-hover); }
+.aip-contract-sidebar__launch .aip-launch__caret { transition: transform 0.15s; }
+.aip-launch:hover .aip-launch__caret,
+.aip-launch.is-open .aip-launch__caret { transform: rotate(180deg); }
+.aip-launch__menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--aip-shadow-menu);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+}
+.aip-launch:hover .aip-launch__menu,
+.aip-launch.is-open .aip-launch__menu,
+.aip-launch__menu.is-demo-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.aip-launch__menu button {
+  width: 100%;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.aip-launch__menu button:hover { background: var(--aip-bg-hover); }
+.aip-launch__menu button:hover .aip-icon { color: var(--aip-brand); }
+.aip-launch__text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.aip-launch__text b { font-size: var(--aip-font-size-md); font-weight: 600; line-height: 20px; }
+.aip-launch__text small { font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); line-height: 16px; }
+
+.aip-contract-sidebar__nav {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
+}
+.aip-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  line-height: 1.4;
+}
+.aip-nav-item:hover { background: var(--aip-bg-hover); }
+.aip-nav-item.is-active {
+  background: var(--aip-bg-active);
+  color: var(--aip-brand);
+  font-weight: var(--aip-font-weight-semibold);
+}
+.aip-nav-item.is-active .aip-icon { color: var(--aip-brand); }
+.aip-nav-item--primary { height: 48px; padding: 0 15px 0 12px; font-weight: 600; }
+.aip-nav-item--secondary { height: 42px; padding: 0 15px 0 44px; font-weight: 400; }
+.aip-nav-item--tool { height: 48px; padding: 0 15px 0 12px; font-weight: 400; }
+
+.aip-nav-section {
+  position: relative;
+  margin-top: 4px;
+  padding-top: 8px;
+}
+.aip-nav-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  background: #eef1f5;
+}
+
+/* 任务文件夹模块 */
+.aip-folder-module { position: relative; }
+.aip-folder-module__head {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: var(--aip-radius);
+}
+.aip-folder-module__head:hover { background: var(--aip-bg-hover); }
+.aip-folder-module__head.is-active { background: var(--aip-bg-active); color: var(--aip-brand); }
+.aip-folder-module__toggle {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 8px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: var(--aip-font-size-md);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.aip-folder-module__more {
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  cursor: pointer;
+}
+.aip-folder-module__more:hover { background: var(--aip-bg-hover); color: var(--aip-ink); }
+.aip-folder-tree__row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  border-radius: var(--aip-radius);
+  padding-left: 36px;
+  box-sizing: border-box;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  cursor: pointer;
+}
+.aip-folder-tree__row:hover { background: var(--aip-bg-hover); }
+.aip-folder-tree__row.is-active {
+  background: var(--aip-bg-active);
+  color: var(--aip-brand);
+  font-weight: 600;
+}
+.aip-folder-tree__row .aip-icon { margin-right: 8px; }
+.aip-folder-tree__count {
+  margin-left: auto;
+  margin-right: 10px;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: rgba(28, 43, 51, 0.08);
+  color: var(--aip-ink-2);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 记录与处理 */
+.aip-records-module__toggle {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.aip-records-module__toggle:hover { background: var(--aip-bg-hover); }
+.aip-records-module__toggle .aip-records-module__caret {
+  margin-left: auto;
+  transition: transform 0.15s;
+}
+.aip-records-module__toggle[aria-expanded="false"] .aip-records-module__caret {
+  transform: rotate(-90deg);
+}
+.aip-records-module__body { padding-bottom: 4px; }
+
+/* ==========================================================================
+   业务组件 · Task List（任务列表内容区）· 默认 Libra 悬浮卡
+   ========================================================================== */
+.aip-task-list,
+.aip-task-list--libra,
+html[data-aip-shell="libra"] .aip-task-list {
+  flex: 1;
+  min-width: 0;
+  margin: 6px 10px 24px 8px;
+  background: #fff;
+  border: 1px solid #e6e9ee;
+  border-radius: var(--aip-radius-md);
+  box-shadow: var(--aip-shadow-sm);
+  box-sizing: border-box;
+}
+.aip-task-list__title {
+  margin: 0;
+  font-size: var(--aip-font-size-display);
+  font-weight: var(--aip-font-weight-regular);
+  line-height: 40px;
+  letter-spacing: -0.32px;
+  color: var(--aip-ink);
+}
+.aip-task-list__toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  min-height: 44px;
+  margin-bottom: 8px;
+}
+.aip-scope-switch {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--aip-radius);
+  background: var(--aip-bg-page);
+}
+.aip-scope-switch button {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  font-size: var(--aip-font-size-md);
+  cursor: pointer;
+}
+.aip-scope-switch button.is-on {
+  background: #fff;
+  color: var(--aip-ink);
+  font-weight: var(--aip-font-weight-semibold);
+  box-shadow: var(--aip-shadow-sm);
+}
+
+/* ==========================================================================
+   图标原子
+   ========================================================================== */
+.aip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  color: var(--aip-ink-2);
+}
+.aip-icon__svg { display: block; width: 1em; height: 1em; }
+.aip-icon--sm { font-size: 16px; width: 16px; height: 16px; }
+.aip-icon--md { font-size: 20px; width: 20px; height: 20px; }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>工作台整体框架调整 · 设计稿预览</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" /></noscript>
+  <link rel="stylesheet" href="../../../shared/portal-home.css" />
+</head>
+<body>
+  <div class="cursor is-hidden" aria-hidden="true">
+    <div class="cursor__blob" data-cursor-blob></div>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar__brand topbar__brand--back" href="../../../#versions" aria-label="返回" data-cursor="hover">
+      <svg class="topbar__mark topbar__mark--back" viewBox="0 0 76 65" aria-hidden="true">
+        <path fill="currentColor" d="M37.5 0L75 65H0L37.5 0Z" />
+      </svg>
+      <span class="topbar__name">返回</span>
+    </a>
+  </header>
+
+  <main class="hero">
+    <section class="hero__panel" aria-labelledby="portal-title">
+      <p class="hero__eyebrow">AIP 0.1 · 法大大 FASC</p>
+      <h1 id="portal-title" class="hero__title">工作台整体框架调整</h1>
+      <p class="hero__lead">在协议典型页 Libra · 顶栏基础上完善整个顶栏并接入协议模块：六个一级模块固定顺序；右侧任务中心、帮助、头像三项；帮助菜单、头像菜单、切换企业、切换产品（个人工作台）；任务中心；协议模块含协议侧栏（发起签署 / 全部任务 / 任务文件夹 / 合同库·协议集 / 记录与处理）与任务列表（PRD 0.1-r15）。</p>
+
+      <div class="portal-cards">
+        <a class="portal-card" href="workbench.html" data-updated-at="2026-09-16T15:35:00" data-cursor="hover">
+          <span class="portal-card__title">工作台框架（顶栏 · 帮助 · 头像 · 切换企业 / 产品 · 任务中心 · 协议模块）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../../shared/format-updated-at.js"></script>
+  <script src="../../../shared/cursor.js"></script>
+  <script src="../../../shared/portal-home.js"></script>
+</body>
+</html>

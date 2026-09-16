@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>工作台整体框架调整 0.1 · 顶栏 / 帮助 / 头像 / 切换 / 任务中心（AIP）</title>
+  <!--
+    AIP 0.1 · 工作台整体框架调整（PRD 0.1-r15）。
+    在协议典型页 Libra · 顶栏基础上完善整个顶栏：
+      · 一级导航：首页 / 协议 / 模板 / 自动化 / 洞察 / 管理（固定顺序）
+      · 右侧工具：升级、任务中心、帮助、头像（PRD：搜索收回所属页面，不进顶栏）
+      · 帮助菜单：使用帮助 / 帮助中心 / 联系支持 / 购买咨询 / 产品更新 / 移动端入口
+      · 头像菜单：只读身份 + 个人资料 / 个人设置 / 站内信 / 切换企业 / 切换产品 / 语言·条款·退出
+      · 切换企业、切换产品（含个人工作台）为面板内子视图
+      · 任务中心：独立页 /work/tasks，1128px 居中，无业务侧栏，一级模块均不选中；
+        按来源分组（签署任务 / 审批任务 / 组织待办 / 功能开通申请），行复用协议列表样式（主题+摘要 / 状态+进度 / 更新时间 / 操作）
+      · 协议模块：协议侧栏（发起签署 / 全部任务 / 任务文件夹 / 合同库·协议集 / 记录与处理）
+        + 任务列表（访问范围 / 搜索 / 筛选 / 导出 / 刷新 / 状态进度 / 分页），默认落点为空白首页
+    规范：ui-kit.html（Libra · 顶栏唯一视觉），组件仅用 .aip-*；PRD 特有结构以 .wb-* 最小扩展。
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="aip-design-system.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: var(--aip-font);
+      color: var(--aip-ink);
+      background: var(--aip-bg-page);
+      -webkit-font-smoothing: antialiased;
+      font-size: var(--aip-font-size-md);
+      line-height: 1.4;
+    }
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    /* ============ Libra · 顶栏骨架（在 .aip-topbar 上补 PRD 布局） ============ */
+    /* 顶栏外壳：sticky + 与页面同底色，遮住滚动时从顶缝透出的内容，避免叠加穿帮 */
+    .wb-topbar-shell {
+      position: sticky; top: 0; z-index: 60;
+      background: var(--aip-bg-page);
+      padding: 0 0 0;
+    }
+    .wb-topbar-shell::after {
+      content: ""; display: block; height: 0;
+    }
+    .wb-topbar { position: relative; z-index: 60; }
+    .wb-topbar .aip-topbar__tabs { flex: 1; min-width: 0; }
+    /* PRD：顶栏搜索收回所属页面（升级按钮保留） */
+    .wb-topbar [data-role="search"] { display: none; }
+
+    /* 图标按钮徽标（头像菜单内站内信未读；顶栏任务图标不带红点） */
+    .aip-topbar__icon-btn.is-active {
+      color: var(--aip-brand); background: var(--aip-bg-active);
+    }
+
+    /* ============ 头像 / 帮助 弹出层（统一容器） ============ */
+    .wb-pop {
+      position: absolute; top: calc(100% + 10px); right: 0; z-index: 90;
+      border-radius: var(--aip-radius-lg);
+      background: #fff;
+      box-shadow: var(--aip-shadow-menu);
+      animation: wbPop .15s cubic-bezier(.22,1,.36,1);
+      transform-origin: top right;
+      overflow: hidden;
+    }
+    .wb-pop[hidden] { display: none !important; }
+    @keyframes wbPop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
+    .wb-anchor { position: relative; }
+
+    /* ---------- 帮助菜单 ---------- */
+    .wb-help { width: 252px; padding: 6px; }
+    .wb-help .aip-menu { box-shadow: none; padding: 0; }
+    .wb-help .aip-menu__item { height: 38px; justify-content: space-between; }
+    .wb-help .aip-menu__item .wb-sub { color: var(--aip-ink-3); font-size: var(--aip-font-size-xs); }
+    .wb-help__sep { height: 1px; margin: 4px 6px; background: var(--aip-line-soft); }
+
+    /* ---------- 头像菜单（含子视图） ---------- */
+    .wb-avatar-menu { width: 292px; }
+    .wb-viewport { position: relative; }
+    .wb-view { transition: opacity .18s; }
+    .wb-view--main { position: relative; }
+    /* 子视图：正常布局位（不绝对定位），高度随内容自适应；打开子视图时隐藏主视图 */
+    .wb-view--sub {
+      background: #fff;
+      display: flex; flex-direction: column;
+      width: 100%; max-height: 70vh;
+    }
+    .wb-avatar-menu.show-sub .wb-view--main { display: none; }
+
+    .wb-idcard {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 12px 12px; border-bottom: 1px solid var(--aip-line-soft);
+    }
+    .wb-idcard .aip-avatar { width: 40px; height: 40px; font-size: 15px; margin: 0; }
+    .wb-idcard__info { min-width: 0; }
+    .wb-idcard__info b { display: block; font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-semibold); line-height: 20px; }
+    .wb-idcard__info small { display: block; font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wb-idcard__tag {
+      flex-shrink: 0; margin-left: auto; height: 20px; padding: 0 6px;
+      display: inline-flex; align-items: center; border-radius: var(--aip-radius-xs);
+      background: var(--aip-brand-soft); color: var(--aip-brand-deep);
+      font-size: 11px; font-weight: var(--aip-font-weight-medium);
+    }
+
+    .wb-menu-list { padding: 6px; }
+    .wb-menu-item {
+      width: 100%; height: 38px; padding: 0 10px;
+      display: flex; align-items: center; gap: 10px;
+      border: 0; border-radius: var(--aip-radius); background: transparent;
+      color: var(--aip-ink); font-size: var(--aip-font-size-md); text-align: left;
+    }
+    .wb-menu-item:hover { background: var(--aip-bg-hover); }
+    .wb-menu-item .aip-icon { color: var(--aip-ink-3); flex-shrink: 0; }
+    .wb-menu-item:hover .aip-icon { color: var(--aip-brand); }
+    .wb-menu-item__label { flex: 1; min-width: 0; }
+    .wb-menu-item__caret { color: var(--aip-ink-3); margin-left: auto; flex-shrink: 0; }
+    .wb-menu-item__badge {
+      min-width: 18px; height: 18px; padding: 0 5px; margin-left: auto;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--aip-radius-pill); background: var(--aip-danger); color: #fff;
+      font-size: 11px; font-weight: var(--aip-font-weight-semibold);
+    }
+    .wb-menu-item__badge + .wb-menu-item__caret { margin-left: 6px; }
+    .wb-menu-sep { height: 1px; margin: 4px 10px; background: var(--aip-line-soft); }
+    .wb-menu-foot { padding: 6px; border-top: 1px solid var(--aip-line-soft); }
+    /* 收纳分组（语言/隐私条款/注册协议） */
+    .wb-menu-group__items { padding: 2px 0 2px 0; }
+    .wb-menu-group__items .wb-menu-item { padding-left: 34px; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); height: 34px; }
+    .wb-menu-group__caret { margin-left: auto; color: var(--aip-ink-3); transition: transform .15s; }
+    .wb-menu-group__toggle[aria-expanded="false"] .wb-menu-group__caret { transform: rotate(-90deg); }
+    /* 退出登录：黑色文字、无图标 */
+    .wb-menu-foot .wb-menu-item--logout { color: var(--aip-ink); }
+    .wb-menu-foot .wb-menu-item--logout:hover { background: var(--aip-bg-hover); }
+
+    /* 子视图头 */
+    .wb-sub-head {
+      display: flex; align-items: center; gap: 4px;
+      padding: 10px 8px; border-bottom: 1px solid var(--aip-line-soft);
+    }
+    .wb-sub-back {
+      width: 28px; height: 28px; flex-shrink: 0; border: 0; border-radius: var(--aip-radius);
+      background: transparent; color: var(--aip-ink-2); display: grid; place-items: center;
+    }
+    .wb-sub-back:hover { background: var(--aip-bg-hover); color: var(--aip-ink); }
+    .wb-sub-head h3 { margin: 0; font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-semibold); }
+
+    /* 切换企业 */
+    .wb-sub-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
+    /* 子视图内搜索框占满宽度（覆盖 .aip-search 固定 284px） */
+    .wb-sub-body .aip-search.wb-sub-search { width: 100%; min-width: 0; max-width: none; margin: 2px 0 8px; box-sizing: border-box; }
+    .wb-corp { display: flex; flex-direction: column; gap: 2px; }
+    .wb-corp__item {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 8px 10px; border: 0; border-radius: var(--aip-radius); background: transparent; text-align: left; box-sizing: border-box;
+    }
+    .wb-corp__item:hover { background: var(--aip-bg-hover); }
+    .wb-corp__logo {
+      width: 32px; height: 32px; flex-shrink: 0; border-radius: var(--aip-radius);
+      display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 600;
+    }
+    .wb-corp__text { flex: 1; min-width: 0; }
+    .wb-corp__text b { display: block; font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium); line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wb-corp__text small { display: block; font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); line-height: 16px; }
+    .wb-corp__current {
+      flex-shrink: 0; height: 20px; padding: 0 6px; display: inline-flex; align-items: center;
+      border-radius: var(--aip-radius-xs); background: var(--aip-bg-active); color: var(--aip-brand);
+      font-size: 11px; font-weight: var(--aip-font-weight-medium);
+    }
+    .wb-corp__check { color: var(--aip-brand); flex-shrink: 0; }
+
+    /* 切换产品 */
+    .wb-prod { display: flex; flex-direction: column; gap: 2px; }
+    .wb-prod__item {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 9px 10px; border: 0; border-radius: var(--aip-radius); background: transparent; text-align: left;
+    }
+    .wb-prod__item:hover { background: var(--aip-bg-hover); }
+    .wb-prod__item .aip-icon { color: var(--aip-ink-3); }
+    .wb-prod__item:hover .aip-icon { color: var(--aip-brand); }
+    .wb-prod__text { flex: 1; min-width: 0; }
+    .wb-prod__text b { display: block; font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium); line-height: 20px; }
+    .wb-prod__text small { display: block; font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); line-height: 16px; }
+    .wb-prod__ext { color: var(--aip-ink-3); flex-shrink: 0; }
+
+    /* ============ 主内容区 ============ */
+    .wb-main { padding: 10px; }
+    .wb-view-page[hidden] { display: none !important; }
+
+    /* 空白首页 */
+    .wb-home {
+      min-height: calc(100vh - 6px - var(--aip-header-h) - 20px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wb-home__hint {
+      color: var(--aip-ink-3); font-size: var(--aip-font-size-sm);
+      border: 1px dashed var(--aip-line-strong); border-radius: var(--aip-radius-lg);
+      padding: 40px 56px; background: var(--aip-bg-card);
+    }
+
+    /* 协议占位（说明本需求聚焦顶栏；协议列表见 signing-task-list 需求） */
+    .wb-contracts-placeholder {
+      min-height: calc(100vh - 6px - var(--aip-header-h) - 20px);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ============ 协议模块（Libra 悬浮卡：侧栏 + 任务列表） ============ */
+    .wb-contracts { display: flex; align-items: flex-start; }
+    .wb-contracts .aip-contract-sidebar { position: sticky; top: calc(6px + var(--aip-header-h) + 10px); max-height: calc(100vh - 6px - var(--aip-header-h) - 34px); }
+    .wb-contracts .aip-task-list { padding: 20px 22px 8px; }
+    .wb-contracts .aip-task-list__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+    .wb-contracts .aip-task-list__title { font-size: 28px; line-height: 36px; }
+    .wb-contracts .aip-task-list__toolbar { gap: 10px; margin-bottom: 4px; }
+    .wb-contracts .aip-task-list__toolbar .aip-search { flex: 1; max-width: 360px; }
+    .wb-contracts .wb-tool-spacer { flex: 1; }
+
+    /* 任务表（协议）状态与进度 */
+    .wb-env-name { display: block; font-weight: var(--aip-font-weight-medium); color: var(--aip-ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+    .wb-env-name:hover { color: var(--aip-brand); }
+    .wb-env-sub { display: block; font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); margin-top: 2px; }
+    .wb-env-state { display: flex; flex-direction: column; gap: 6px; min-width: 120px; }
+    .wb-env-track { height: 4px; border-radius: var(--aip-radius-pill); background: var(--aip-bg-muted); overflow: hidden; }
+    .wb-env-track i { display: block; height: 100%; border-radius: var(--aip-radius-pill); background: var(--aip-brand); }
+    .wb-env-state.is-done .wb-env-track i { background: var(--aip-success); }
+    .wb-env-files { color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); display: inline-flex; align-items: center; gap: 6px; }
+    .wb-env-files .aip-icon { color: var(--aip-ink-3); }
+    /* 列表操作按钮：对齐典型页 .resend-button（默认空心墨字，hover 灰底；主操作 is-solid 实心蓝） */
+    .wb-row-op {
+      height: 32px; padding: 0 12px;
+      border: 1px solid var(--aip-line-strong); border-radius: var(--aip-radius);
+      background: #fff; color: var(--aip-ink);
+      font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-semibold);
+    }
+    .wb-row-op:hover { background: var(--aip-bg-hover); }
+    .wb-row-op--primary { background: var(--aip-brand); border-color: var(--aip-brand); color: #fff; }
+    .wb-row-op--primary:hover { background: var(--aip-brand-hover); border-color: var(--aip-brand-hover); }
+
+    /* ============ 任务中心 ============ */
+    /* 整体一张 Libra 大卡片：标题 / 工具栏 / 分组列表 / 分页 都嵌在内 */
+    .wb-tasks {
+      /* 大卡片与顶栏水平对齐：撑满 .wb-main 内容区（.wb-main padding 10px ≈ 顶栏 margin 10px），不再限 1128px 居中 */
+      margin: 0; padding: 0 0 40px;
+      max-width: none;
+    }
+    .wb-tasks-card {
+      background: #fff; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-lg);
+      box-shadow: var(--aip-shadow-sm);
+      padding: 22px 22px 0;
+      /* 高度随屏幕变化：视口高 − 顶栏(56) − 顶栏上缝(6) − 主区上下 padding(10+10) − 底部留白(40) */
+      height: calc(100vh - 6px - var(--aip-header-h) - 20px - 40px);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    /* 列表滚动区：头部/Tab/分页固定，仅这里内部滚动 */
+    .wb-tasks-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -22px; padding: 0 22px; }
+    .wb-tasks__title {
+      margin: 0 0 16px; flex-shrink: 0; font-size: var(--aip-font-size-display);
+      font-weight: var(--aip-font-weight-regular); line-height: 40px; letter-spacing: -.32px;
+    }
+    .wb-tasks__toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
+    .wb-tasks__toolbar .aip-search { flex: 1; max-width: 420px; }
+    .wb-tasks__spacer { flex: 1; }
+
+    /* 顶部来源 Tab */
+    .wb-tasks-tabs { display: inline-flex; align-items: center; gap: 4px; padding: 3px; border-radius: var(--aip-radius); background: var(--aip-bg-page); }
+    .wb-tasks-tabs button {
+      height: 30px; padding: 0 14px; border: 0; border-radius: var(--aip-radius-sm);
+      background: transparent; color: var(--aip-ink-2);
+      font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium); cursor: pointer;
+      white-space: nowrap;
+    }
+    .wb-tasks-tabs button:hover { color: var(--aip-ink); }
+    .wb-tasks-tabs button.is-on {
+      background: #fff; color: var(--aip-brand); font-weight: var(--aip-font-weight-semibold);
+      box-shadow: var(--aip-shadow-sm);
+    }
+    .wb-tab-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 20px; height: 18px; padding: 0 5px; margin-left: 2px;
+      border-radius: var(--aip-radius-pill); background: var(--aip-bg-muted);
+      color: var(--aip-ink-2); font-size: 11px; font-weight: var(--aip-font-weight-medium);
+      vertical-align: 1px;
+    }
+    .wb-tasks-tabs button.is-on .wb-tab-count { background: var(--aip-bg-active); color: var(--aip-brand); }
+
+    /* 已应用筛选 chip */
+    .wb-tasks__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; min-height: 0; }
+    .wb-tasks__chips:empty { display: none; }
+    .wb-chip {
+      display: inline-flex; align-items: center; gap: 6px; height: var(--aip-control-h);
+      padding: 0 6px 0 12px; border-radius: var(--aip-radius);
+      background: var(--aip-bg-muted); color: var(--aip-ink);
+      font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium);
+    }
+    .wb-chip__x {
+      width: 20px; height: 20px; border: 0; border-radius: var(--aip-radius-xs);
+      background: transparent; color: var(--aip-ink-3); display: grid; place-items: center; font-size: 14px; line-height: 1;
+    }
+    .wb-chip__x:hover { background: var(--aip-bg-active); color: var(--aip-brand); }
+    .wb-chip-clear {
+      height: var(--aip-control-h); padding: 0 8px; border: 0; background: transparent;
+      color: var(--aip-brand); font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium);
+    }
+    .wb-chip-clear:hover { text-decoration: underline; }
+
+    /* 任务中心分组：大卡片内的分区（不再单独成卡，用分割线隔开） */
+    .wb-task-group {
+      background: transparent; border: 0; border-radius: 0;
+      box-shadow: none; overflow: visible;
+    }
+    .wb-task-group + .wb-task-group { margin-top: 8px; border-top: 1px solid var(--aip-line-soft); }
+    .wb-task-group__head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 12px 12px; border-bottom: 0;
+    }
+    .wb-task-group__head .aip-icon { color: var(--aip-brand); }
+    .wb-task-group__title { margin: 0; font-size: var(--aip-font-size-lg); font-weight: var(--aip-font-weight-semibold); }
+    .wb-task-group__count { color: var(--aip-ink-3); font-size: var(--aip-font-size-sm); }
+    .wb-task-group .aip-table th:first-child, .wb-task-group .aip-table td:first-child { padding-left: 12px; }
+    .wb-task-group .aip-table th:last-child, .wb-task-group .aip-table td:last-child { padding-right: 12px; text-align: left; }
+
+    /* 大卡片底部分页：固定底部（flex 项）、与卡片同宽、顶部分隔线 */
+    .wb-tasks-card #pagerCard .wb-pager {
+      margin: 0 -22px; padding: 14px 22px;
+      border-top: 1px solid var(--aip-line-soft);
+      flex-shrink: 0;
+    }
+
+    /* 任务行：复用协议列表样式（主题+摘要 / 状态+进度 / 更新时间 / 操作） */
+    .wb-task-name { display: block; font-weight: var(--aip-font-weight-medium); color: var(--aip-ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+    .wb-task-name:hover { color: var(--aip-brand); }
+    .wb-task-summary { display: block; font-size: var(--aip-font-size-xs); color: var(--aip-ink-3); margin-top: 2px; }
+    .wb-task-time { color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); white-space: nowrap; }
+
+    /* 状态条（空态 / 异常 / 筛选无命中） */
+    .wb-state { padding: 56px 24px; text-align: center; }
+    .wb-state .aip-icon { font-size: 40px; width: 40px; height: 40px; color: var(--aip-ink-3); margin-bottom: 12px; }
+    .wb-state h4 { margin: 0 0 6px; font-size: var(--aip-font-size-lg); font-weight: var(--aip-font-weight-medium); }
+    .wb-state p { margin: 0 0 16px; color: var(--aip-ink-3); font-size: var(--aip-font-size-md); }
+    .wb-state--warn .aip-icon { color: var(--aip-warning); }
+    .wb-state--error .aip-icon { color: var(--aip-danger); }
+
+    /* 部分失败提示条 */
+    .wb-partial {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      padding: 9px 14px; border-radius: var(--aip-radius);
+      background: #fff7e8; border: 1px solid #ffe1ad; color: #9a6a00;
+      font-size: var(--aip-font-size-sm);
+    }
+    .wb-partial .aip-icon { color: var(--aip-warning); }
+    .wb-partial__retry { margin-left: auto; border: 0; background: transparent; color: var(--aip-brand); font-weight: var(--aip-font-weight-medium); }
+    .wb-partial__retry:hover { text-decoration: underline; }
+
+    /* 分页 */
+    .wb-pager { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid var(--aip-line-soft); }
+    .wb-pager__total { color: var(--aip-ink-3); font-size: var(--aip-font-size-sm); }
+    .wb-pager__size { display: flex; align-items: center; gap: 6px; color: var(--aip-ink-3); font-size: var(--aip-font-size-sm); }
+    .wb-pager__size select { height: 28px; padding: 0 6px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-xs); background: #fff; }
+    .wb-pager__nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .wb-pager__btn {
+      min-width: 30px; height: 30px; padding: 0 8px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-xs);
+      background: #fff; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm);
+    }
+    .wb-pager__btn:hover:not(:disabled) { border-color: var(--aip-brand); color: var(--aip-brand); }
+    .wb-pager__btn.is-on { background: var(--aip-brand); border-color: var(--aip-brand); color: #fff; }
+    .wb-pager__btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ============ 任务筛选弹窗（640px 居中） ============ */
+    .wb-filter-modal { width: 640px; max-width: calc(100vw - 48px); }
+    .wb-filter-modal .aip-modal__body { padding: 18px 20px; }
+    .wb-filter-sec h5 { margin: 0 0 10px; font-size: var(--aip-font-size-sm); font-weight: var(--aip-font-weight-semibold); color: var(--aip-ink-2); }
+    .wb-filter-opts { display: flex; flex-direction: column; gap: 4px; }
+    .wb-filter-opt {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      border: 1px solid var(--aip-line-soft); border-radius: var(--aip-radius); cursor: pointer;
+    }
+    .wb-filter-opt:hover { border-color: var(--aip-line-strong); background: var(--aip-bg-hover); }
+    .wb-filter-opt input { accent-color: var(--aip-brand); width: 16px; height: 16px; margin: 0; }
+    .wb-filter-opt__label { flex: 1; font-size: var(--aip-font-size-md); }
+    .wb-filter-opt__count { color: var(--aip-ink-3); font-size: var(--aip-font-size-xs); }
+    .wb-filter-opt.is-on { border-color: var(--aip-brand); background: var(--aip-bg-active); }
+
+    /* 触发按钮（筛选 / 刷新） */
+    .wb-tool-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: var(--aip-control-h);
+      padding: 0 12px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius);
+      background: #fff; color: var(--aip-ink-2); font-size: var(--aip-font-size-md); font-weight: var(--aip-font-weight-medium);
+    }
+    .wb-tool-btn:hover { border-color: var(--aip-brand); color: var(--aip-brand); }
+    .wb-tool-btn.is-on { border-color: var(--aip-brand); color: var(--aip-brand); background: var(--aip-bg-active); }
+
+    .wb-demo-bar {
+      position: fixed; right: 14px; bottom: 14px; z-index: 200;
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      background: #fff; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-lg);
+      box-shadow: var(--aip-shadow-menu); font-size: var(--aip-font-size-xs); color: var(--aip-ink-3);
+    }
+    .wb-demo-bar button { height: 26px; padding: 0 8px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-xs); background: #fff; color: var(--aip-ink-2); font-size: 12px; }
+    .wb-demo-bar button.is-on { border-color: var(--aip-brand); background: var(--aip-brand); color: #fff; }
+
+    @media (max-width: 1180px) { .wb-tasks { max-width: none; padding: 0 0 40px; } }
+  </style>
+</head>
+<body>
+
+  <!-- ================= Libra · 顶栏 ================= -->
+  <div class="wb-topbar-shell">
+  <header class="aip-topbar wb-topbar" data-aip-business="topbar">
+    <div class="aip-topbar__left">
+      <a class="aip-topbar__brand" href="#" aria-label="法大大首页" id="brandHome">
+        <img src="assets/fadada-logo.png" alt="法大大" />
+      </a>
+      <nav aria-label="主导航">
+        <ul class="aip-topbar__tabs" id="navTabs">
+          <li><button type="button" data-view="home">首页</button></li>
+          <li><button type="button" data-view="contracts">协议</button></li>
+          <li><button type="button" data-toast="模板（原有页面，本期仅迁移入口）">模板</button></li>
+          <li><button type="button" data-toast="自动化（原有页面，本期仅迁移入口）">自动化</button></li>
+          <li><button type="button" data-toast="洞察（原有页面，本期仅迁移入口）">洞察</button></li>
+          <li><button type="button" data-toast="管理（原有页面，本期仅迁移入口）">管理</button></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="aip-topbar__right">
+      <!-- 升级按钮（保留，进入升级选购流程） -->
+      <button class="aip-topbar__upgrade" type="button" data-toast="进入升级选购（原有流程）">升级</button>
+      <!-- PRD：顶栏搜索移除 -->
+      <button class="aip-topbar__icon-btn" type="button" data-role="search" aria-label="搜索" hidden tabindex="-1">
+        <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+      </button>
+
+      <!-- 任务中心（PRD：图标不展示数字或红点） -->
+      <button class="aip-topbar__icon-btn" type="button" id="taskBtn" aria-label="任务中心" aria-current="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.43 10.77 2 8.34 3.34 7 5 8.66 8.66 5 10 6.34l-4.43 4.43c-.16.16-.37.23-.57.23s-.41-.07-.57-.23M22 7H12v2h10zM5 19c.21 0 .41-.07.57-.23L10 14.34 8.66 13 5 16.66 3.34 15 2 16.34l2.43 2.43c.16.16.37.23.57.23m17-4H12v2h10z"/></svg>
+      </button>
+
+      <!-- 帮助 -->
+      <div class="wb-anchor">
+        <button class="aip-topbar__icon-btn" type="button" id="helpBtn" aria-label="帮助" aria-haspopup="menu" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 3.9c3.36 0 6.1 2.74 6.1 6.1s-2.74 6.1-6.1 6.1-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9M10 2c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8m1 11H9v2h2zm0-8H9c-1.1 0-2 .9-2 2v1h2V7h2v2H9v3h2v-1c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2"/></svg>
+        </button>
+        <div class="wb-pop wb-help" id="helpMenu" hidden role="menu" aria-label="帮助菜单">
+          <div class="aip-menu">
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="新标签页打开 support.fadada.com">使用帮助</button>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开帮助中心文档面板（无面板则新标签 help.fadada.com）">帮助中心</button>
+            <div class="wb-help__sep" role="separator"></div>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开在线客服（原组件）">联系支持 · 在线客服</button>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="拨打服务热线 tel:400-869-2012">联系支持 · 服务热线 <span class="wb-sub">400-869-2012</span></button>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开购买咨询（原组件）">购买咨询</button>
+            <div class="wb-help__sep" role="separator"></div>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开产品更新（原目标）">产品更新</button>
+            <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开移动端入口二维码（原弹层）">移动端入口</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 头像 -->
+      <div class="wb-anchor">
+        <button class="aip-avatar" type="button" id="avatarBtn" aria-label="用户菜单" aria-haspopup="menu" aria-expanded="false">CX</button>
+
+        <div class="wb-pop wb-avatar-menu" id="avatarMenu" hidden role="menu" aria-label="用户菜单">
+          <div class="wb-viewport">
+            <!-- 主视图 -->
+            <div class="wb-view wb-view--main">
+              <div class="wb-idcard">
+                <span class="aip-avatar">CX</span>
+                <div class="wb-idcard__info">
+                  <b>CX</b>
+                  <small>法大大网络科技有限公司</small>
+                </div>
+                <span class="wb-idcard__tag">企业版</span>
+              </div>
+
+              <div class="wb-menu-list">
+                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开个人资料（原有页面）">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/user.svg" alt="" /></span>
+                  <span class="wb-menu-item__label">个人资料</span>
+                </button>
+                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开个人设置（默认账号信息）">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
+                  <span class="wb-menu-item__label">个人设置</span>
+                </button>
+                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开站内信（成员消息，保留未读）">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/bell.svg" alt="" /></span>
+                  <span class="wb-menu-item__label">站内信</span>
+                  <span class="wb-menu-item__badge">3</span>
+                </button>
+
+                <div class="wb-menu-sep" role="separator"></div>
+
+                <button class="wb-menu-item" type="button" role="menuitem" id="openCorpSub" aria-haspopup="true">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrows-left-right.svg" alt="" /></span>
+                  <span class="wb-menu-item__label">切换企业</span>
+                  <svg class="wb-menu-item__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+                <button class="wb-menu-item" type="button" role="menuitem" id="openProdSub" aria-haspopup="true">
+                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/squares-four.svg" alt="" /></span>
+                  <span class="wb-menu-item__label">切换产品</span>
+                  <svg class="wb-menu-item__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+              </div>
+
+              <div class="wb-menu-foot">
+                <div class="wb-menu-group">
+                  <button class="wb-menu-item wb-menu-group__toggle" type="button" id="moreGroupToggle" aria-expanded="false" aria-controls="moreGroupItems">
+                    <span class="wb-menu-item__label">更多</span>
+                    <svg class="wb-menu-group__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="wb-menu-group__items" id="moreGroupItems" hidden>
+                    <button class="wb-menu-item" type="button" role="menuitem" data-toast="语言（子视图：中文 / English）">
+                      <span class="wb-menu-item__label">语言</span>
+                    </button>
+                    <button class="wb-menu-item" type="button" role="menuitem" data-toast="隐私条款（原页面）">
+                      <span class="wb-menu-item__label">隐私条款</span>
+                    </button>
+                    <button class="wb-menu-item" type="button" role="menuitem" data-toast="注册协议（原页面）">
+                      <span class="wb-menu-item__label">注册协议</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="wb-menu-sep" role="separator"></div>
+                <button class="wb-menu-item wb-menu-item--logout" type="button" role="menuitem" id="logoutBtn">
+                  <span class="wb-menu-item__label">退出登录</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 子视图：切换企业 -->
+            <div class="wb-view wb-view--sub" id="corpSub" aria-label="切换企业" hidden>
+              <div class="wb-sub-head">
+                <button class="wb-sub-back" type="button" data-back aria-label="返回">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <h3>切换企业</h3>
+              </div>
+              <div class="wb-sub-body">
+                <div class="aip-search wb-sub-search">
+                  <input type="search" placeholder="搜索企业" aria-label="搜索企业" />
+                </div>
+                <div class="wb-corp" id="corpList">
+                  <button class="wb-corp__item" type="button" data-current="true">
+                    <span class="wb-corp__logo" style="background:#0059ef">法</span>
+                    <span class="wb-corp__text"><b>法大大网络科技有限公司</b><small>企业版 · 管理员</small></span>
+                    <span class="wb-corp__current">当前企业</span>
+                  </button>
+                  <button class="wb-corp__item" type="button" data-toast="切换到：云合同科技（演示）">
+                    <span class="wb-corp__logo" style="background:#1b9275">云</span>
+                    <span class="wb-corp__text"><b>云合同科技有限公司</b><small>企业版 · 成员</small></span>
+                    <svg class="wb-corp__check" width="0" height="0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="display:none"><path d="M5 12.5 9.5 17 19 7.5"/></svg>
+                  </button>
+                  <button class="wb-corp__item" type="button" data-toast="切换到：信达供应链（演示）">
+                    <span class="wb-corp__logo" style="background:#7a5af8">信</span>
+                    <span class="wb-corp__text"><b>信达供应链管理有限公司</b><small>企业版 · 成员</small></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 子视图：切换产品 -->
+            <div class="wb-view wb-view--sub" id="prodSub" aria-label="切换产品" hidden>
+              <div class="wb-sub-head">
+                <button class="wb-sub-back" type="button" data-back aria-label="返回">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <h3>切换产品</h3>
+              </div>
+              <div class="wb-sub-body">
+                <div class="wb-prod">
+                  <button class="wb-prod__item" type="button" data-current="true">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" /></span>
+                    <span class="wb-prod__text"><b>企业工作台</b><small>当前所在产品</small></span>
+                    <span class="wb-corp__current">当前</span>
+                  </button>
+                  <button class="wb-prod__item" type="button" data-toast="新标签页打开个人工作台（cloud.fadada.com/person）">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/user.svg" alt="" /></span>
+                    <span class="wb-prod__text"><b>个人工作台</b><small>面向个人用户的签署与合同管理</small></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  </div>
+
+  <!-- ================= 主内容 ================= -->
+  <main class="wb-main">
+    <!-- 空白首页 -->
+    <section class="wb-view-page" id="pageHome" hidden>
+      <div class="wb-home">
+        <div class="wb-home__hint">首页主内容留白（PRD：仅公共框架，不放业务组件 / 待办 / 统计 / 引导卡）</div>
+      </div>
+    </section>
+
+    <!-- 协议模块（Libra：协议侧栏 + 任务列表） -->
+    <section class="wb-view-page" id="pageContracts" hidden>
+      <div class="wb-contracts">
+        <!-- 协议侧栏 -->
+        <aside class="aip-contract-sidebar" data-aip-business="contract-sidebar" aria-label="协议侧栏">
+          <div class="aip-contract-sidebar__inner">
+            <div class="aip-contract-sidebar__start">
+              <div class="aip-launch">
+                <button class="aip-contract-sidebar__launch" type="button" id="launchBtn" aria-haspopup="menu" aria-expanded="false">
+                  发起签署
+                  <svg class="aip-launch__caret" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+                </button>
+                <div class="aip-launch__menu" id="launchMenu" role="menu" aria-label="发起方式">
+                  <button type="button" role="menuitem" data-toast="直接创建：上传文件发起签署">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" /></span>
+                    <span class="aip-launch__text"><b>直接创建</b><small>上传文件发起签署</small></span>
+                  </button>
+                  <button type="button" role="menuitem" data-toast="模板创建：选择签署模板快速发起">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/squares-four.svg" alt="" /></span>
+                    <span class="aip-launch__text"><b>模板创建</b><small>选择签署模板快速发起</small></span>
+                  </button>
+                  <button type="button" role="menuitem" data-toast="批量创建：按模板批量发起多份任务">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
+                    <span class="aip-launch__text"><b>批量创建</b><small>按模板批量发起多份任务</small></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <nav class="aip-contract-sidebar__nav" aria-label="协议导航">
+              <button class="aip-nav-item aip-nav-item--primary is-active" type="button" data-cnav="all">
+                <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" /></span>
+                全部任务
+              </button>
+              <button class="aip-nav-item aip-nav-item--secondary" type="button" data-cnav="draft">草稿</button>
+              <button class="aip-nav-item aip-nav-item--secondary" type="button" data-cnav="active">进行中</button>
+              <button class="aip-nav-item aip-nav-item--secondary" type="button" data-cnav="completed">已完成</button>
+
+              <div class="aip-nav-section">
+                <div class="aip-folder-module">
+                  <div class="aip-folder-module__head">
+                    <button class="aip-folder-module__toggle" type="button" id="folderToggle" aria-expanded="true">
+                      <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+                      任务文件夹
+                    </button>
+                    <button class="aip-folder-module__more" type="button" aria-label="文件夹操作" data-toast="文件夹操作：全部收起 / 新建 / 查找">
+                      <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/dots-three.svg" alt="" /></span>
+                    </button>
+                  </div>
+                  <div id="folderBody">
+                    <div class="aip-folder-tree__row" data-toast-row="文件夹：销售合同">
+                      <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+                      销售合同 <span class="aip-folder-tree__count">8</span>
+                    </div>
+                    <div class="aip-folder-tree__row" data-toast-row="文件夹：人事签署">
+                      <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+                      人事签署 <span class="aip-folder-tree__count">5</span>
+                    </div>
+                    <div class="aip-folder-tree__row" data-toast-row="文件夹：采购供应">
+                      <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+                      采购供应 <span class="aip-folder-tree__count">3</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aip-nav-section">
+                <button class="aip-nav-item aip-nav-item--tool" type="button" data-toast="进入合同库（原有页面）">
+                  <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" /></span>
+                  合同库
+                </button>
+                <button class="aip-nav-item aip-nav-item--tool" type="button" data-toast="进入协议集（原有页面）">
+                  <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/cards.svg" alt="" /></span>
+                  协议集
+                </button>
+              </div>
+
+              <div class="aip-nav-section">
+                <div class="aip-records-module">
+                  <button class="aip-records-module__toggle" type="button" id="recordsToggle" aria-expanded="true">
+                    <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
+                    记录与处理
+                    <svg class="aip-records-module__caret" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+                  </button>
+                  <div class="aip-records-module__body" id="recordsBody">
+                    <button class="aip-nav-item aip-nav-item--secondary" type="button" data-toast="待我接收（原有页面）">待我接收</button>
+                    <button class="aip-nav-item aip-nav-item--secondary" type="button" data-toast="批量发送记录（原有页面）">批量发送记录</button>
+                    <button class="aip-nav-item aip-nav-item--secondary" type="button" data-toast="扫码签记录（原有页面）">扫码签记录</button>
+                    <button class="aip-nav-item aip-nav-item--secondary" type="button" data-toast="处理中心（原有页面）">处理中心</button>
+                    <button class="aip-nav-item aip-nav-item--secondary" type="button" data-toast="数据统计（原有页面）">数据统计</button>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- 任务列表内容区 -->
+        <div class="aip-task-list" data-aip-business="task-list">
+          <div class="aip-task-list__head">
+            <h1 class="aip-task-list__title" id="contractTitle">全部任务</h1>
+            <div class="aip-scope-switch" role="group" aria-label="访问范围" id="scopeSwitch">
+              <button type="button" class="is-on" data-scope="mine">我的签署</button>
+              <button type="button" data-scope="corp">全部签署</button>
+            </div>
+          </div>
+
+          <div class="aip-task-list__toolbar">
+            <div class="aip-search">
+              <input type="search" id="contractSearch" placeholder="搜索签署任务" aria-label="搜索签署任务" />
+            </div>
+            <div class="wb-tool-spacer"></div>
+            <button class="wb-tool-btn" type="button" data-toast="筛选：日期 / 状态 / 发起人 / 快速视图">
+              <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/funnel.svg" alt="" /></span>
+              筛选
+            </button>
+            <button class="wb-tool-btn" type="button" data-toast="导出当前筛选结果">
+              <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+              导出
+            </button>
+            <button class="wb-tool-btn" type="button" id="contractRefresh">
+              <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
+              刷新
+            </button>
+          </div>
+
+          <table class="aip-table" id="contractTable">
+            <thead>
+              <tr>
+                <th style="width:40px"><input type="checkbox" aria-label="全选" style="accent-color:var(--aip-brand);width:15px;height:15px" /></th>
+                <th style="width:36%">任务主题</th>
+                <th style="width:20%">状态</th>
+                <th>更新时间</th>
+                <th>文件</th>
+                <th style="width:96px;text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="contractTbody"></tbody>
+          </table>
+
+          <div class="wb-pager" style="border-top:1px solid var(--aip-line-soft)">
+            <span class="wb-pager__total" id="contractTotal">共 0 条</span>
+            <div class="wb-pager__nav" id="contractPager"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 任务中心 -->
+    <section class="wb-view-page" id="pageTasks" hidden>
+      <div class="wb-tasks">
+       <div class="wb-tasks-card">
+        <h1 class="wb-tasks__title">任务中心</h1>
+
+        <!-- 顶部 Tab：按来源区分（全部 / 签署任务 / 审批任务 / 组织待办 / 功能申请） -->
+        <div class="wb-tasks__toolbar">
+          <div class="wb-tasks-tabs" id="taskTabs" role="tablist" aria-label="任务来源">
+            <button type="button" role="tab" class="is-on" data-tab="sign" aria-selected="true">签署任务 <span class="wb-tab-count" data-count="sign"></span></button>
+            <button type="button" role="tab" data-tab="approval" aria-selected="false">审批任务 <span class="wb-tab-count" data-count="approval"></span></button>
+          </div>
+          <div class="wb-tasks__spacer"></div>
+          <button class="wb-tool-btn" type="button" id="refreshBtn" data-toast="刷新当前列表">
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
+            刷新
+          </button>
+        </div>
+
+        <div class="wb-partial" id="partialBar" hidden>
+          <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/question.svg" alt="" /></span>
+          <span>结果不完整：<b>审批待办</b>来源加载失败，已显示其余来源。</span>
+          <button class="wb-partial__retry" type="button" data-toast="重试失败来源（成功后重建完整分页）">重试</button>
+        </div>
+
+        <!-- 列表滚动区：分组列表 + 状态（头部/分页固定，仅此处滚动） -->
+        <div class="wb-tasks-scroll">
+          <!-- 分组列表：签署 / 审批（JS 渲染） -->
+          <div id="taskGroups"></div>
+
+          <!-- 状态区：空 / 无命中 / 来源失效 -->
+          <div id="stateCard" hidden>
+          <div class="wb-state" id="stateEmpty" hidden>
+            <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/checks.svg" alt="" /></span>
+            <h4>当前没有待处理任务</h4>
+            <p>所有来源的待办都已处理完成。</p>
+          </div>
+          <div class="wb-state" id="stateNoHit" hidden>
+            <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+            <h4>没有符合条件的任务</h4>
+            <p>当前分类下没有待办。</p>
+          </div>
+          <div class="wb-state wb-state--error" id="stateSourceDead" hidden>
+            <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/eye-slash.svg" alt="" /></span>
+            <h4>所选来源不可访问</h4>
+            <p>当前筛选的来源已不可用（无权限或已撤权），请清除筛选后按全部合法来源重新查询。</p>
+            <button class="aip-btn aip-btn--secondary" type="button" id="clearFilterBtn2">清除筛选</button>
+          </div>
+          </div>
+        </div>
+
+        <!-- 分页 -->
+        <div id="pagerCard">
+          <div class="wb-pager" id="pager">
+            <span class="wb-pager__total" id="pagerTotal">共 0 条</span>
+            <label class="wb-pager__size">每页
+              <select id="pageSize" aria-label="每页条数">
+                <option>10</option><option>20</option><option>30</option><option>50</option>
+              </select> 条
+            </label>
+            <div class="wb-pager__nav" id="pagerNav"></div>
+          </div>
+        </div>
+       </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 演示控制条 -->
+  <div class="wb-demo-bar" role="group" aria-label="演示控制">
+    <span>演示：</span>
+    <button type="button" data-demo="normal" class="is-on">正常</button>
+    <button type="button" data-demo="empty">空态</button>
+    <button type="button" data-demo="partial">部分失败</button>
+    <button type="button" data-demo="dead">来源失效</button>
+  </div>
+
+  <!-- 退出登录二次确认 -->
+  <div class="aip-modal-mask" id="logoutMask" hidden>
+    <div class="aip-modal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" style="width:400px">
+      <div class="aip-modal__head">
+        <h2 id="logoutTitle">退出登录</h2>
+        <button class="aip-topbar__icon-btn" type="button" id="logoutClose" aria-label="关闭">
+          <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/x.svg" alt="" /></span>
+        </button>
+      </div>
+      <div class="aip-modal__body" style="padding:20px">
+        <p style="margin:0;color:var(--aip-ink-2);font-size:var(--aip-font-size-md);line-height:1.6">确定要退出当前账号吗？退出后需要重新登录才能继续使用。</p>
+      </div>
+      <div class="aip-modal__foot">
+        <button class="aip-btn aip-btn--secondary" type="button" id="logoutCancel">取消</button>
+        <button class="aip-btn aip-btn--primary" type="button" id="logoutConfirm">退出登录</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+    /* ---------------- Toast ---------------- */
+    var toastEl = null, toastTimer = null;
+    function toast (msg) {
+      if (!toastEl) {
+        toastEl = document.createElement("div");
+        toastEl.style.cssText = "position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:999;" +
+          "padding:10px 16px;border-radius:8px;background:rgba(20,24,29,.92);color:#fff;font-size:13px;" +
+          "box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:72vw;text-align:center;";
+        document.body.appendChild(toastEl);
+      }
+      toastEl.textContent = msg;
+      toastEl.style.opacity = "1";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.style.opacity = "0"; toastEl.style.transition = "opacity .4s"; }, 2200);
+    }
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-toast]");
+      if (t) { toast(t.getAttribute("data-toast")); }
+    });
+
+    /* ---------------- 顶栏视图切换 ---------------- */
+    var pages = { home: $("#pageHome"), contracts: $("#pageContracts"), tasks: $("#pageTasks") };
+    var navTabs = $("#navTabs");
+    var taskBtn = $("#taskBtn");
+    var currentView = "home";
+
+    function setView (view) {
+      currentView = view;
+      Object.keys(pages).forEach(function (k) { pages[k].hidden = (k !== view); });
+      // 一级模块选中态：任务中心为公共页，六个一级模块均不选中
+      $$("button", navTabs).forEach(function (b) {
+        var on = b.getAttribute("data-view") === view;
+        b.classList.toggle("is-active", on);
+        if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+      });
+      var onTasks = view === "tasks";
+      taskBtn.classList.toggle("is-active", onTasks);
+      taskBtn.setAttribute("aria-current", onTasks ? "page" : "false");
+      closeAllMenus();
+      if (view === "tasks") { renderTabCounts(); renderTasks(); }
+    }
+    navTabs.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-view]");
+      if (b) setView(b.getAttribute("data-view"));
+    });
+    $("#brandHome").addEventListener("click", function (e) { e.preventDefault(); setView("home"); });
+    taskBtn.addEventListener("click", function () { setView("tasks"); });
+
+    /* ---------------- 菜单（帮助 / 头像 互斥 + 子视图） ---------------- */
+    var helpBtn = $("#helpBtn"), helpMenu = $("#helpMenu");
+    var avatarBtn = $("#avatarBtn"), avatarMenu = $("#avatarMenu");
+
+    function openMenu (menu, btn) {
+      closeAllMenus();
+      menu.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu (menu, btn) {
+      menu.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      if (menu === avatarMenu) resetSub();
+    }
+    function closeAllMenus () {
+      if (!helpMenu.hidden) closeMenu(helpMenu, helpBtn);
+      if (!avatarMenu.hidden) closeMenu(avatarMenu, avatarBtn);
+    }
+    helpBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      helpMenu.hidden ? openMenu(helpMenu, helpBtn) : closeMenu(helpMenu, helpBtn);
+    });
+    avatarBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      avatarMenu.hidden ? openMenu(avatarMenu, avatarBtn) : closeMenu(avatarMenu, avatarBtn);
+    });
+    helpMenu.addEventListener("click", function (e) {
+      if (e.target.closest("[data-toast]")) closeMenu(helpMenu, helpBtn);
+    });
+
+    /* 头像子视图 */
+    function showSub (id) {
+      $$(".wb-view--sub", avatarMenu).forEach(function (v) { v.hidden = (v.id !== id); });
+      avatarMenu.classList.add("show-sub");
+    }
+    function resetSub () {
+      avatarMenu.classList.remove("show-sub");
+      $$(".wb-view--sub", avatarMenu).forEach(function (v) { v.hidden = true; });
+    }
+    $("#openCorpSub").addEventListener("click", function () { showSub("corpSub"); });
+    $("#openProdSub").addEventListener("click", function () { showSub("prodSub"); });
+    $$("[data-back]", avatarMenu).forEach(function (b) {
+      b.addEventListener("click", function () { avatarMenu.classList.remove("show-sub"); });
+    });
+    // 更多分组（语言/隐私条款/注册协议）折叠
+    (function () {
+      var toggle = $("#moreGroupToggle"), items = $("#moreGroupItems");
+      if (toggle && items) {
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var open = items.hidden;
+          items.hidden = !open;
+          toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+      }
+    })();
+
+    /* 点外部 / Esc 关闭 */
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".wb-anchor")) closeAllMenus();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      // 先关退出确认，再退菜单子视图，再关最上层菜单
+      if (!logoutMask.hidden) { closeLogout(); return; }
+      if (!avatarMenu.hidden && avatarMenu.classList.contains("show-sub")) { avatarMenu.classList.remove("show-sub"); return; }
+      closeAllMenus();
+    });
+
+    /* ---------------- 退出登录二次确认 ---------------- */
+    var logoutMask = $("#logoutMask");
+    function openLogout () {
+      closeAllMenus();
+      logoutMask.hidden = false;
+    }
+    function closeLogout () { logoutMask.hidden = true; }
+    $("#logoutBtn").addEventListener("click", openLogout);
+    $("#logoutClose").addEventListener("click", closeLogout);
+    $("#logoutCancel").addEventListener("click", closeLogout);
+    logoutMask.addEventListener("click", function (e) { if (e.target === logoutMask) closeLogout(); });
+    $("#logoutConfirm").addEventListener("click", function () {
+      closeLogout();
+      toast("已退出登录（演示）");
+    });
+
+    /* ---------------- 任务中心数据与渲染 ---------------- */
+    var SOURCES = {
+      sign:     { name: "签署任务",   order: 1, icon: "envelope-simple" },
+      approval: { name: "审批任务",   order: 2, icon: "note-pencil" },
+      org:      { name: "组织待办",   order: 3, icon: "users" },
+      feature:  { name: "功能开通申请", order: 4, icon: "puzzle-piece" }
+    };
+    var ALL_TASKS = [
+      { id: 1, src: "sign",     name: "劳动合同续签（2026）",        summary: "张三 · 待你签署",            status: "待签署", prog: 0,   time: "2026-09-15 14:20", op: "去签署", pri: true },
+      { id: 2, src: "sign",     name: "采购框架协议补充条款",        summary: "法务部 · 待你填写",          status: "待填写", prog: 20,  time: "2026-09-15 11:02", op: "去填写", pri: true },
+      { id: 3, src: "sign",     name: "渠道分销合作协议",            summary: "销售一部 · 待你定稿",        status: "待定稿", prog: 80,  time: "2026-09-14 17:48", op: "去定稿", pri: true },
+      { id: 4, src: "sign",     name: "入职材料签署包",              summary: "人力资源部 · 待你接收",      status: "待接收", prog: 0,   time: "2026-09-14 09:15", op: "去接收", pri: true },
+      { id: 5, src: "approval", name: "用印申请：与 XX 公司年度合同", summary: "印章审批 · 李四发起",        status: "待审批", prog: 50,  time: "2026-09-15 10:11", op: "去审批", pri: true },
+      { id: 6, src: "approval", name: "合同审批：供应商准入协议",    summary: "合同审批 · 王五发起",        status: "待审批", prog: 50,  time: "2026-09-14 16:35", op: "去审批", pri: true },
+      { id: 7, src: "org",      name: "成员加入确认",                summary: "邀请你加入「云合同科技」",   status: "待确认", prog: 0,   time: "2026-09-13 09:02", op: "去确认", pri: true },
+      { id: 8, src: "org",      name: "企业关联确认",                summary: "申请关联你的企业",           status: "待确认", prog: 0,   time: "2026-09-12 15:26", op: "去确认", pri: true },
+      { id: 9, src: "feature",  name: "功能开通申请：智能审查",      summary: "赵六申请开通 · 待受理",      status: "待受理", prog: 40,  time: "2026-09-11 13:40", op: "去受理", pri: true },
+      { id: 10, src: "feature", name: "功能开通申请：批量签署",      summary: "钱七申请开通 · 待受理",      status: "待受理", prog: 40,  time: "2026-09-10 18:05", op: "去受理", pri: true },
+      { id: 11, src: "sign",    name: "保密协议（NDA）",             summary: "市场部 · 待你签署",          status: "待签署", prog: 0,   time: "2026-09-09 12:00", op: "去签署", pri: true },
+      { id: 12, src: "sign",    name: "服务外包合同",                summary: "采购部 · 已完成",            status: "已完成", prog: 100, time: "2026-09-08 10:47", op: "查看" },
+      { id: 13, src: "approval", name: "费用报销审批",               summary: "财务审批 · 已完成",          status: "已完成", prog: 100, time: "2026-09-07 17:19", op: "查看" },
+      { id: 14, src: "sign",    name: "房屋租赁合同",                summary: "行政部 · 待你签署",          status: "待签署", prog: 0,   time: "2026-09-06 08:53", op: "去签署", pri: true },
+      { id: 15, src: "sign",    name: "软件授权协议",                summary: "IT 部 · 待你填写",           status: "待填写", prog: 20,  time: "2026-09-05 14:31", op: "去填写", pri: true },
+      { id: 16, src: "org",     name: "部门调整确认",                summary: "你的部门将调整",             status: "待确认", prog: 0,   time: "2026-09-04 11:12", op: "去确认", pri: true },
+      { id: 17, src: "sign",    name: "股权转让协议",                summary: "法务部 · 待你签署",          status: "待签署", prog: 0,   time: "2026-09-03 16:58", op: "去签署", pri: true },
+      { id: 18, src: "approval", name: "印章外带申请",               summary: "印章审批 · 待审批",          status: "待审批", prog: 50,  time: "2026-09-02 09:44", op: "去审批", pri: true }
+    ];
+
+    var state = {
+      tab: "sign",           // 顶部来源 Tab：sign（签署任务）| approval（审批任务）
+      page: 1,
+      pageSize: 10,
+      demo: "normal"         // normal | empty | partial | dead
+    };
+
+    var taskGroups = $("#taskGroups"), stateCard = $("#stateCard"), pagerCard = $("#pagerCard");
+    var stateEmpty = $("#stateEmpty"), stateNoHit = $("#stateNoHit"), stateSourceDead = $("#stateSourceDead");
+    var partialBar = $("#partialBar"), pager = $("#pager"), pagerTotal = $("#pagerTotal"), pagerNav = $("#pagerNav");
+    var STATUS_CLS = { "已完成": "done" };
+
+    function filteredTasks () {
+      var list = ALL_TASKS.filter(function (t) { return t.src === state.tab; });
+      // 按 签署→审批→组织→功能申请 排序
+      list.sort(function (a, b) { return SOURCES[a.src].order - SOURCES[b.src].order || a.id - b.id; });
+      return list;
+    }
+
+    function escapeHtml (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+    // 渲染各 Tab 待办数量
+    function renderTabCounts () {
+      $$("#taskTabs .wb-tab-count").forEach(function (el) {
+        var src = el.getAttribute("data-count");
+        var n = ALL_TASKS.filter(function (t) { return t.src === src; }).length;
+        el.textContent = n;
+      });
+    }
+
+    function renderTasks () {
+      stateEmpty.hidden = stateNoHit.hidden = stateSourceDead.hidden = true;
+      stateCard.hidden = true; taskGroups.innerHTML = ""; pagerCard.hidden = false; partialBar.hidden = true;
+
+      if (state.demo === "empty") {
+        pagerCard.hidden = true; stateCard.hidden = false; stateEmpty.hidden = false;
+        pagerTotal.textContent = "共 0 条"; return;
+      }
+      if (state.demo === "dead") {
+        pagerCard.hidden = true; stateCard.hidden = false; stateSourceDead.hidden = false;
+        pagerTotal.textContent = "共 0 条"; return;
+      }
+      if (state.demo === "partial") { partialBar.hidden = false; }
+
+      var list = filteredTasks();
+      if (!list.length) {
+        pagerCard.hidden = true; stateCard.hidden = false; stateNoHit.hidden = false;
+        pagerTotal.textContent = "共 0 条"; return;
+      }
+
+      var total = list.length;
+      var pages = Math.max(1, Math.ceil(total / state.pageSize));
+      if (state.page > pages) state.page = pages; // 越界回最后有效页
+      var start = (state.page - 1) * state.pageSize;
+      var rows = list.slice(start, start + state.pageSize);
+
+      // 按来源分组（签署 → 审批 → 组织 → 功能申请），保持组内原顺序
+      var bySrc = {};
+      rows.forEach(function (t) { (bySrc[t.src] = bySrc[t.src] || []).push(t); });
+      var srcOrder = Object.keys(SOURCES).sort(function (a, b) { return SOURCES[a].order - SOURCES[b].order; });
+
+      taskGroups.innerHTML = srcOrder.filter(function (s) { return bySrc[s] && bySrc[s].length; }).map(function (s) {
+        var meta = SOURCES[s];
+        // 单一来源 Tab（签署任务/审批任务）：顶部 Tab 已表明分类，不显示分组头
+        var showHead = false;
+        var body = bySrc[s].map(function (t) {
+          var done = STATUS_CLS[t.status] === "done";
+          return '<tr>' +
+            '<td><button type="button" class="wb-task-name" data-toast="打开：' + escapeHtml(t.name) + '">' + escapeHtml(t.name) + '</button><span class="wb-task-summary">' + escapeHtml(t.summary) + '</span></td>' +
+            '<td><div class="wb-env-state' + (done ? ' is-done' : '') + '"><span style="font-size:var(--aip-font-size-sm);font-weight:500;color:' + (done ? 'var(--aip-success)' : 'var(--aip-ink-2)') + '">' + t.status + '</span><div class="wb-env-track"><i style="width:' + t.prog + '%"></i></div></div></td>' +
+            '<td class="wb-task-time">' + t.time + '</td>' +
+            '<td style="text-align:left"><button type="button" class="wb-row-op' + (t.pri ? ' wb-row-op--primary' : '') + '" data-toast="' + t.op + '：进入原处理页（演示）">' + t.op + '</button></td>' +
+          '</tr>';
+        }).join("");
+        return '<div class="wb-task-group">' +
+          (showHead ?
+          '<div class="wb-task-group__head">' +
+            '<h3 class="wb-task-group__title">' + meta.name + '</h3>' +
+            '<span class="wb-task-group__count">' + bySrc[s].length + ' 项待处理</span>' +
+          '</div>' : '') +
+          '<table class="aip-table"><thead><tr>' +
+            '<th style="width:38%">任务</th><th style="width:20%">状态</th><th>更新时间</th><th style="width:110px;text-align:left">操作</th>' +
+          '</tr></thead><tbody>' + body + '</tbody></table>' +
+        '</div>';
+      }).join("");
+
+      pagerTotal.textContent = "共 " + total + " 条";
+      renderPager(pages);
+    }
+
+    function renderPager (pages) {
+      pagerNav.innerHTML = "";
+      function btn (label, page, opts) {
+        opts = opts || {};
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "wb-pager__btn" + (opts.on ? " is-on" : "");
+        b.textContent = label;
+        if (opts.disabled) b.disabled = true;
+        else b.addEventListener("click", function () { state.page = page; renderTasks(); });
+        pagerNav.appendChild(b);
+      }
+      btn("‹", state.page - 1, { disabled: state.page <= 1 });
+      var window = 5, from = Math.max(1, Math.min(state.page - 2, pages - window + 1)), to = Math.min(pages, from + window - 1);
+      if (from > 1) { btn("1", 1, { on: state.page === 1 }); if (from > 2) { var d = document.createElement("span"); d.textContent = "…"; d.style.color = "var(--aip-ink-3)"; pagerNav.appendChild(d); } }
+      for (var p = from; p <= to; p++) btn(String(p), p, { on: p === state.page });
+      if (to < pages) { if (to < pages - 1) { var d2 = document.createElement("span"); d2.textContent = "…"; d2.style.color = "var(--aip-ink-3)"; pagerNav.appendChild(d2); } btn(String(pages), pages, { on: state.page === pages }); }
+      btn("›", state.page + 1, { disabled: state.page >= pages });
+    }
+
+    /* 顶部来源 Tab */
+    $("#taskTabs").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-tab]");
+      if (!b) return;
+      state.tab = b.getAttribute("data-tab"); state.page = 1;
+      $$("#taskTabs button").forEach(function (x) {
+        var on = x === b;
+        x.classList.toggle("is-on", on);
+        x.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      renderTasks();
+    });
+
+    /* 每页条数 */
+    $("#pageSize").addEventListener("change", function () {
+      state.pageSize = parseInt(this.value, 10); state.page = 1; renderTasks();
+    });
+
+    /* 来源失效态：回到签署任务 */
+    $("#clearFilterBtn2").addEventListener("click", function () {
+      state.tab = "sign"; state.page = 1; state.demo = "normal";
+      $$("#taskTabs button").forEach(function (x) {
+        var on = x.getAttribute("data-tab") === "sign";
+        x.classList.toggle("is-on", on); x.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      renderTasks();
+    });
+
+    /* ---------------- 演示控制 ---------------- */
+    $$(".wb-demo-bar button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        $$(".wb-demo-bar button").forEach(function (x) { x.classList.toggle("is-on", x === b); });
+        state.demo = b.getAttribute("data-demo");
+        if (currentView !== "tasks") setView("tasks");
+        renderTasks();
+      });
+    });
+
+    /* ---------------- 初始化 ---------------- */
+
+    /* ================= 协议模块 ================= */
+    (function contracts () {
+      var CNAV = {
+        all: { title: "全部任务", filter: null },
+        draft: { title: "草稿", filter: function (s) { return s === "草稿"; } },
+        active: { title: "进行中", filter: function (s) { return ["填写中", "待定稿", "签署中", "待接收"].indexOf(s) > -1; } },
+        completed: { title: "已完成", filter: function (s) { return s === "已完成"; } }
+      };
+      var CONTRACTS = [
+        { id: 1, name: "劳动合同续签（2026）", sub: "我发起 · 3 人参与", status: "签署中", prog: 66, time: "2026-09-15 14:20", files: 3, op: "继续签署", pri: true, views: ["all", "active"] },
+        { id: 2, name: "采购框架协议补充条款", sub: "我收到 · 法务部", status: "填写中", prog: 30, time: "2026-09-15 11:02", files: 2, op: "去填写", pri: true, views: ["all", "active"] },
+        { id: 3, name: "渠道分销合作协议", sub: "我发起 · 销售一部", status: "待定稿", prog: 80, time: "2026-09-14 17:48", files: 5, op: "去定稿", pri: true, views: ["all", "active"] },
+        { id: 4, name: "入职材料签署包", sub: "我收到 · 人力资源部", status: "待接收", prog: 0, time: "2026-09-14 09:15", files: 4, op: "去接收", pri: true, views: ["all", "active"] },
+        { id: 5, name: "年度供应商框架合同", sub: "我发起 · 采购部", status: "签署中", prog: 45, time: "2026-09-13 16:30", files: 6, op: "催办", views: ["all", "active"] },
+        { id: 6, name: "保密协议（NDA）- 新客户", sub: "我发起 · 市场部", status: "已完成", prog: 100, time: "2026-09-12 10:08", files: 1, op: "下载", views: ["all", "completed"] },
+        { id: 7, name: "软件授权服务协议", sub: "我收到 · IT 部", status: "签署中", prog: 55, time: "2026-09-11 15:44", files: 2, op: "继续签署", pri: true, views: ["all", "active"] },
+        { id: 8, name: "房屋租赁合同", sub: "我发起 · 行政部", status: "已完成", prog: 100, time: "2026-09-10 13:20", files: 3, op: "下载", views: ["all", "completed"] },
+        { id: 9, name: "股权代持协议（草稿）", sub: "我发起 · 法务部", status: "草稿", prog: 0, time: "2026-09-09 18:02", files: 1, op: "编辑", views: ["all", "draft"] },
+        { id: 10, name: "广告推广合作合同", sub: "我发起 · 市场部", status: "签署中", prog: 72, time: "2026-09-08 09:37", files: 4, op: "催办", views: ["all", "active"] },
+        { id: 11, name: "仓储物流服务协议", sub: "我收到 · 供应链", status: "已完成", prog: 100, time: "2026-09-05 14:55", files: 5, op: "下载", views: ["all", "completed"] },
+        { id: 12, name: "项目外包开发合同（草稿）", sub: "我发起 · 技术部", status: "草稿", prog: 0, time: "2026-09-03 20:11", files: 2, op: "编辑", views: ["all", "draft"] }
+      ];
+      var cstate = { nav: "all", scope: "mine", q: "", page: 1, pageSize: 8 };
+      var titleEl = $("#contractTitle"), tbody = $("#contractTbody"), totalEl = $("#contractTotal"), pagerEl = $("#contractPager");
+
+      function filtered () {
+        var nav = CNAV[cstate.nav];
+        var list = CONTRACTS.filter(function (c) { return c.views.indexOf(cstate.nav) > -1; });
+        if (nav.filter) list = list.filter(function (c) { return nav.filter(c.status); });
+        if (cstate.q) {
+          var q = cstate.q.toLowerCase();
+          list = list.filter(function (c) { return (c.name + c.sub).toLowerCase().indexOf(q) > -1; });
+        }
+        return list;
+      }
+      function render () {
+        titleEl.textContent = CNAV[cstate.nav].title;
+        var list = filtered();
+        var total = list.length;
+        var pages = Math.max(1, Math.ceil(total / cstate.pageSize));
+        if (cstate.page > pages) cstate.page = pages;
+        var rows = list.slice((cstate.page - 1) * cstate.pageSize, cstate.page * cstate.pageSize);
+        tbody.innerHTML = rows.map(function (c) {
+          var done = c.status === "已完成";
+          return '<tr>' +
+            '<td><input type="checkbox" aria-label="选择" style="accent-color:var(--aip-brand);width:15px;height:15px" /></td>' +
+            '<td><button type="button" class="wb-env-name" data-toast="打开任务详情：' + esc(c.name) + '">' + esc(c.name) + '</button><span class="wb-env-sub">' + esc(c.sub) + '</span></td>' +
+            '<td><div class="wb-env-state' + (done ? ' is-done' : '') + '"><span style="font-size:var(--aip-font-size-sm);font-weight:500;color:' + (done ? 'var(--aip-success)' : 'var(--aip-ink-2)') + '">' + c.status + '</span><div class="wb-env-track"><i style="width:' + c.prog + '%"></i></div></div></td>' +
+            '<td style="color:var(--aip-ink-2);font-size:var(--aip-font-size-sm)">' + c.time + '</td>' +
+            '<td><span class="wb-env-files"><span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-text.svg" alt="" /></span>' + c.files + '</span></td>' +
+            '<td style="text-align:right"><button type="button" class="wb-row-op' + (c.pri ? ' wb-row-op--primary' : '') + '" data-toast="' + c.op + '：' + esc(c.name) + '">' + c.op + '</button></td>' +
+          '</tr>';
+        }).join("") || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--aip-ink-3)">当前没有符合条件的签署任务</td></tr>';
+        totalEl.textContent = "共 " + total + " 条";
+        pagerEl.innerHTML = "";
+        function pb (label, page, opts) {
+          opts = opts || {};
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "wb-pager__btn" + (opts.on ? " is-on" : "");
+          b.textContent = label;
+          if (opts.disabled) b.disabled = true; else b.addEventListener("click", function () { cstate.page = page; render(); });
+          pagerEl.appendChild(b);
+        }
+        pb("‹", cstate.page - 1, { disabled: cstate.page <= 1 });
+        for (var p = 1; p <= pages; p++) pb(String(p), p, { on: p === cstate.page });
+        pb("›", cstate.page + 1, { disabled: cstate.page >= pages });
+      }
+      function esc (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+      // 侧栏导航
+      $$("[data-cnav]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          cstate.nav = b.getAttribute("data-cnav"); cstate.page = 1;
+          $$("[data-cnav]").forEach(function (x) { x.classList.toggle("is-active", x === b); });
+          render();
+        });
+      });
+      // 访问范围
+      $("#scopeSwitch").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-scope]");
+        if (!b) return;
+        cstate.scope = b.getAttribute("data-scope");
+        $$("#scopeSwitch button").forEach(function (x) { x.classList.toggle("is-on", x === b); });
+        toast(b.textContent.trim() + "（演示：切换访问范围）");
+      });
+      // 发起签署菜单
+      var launchBtn = $("#launchBtn"), launchMenu = $("#launchMenu");
+      launchBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var open = launchBtn.classList.toggle("is-open");
+        launchBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".aip-launch")) { launchBtn.classList.remove("is-open"); launchBtn.setAttribute("aria-expanded", "false"); }
+      });
+      // 折叠：任务文件夹 / 记录与处理
+      function fold (btnId, bodyId) {
+        var btn = $(btnId), body = $(bodyId);
+        if (!btn || !body) return;
+        btn.addEventListener("click", function () {
+          var open = body.style.display !== "none";
+          body.style.display = open ? "none" : "";
+          btn.setAttribute("aria-expanded", open ? "false" : "true");
+        });
+      }
+      fold("#folderToggle", "#folderBody");
+      fold("#recordsToggle", "#recordsBody");
+      // 文件夹行
+      $$("[data-toast-row]").forEach(function (r) {
+        r.addEventListener("click", function () { toast(r.getAttribute("data-toast-row") + "（演示）"); });
+      });
+      // 搜索 / 刷新
+      var cs = $("#contractSearch"), ct = null;
+      cs.addEventListener("input", function () {
+        clearTimeout(ct);
+        ct = setTimeout(function () { cstate.q = cs.value.trim(); cstate.page = 1; render(); }, 250);
+      });
+      $("#contractRefresh").addEventListener("click", function () { toast("已刷新任务列表"); render(); });
+
+      render();
+    })();
+
+    setView("home");
+  })();
+  </script>
+</body>
+</html>

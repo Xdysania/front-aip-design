@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>合同库 · 设计稿预览</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" /></noscript>
+  <link rel="stylesheet" href="../../../shared/portal-home.css" />
+</head>
+<body>
+  <div class="cursor is-hidden" aria-hidden="true">
+    <div class="cursor__blob" data-cursor-blob></div>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar__brand topbar__brand--back" href="../../../#versions" aria-label="返回" data-cursor="hover">
+      <svg class="topbar__mark topbar__mark--back" viewBox="0 0 76 65" aria-hidden="true">
+        <path fill="currentColor" d="M37.5 0L75 65H0L37.5 0Z" />
+      </svg>
+      <span class="topbar__name">返回</span>
+    </a>
+  </header>
+
+  <main class="hero">
+    <section class="hero__panel" aria-labelledby="portal-title">
+      <p class="hero__eyebrow">AIP 0.1 · 法大大 FASC</p>
+      <h1 id="portal-title" class="hero__title">合同库</h1>
+      <p class="hero__lead">签后文件管理入口：FASC 已完成签署任务自动同步入库 + 本地上传；合同列表（搜索/筛选/自定义列）、详情抽屉（PDF 预览/字段定位/附件/编辑）、本地上传三段式、文件上传记录、合同类型与字段管理（PRD v0.6 · TAPD 1092515）。</p>
+
+      <div class="portal-cards">
+        <a class="portal-card" href="contract-library.html" data-updated-at="2026-09-16T17:00:00" data-cursor="hover">
+          <span class="portal-card__title">合同库（列表 / 详情抽屉 / 上传合同 / 文件上传记录 / 合同类型 / 字段管理）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html#upload-records" data-updated-at="2026-09-16T17:00:00" data-cursor="hover">
+          <span class="portal-card__title">文件上传记录（直达：任务状态 / 失败文件 / 查询文件）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../../shared/format-updated-at.js"></script>
+  <script src="../../../shared/cursor.js"></script>
+  <script src="../../../shared/portal-home.js"></script>
+</body>
+</html>

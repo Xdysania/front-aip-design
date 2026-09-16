@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AIP 设计规范 · UI Kit（Libra）</title>
+<link rel="stylesheet" href="aip-design-system.css" />
+<style>
+  /* UI Kit 壳层：对齐 Libra · 顶栏（sunken 底 + 悬浮卡） */
+  body {
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden; margin: 0;
+    background: var(--aip-bg-page); font-family: var(--aip-font); color: var(--aip-ink);
+  }
+  .kit-top {
+    flex: none; height: 56px; margin: 6px 10px 0; padding: 0 16px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--aip-bg-card); border: 1px solid #e6e9ee;
+    border-radius: var(--aip-radius-lg); box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-top__logo {
+    width: 28px; height: 28px; border-radius: 8px; background: var(--aip-brand); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;
+  }
+  .kit-top__title { font-weight: 600; font-size: 15px; }
+  .kit-top__tag {
+    font-size: 11px; background: var(--aip-brand-soft); color: var(--aip-brand-deep);
+    padding: 2px 8px; border-radius: var(--aip-radius-pill); font-weight: 600;
+  }
+  .kit-body { flex: 1; display: flex; min-height: 0; padding: 8px 5px 16px; gap: 8px; }
+  /* 侧栏层级对齐 NotaSign：类目加粗深色 · 小节灰字+横线 · 条目可点 */
+  .kit-nav {
+    width: 248px; flex: none; overflow: auto; padding: 8px 0 20px;
+    background: var(--aip-bg-card); border: 1px solid #e6e9ee;
+    border-radius: var(--aip-radius-lg); box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-nav__block { margin-top: 16px; }
+  .kit-nav__block:first-child { margin-top: 0; }
+  .kit-nav__category {
+    margin: 0; padding: 8px 16px 4px;
+    font-size: 13px; font-weight: 600; line-height: 20px;
+    color: var(--aip-ink);
+  }
+  .kit-nav__section { margin-top: 12px; }
+  .kit-nav__section:first-of-type { margin-top: 8px; }
+  .kit-nav__section-title {
+    display: flex; align-items: center; gap: 8px;
+    margin: 0; padding: 8px 16px;
+    font-size: 13px; font-weight: 400; line-height: 20px;
+    color: var(--aip-ink-3);
+  }
+  .kit-nav__section-title::after {
+    content: ""; flex: 1 1 auto; height: 1px;
+    background: var(--aip-line);
+  }
+  .kit-nav__list {
+    margin: 0; padding: 0; list-style: none;
+  }
+  .kit-nav__list > li { margin: 0; }
+  .kit-nav a {
+    display: block; margin: 4px 8px; padding: 0 12px;
+    border-radius: 8px; font-size: 13px; font-weight: 400;
+    line-height: 36px; color: var(--aip-ink); text-decoration: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .kit-nav a:hover {
+    background: color-mix(in srgb, var(--aip-brand) 6%, var(--aip-bg-page));
+    color: var(--aip-brand);
+  }
+  .kit-nav a.is-active {
+    background: color-mix(in srgb, var(--aip-brand) 10%, var(--aip-bg-page));
+    color: var(--aip-brand); font-weight: 500;
+  }
+  .kit-main {
+    flex: 1; overflow: auto; min-height: 0;
+    background: #fff; border: 1px solid #e6e9ee;
+    border-radius: var(--aip-radius-md); box-shadow: var(--aip-shadow-sm);
+  }
+  /* 内容区左右留白收窄一半 */
+  .kit-panel { display: none; max-width: none; margin: 0; padding: 32px 20px 80px; }
+  .kit-panel.is-active { display: block; }
+  .kit-panel[hidden] { display: none !important; }
+  .kit-panel--page { max-width: none; padding: 12px 8px 16px; }
+  .kit-panel--biz-wide { max-width: none; padding: 24px 8px 40px; }
+  .kit-panel--page .kit-page-preview { height: calc(100vh - 56px - 140px); }
+  .kit-panel--page .kit-page-preview__frame { min-height: 0; height: 100%; }
+  .kit-panel > h1 { font-size: 28px; font-weight: 500; margin: 0 0 4px; letter-spacing: -.02em; }
+  .kit-panel > .en { color: var(--aip-ink-3); font-size: 14px; margin: 0 0 16px; }
+  .kit-doc__note {
+    background: var(--aip-bg-page); border-left: 3px solid var(--aip-brand);
+    padding: 12px 8px; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--aip-ink-2); margin: 12px 0;
+  }
+  .kit-demo {
+    background: #fff; border: 1px solid #e6e9ee; border-radius: 12px;
+    padding: 28px 14px; margin: 12px 0; position: relative; box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-demo--subtle { background: var(--aip-bg-page); box-shadow: none; }
+  .kit-demo--pop { min-height: 220px; }
+  .kit-demo__label { font-size: 12px; color: var(--aip-ink-3); margin-bottom: 14px; letter-spacing: .4px; }
+  .kit-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .kit-sec { margin: 32px 0 8px; font-size: 18px; font-weight: 600; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+  .swatch { border: 1px solid #e6e9ee; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: var(--aip-shadow-sm); }
+  .swatch i { display: block; height: 56px; }
+  .swatch div { padding: 8px 12px; font-size: 13px; }
+  .swatch small { display: block; color: var(--aip-ink-3); font-size: 11px; margin-top: 2px; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: .85em; background: rgba(28,43,51,.05); padding: 1px 5px; border-radius: 4px; color: var(--aip-brand-deep); }
+  .kit-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  .kit-table th { text-align: left; color: var(--aip-ink-2); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--aip-line); }
+  .kit-table td { padding: 8px 12px; border-bottom: 1px solid var(--aip-line-soft); }
+  .type-demo { border-bottom: 1px dashed var(--aip-line); padding: 12px 0; display: flex; align-items: baseline; gap: 20px; }
+  .type-demo code { min-width: 150px; flex: none; }
+  .kit-page-preview {
+    display: flex; flex-direction: column; width: 100%;
+    border: 1px solid #e6e9ee; border-radius: 12px; overflow: hidden;
+    background: var(--aip-bg-page); margin: 12px 0; box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-page-preview__frame { display: block; width: 100%; height: 100%; min-height: 720px; border: 0; background: var(--aip-bg-page); }
+  .kit-page-preview__bar {
+    flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 12px;
+    background: var(--aip-bg-card); border-bottom: 1px solid #e6e9ee; font-size: 12px; color: var(--aip-ink-3);
+  }
+  .kit-page-preview__bar a { color: var(--aip-brand); margin-left: auto; text-decoration: none; }
+  .kit-biz-embed {
+    display: flex; flex-direction: column; width: 100%;
+    border: 1px solid #e6e9ee; border-radius: 12px; overflow: hidden;
+    background: var(--aip-bg-page); margin: 12px 0 0; box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-biz-embed__bar {
+    flex: none; display: flex; align-items: center; gap: 10px; padding: 6px 12px;
+    background: var(--aip-bg-card); border-bottom: 1px solid #e6e9ee; font-size: 12px; color: var(--aip-ink-3);
+  }
+  .kit-biz-embed__bar a { color: var(--aip-brand); margin-left: auto; text-decoration: none; }
+  .kit-biz-embed__frame { display: block; width: 100%; border: 0; background: var(--aip-bg-page); }
+  .kit-biz-embed__frame--task { height: calc(100vh - 200px); min-height: 640px; }
+  .kit-biz-embed__frame--sidebar {
+    height: 680px;
+    width: 280px !important;
+    max-width: 100%;
+    flex: none;
+    background: #fafbfc;
+  }
+  .kit-biz-embed__frame--topbar { height: 100px; }
+  .kit-biz-embed__frame--modal { height: 560px; background: #f3f5f8; }
+  .kit-biz-embed__frame--modal-sm { height: 420px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics { height: 360px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics-sm { height: 220px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics-md { height: 300px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics-lg { height: 420px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics-xl { height: 520px; background: #f3f5f8; }
+  .kit-biz-embed__frame--basics-table { height: 380px; background: #f3f5f8; }
+  .kit-biz-embed--sidebar {
+    width: 280px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .kit-biz-shell { display: flex; flex-direction: column; gap: 8px; background: var(--aip-bg-page); padding: 10px; border-radius: 12px; min-height: 420px; }
+  .kit-biz-shell__body { display: flex; flex: 1; min-height: 0; gap: 8px; }
+  .radius-row { display: flex; flex-wrap: wrap; gap: 16px; }
+  .radius-cell { text-align: center; font-size: 12px; color: var(--aip-ink-2); }
+  .radius-cell b { display: block; width: 64px; height: 64px; background: var(--aip-brand-soft); border: 1px solid var(--aip-brand); margin-bottom: 8px; }
+  .space-bar { height: 24px; background: var(--aip-brand); border-radius: 2px; }
+  .kit-icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; margin: 12px 0 8px; }
+  .kit-icon-cell {
+    border: 1px solid #e6e9ee; border-radius: 10px; background: #fff;
+    padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: var(--aip-shadow-sm);
+  }
+  .kit-icon-cell__name { font-size: 13px; color: var(--aip-ink); text-align: center; }
+  .kit-icon-cell__slug { font-size: 11px; color: var(--aip-ink-3); text-align: center; word-break: break-all; }
+</style>
+</head>
+<body class="aip-kit-reset">
+  <header class="kit-top">
+    <div class="kit-top__logo">AI</div>
+    <div class="kit-top__title">AIP 设计规范 · UI Kit</div>
+    <span style="margin-left:auto;font-size:12px;color:var(--aip-ink-3)">唯一视觉 · 控件 SSOT：典型页真实样式（embed）</span>
+    <a href="../index.html" style="flex:none;font-size:12px;color:var(--aip-brand-deep);text-decoration:none;border:1px solid var(--aip-line);padding:4px 12px;border-radius:var(--aip-radius-pill);background:var(--aip-bg-page)">← 在线设计稿</a>
+  </header>
+
+  <div class="kit-body">
+    <nav class="kit-nav" id="kit-nav" aria-label="规范目录">
+      <div class="kit-nav__block">
+        <ul class="kit-nav__list">
+          <li><a href="#overview" class="is-active">Overview 总览</a></li>
+        </ul>
+      </div>
+
+      <div class="kit-nav__block">
+        <h2 class="kit-nav__category">基本元素</h2>
+        <ul class="kit-nav__list">
+          <li><a href="#colors">Colors 色彩</a></li>
+          <li><a href="#typography">Typography 字体</a></li>
+          <li><a href="#spacing">Spacing 间距</a></li>
+          <li><a href="#radius">Radius 圆角</a></li>
+          <li><a href="#shadows">Shadow 阴影</a></li>
+          <li><a href="#icons">Icons 图标</a></li>
+        </ul>
+      </div>
+
+      <div class="kit-nav__block">
+        <h2 class="kit-nav__category">基础组件</h2>
+        <div class="kit-nav__section">
+          <h3 class="kit-nav__section-title"><span>通用</span></h3>
+          <ul class="kit-nav__list">
+            <li><a href="#button">Button 按钮</a></li>
+          </ul>
+        </div>
+        <div class="kit-nav__section">
+          <h3 class="kit-nav__section-title"><span>数据录入</span></h3>
+          <ul class="kit-nav__list">
+            <li><a href="#search">Search 搜索框</a></li>
+            <li><a href="#input">Input 输入框</a></li>
+            <li><a href="#select">Select 下拉框</a></li>
+            <li><a href="#checkbox">Checkbox 勾选框</a></li>
+            <li><a href="#radio">Radio 单选</a></li>
+          </ul>
+        </div>
+        <div class="kit-nav__section">
+          <h3 class="kit-nav__section-title"><span>数据展示</span></h3>
+          <ul class="kit-nav__list">
+            <li><a href="#table">Table 列表</a></li>
+            <li><a href="#progress">Progress 进度条</a></li>
+            <li><a href="#chip">Chip 芯片</a></li>
+          </ul>
+        </div>
+        <div class="kit-nav__section">
+          <h3 class="kit-nav__section-title"><span>反馈</span></h3>
+          <ul class="kit-nav__list">
+            <li><a href="#popover">Popover 浮窗</a></li>
+            <li><a href="#menu">Menu 菜单</a></li>
+            <li><a href="#modal">Modal 对话框</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="kit-nav__block">
+        <h2 class="kit-nav__category">业务组件</h2>
+        <ul class="kit-nav__list">
+          <li><a href="#biz-topbar">Topbar 全局顶栏</a></li>
+          <li><a href="#biz-contract-sidebar">ContractSidebar 协议侧栏</a></li>
+          <li><a href="#biz-task-list">TaskList 任务列表</a></li>
+        </ul>
+      </div>
+
+      <div class="kit-nav__block">
+        <h2 class="kit-nav__category">典型页面</h2>
+        <div class="kit-nav__section">
+          <h3 class="kit-nav__section-title"><span>协议</span></h3>
+          <ul class="kit-nav__list">
+            <li><a href="#page-signing-task-list">签署任务列表</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="kit-main">
+      <!-- —— 总览 —— -->
+      <section class="kit-panel is-active" id="panel-overview">
+        <h1>Overview 总览</h1>
+        <p class="en">AIP · Libra · 顶栏（唯一视觉）</p>
+        <div class="kit-doc__note">令牌见 <code>aip-design-system.css</code>（对齐典型页 Libra shell）。基本元素 / 基础组件 / 业务组件演示一律嵌入典型页真实 DOM（<code>?embed=basics|topbar|…</code>），禁止 Kit 自造简化稿。</div>
+        <h2 class="kit-sec">怎么用</h2>
+        <ol style="color:var(--aip-ink-2);line-height:1.8;padding-left:20px">
+          <li>读左侧面板活体 demo，不要整文件硬读 HTML。</li>
+          <li>出页先读 <code>docs/spec-usage.md</code> 与 <code>docs/templates/list-page.md</code>。</li>
+          <li>样式只用 <code>var(--aip-*)</code>；业务壳组合 Topbar / ContractSidebar / TaskList。</li>
+        </ol>
+        <h2 class="kit-sec">目录对照</h2>
+        <table class="kit-table">
+          <thead><tr><th>层级</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>基本元素</td><td>Colors / Typography / Spacing / Radius / Shadow / Icons</td></tr>
+            <tr><td>基础组件</td><td>Button / Search / Input / Select / Checkbox / Radio / Table / Progress / Chip / Popover / Menu / Modal</td></tr>
+            <tr><td>业务组件</td><td>Topbar · ContractSidebar · TaskList</td></tr>
+            <tr><td>典型页面</td><td>协议 · 签署任务列表</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- —— 基本元素 —— -->
+      <section class="kit-panel" id="panel-colors" hidden>
+        <h1>Colors 色彩</h1>
+        <p class="en">典型页 Libra shell 生效色</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=colors</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=colors" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-lg" title="Colors 色彩" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=colors"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-typography" hidden>
+        <h1>Typography 字体</h1>
+        <p class="en">PingFang SC · 典型页字号阶梯</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=typography</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=typography" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-md" title="Typography 字体" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=typography"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-spacing" hidden>
+        <h1>Spacing 间距</h1>
+        <p class="en">4px 网格 · 壳尺寸同源典型页</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。 壳：顶栏 56 · 侧栏 280 · 控件高 32。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=spacing</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=spacing" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Spacing 间距" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=spacing"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-radius" hidden>
+        <h1>Radius 圆角</h1>
+        <p class="en">控件 8 · 卡 10/12 · pill</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=radius</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radius" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Radius 圆角" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radius"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-shadows" hidden>
+        <h1>Shadow 阴影</h1>
+        <p class="en">典型页 --lt-shadow-* / --fdd-shadow-*</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=shadows</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=shadows" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Shadow 阴影" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=shadows"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-icons" hidden>
+        <h1>Icons 图标</h1>
+        <p class="en">Phosphor Regular · .aip-icon · 共 56 个</p>
+        <div class="kit-doc__note">资源位于 <code>assets/icons/phosphor/regular/</code>。槽位 <code>.aip-icon--sm</code> 16 / <code>.aip-icon--md</code> 20。含协议侧栏（全部任务 / 文件夹 / 合同库 / 协议集 / 记录与处理）及列表工具栏用到的全量图标。</div>
+        <div class="kit-icon-grid">
+          <div class="kit-icon-cell" title="arrow-clockwise">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">刷新</span>
+            <span class="kit-icon-cell__slug">arrow-clockwise</span>
+          </div>
+          <div class="kit-icon-cell" title="arrow-left">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-left.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">左箭头</span>
+            <span class="kit-icon-cell__slug">arrow-left</span>
+          </div>
+          <div class="kit-icon-cell" title="arrow-right">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-right.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">右箭头</span>
+            <span class="kit-icon-cell__slug">arrow-right</span>
+          </div>
+          <div class="kit-icon-cell" title="bell">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/bell.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">通知</span>
+            <span class="kit-icon-cell__slug">bell</span>
+          </div>
+          <div class="kit-icon-cell" title="book">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/book.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">书</span>
+            <span class="kit-icon-cell__slug">book</span>
+          </div>
+          <div class="kit-icon-cell" title="books">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/books.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">书库</span>
+            <span class="kit-icon-cell__slug">books</span>
+          </div>
+          <div class="kit-icon-cell" title="briefcase">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">合同库</span>
+            <span class="kit-icon-cell__slug">briefcase</span>
+          </div>
+          <div class="kit-icon-cell" title="calendar-check">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/calendar-check.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">日程</span>
+            <span class="kit-icon-cell__slug">calendar-check</span>
+          </div>
+          <div class="kit-icon-cell" title="cards">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/cards.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">协议集</span>
+            <span class="kit-icon-cell__slug">cards</span>
+          </div>
+          <div class="kit-icon-cell" title="caret-down">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-down.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">展开</span>
+            <span class="kit-icon-cell__slug">caret-down</span>
+          </div>
+          <div class="kit-icon-cell" title="caret-left">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-left.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">向左</span>
+            <span class="kit-icon-cell__slug">caret-left</span>
+          </div>
+          <div class="kit-icon-cell" title="caret-right">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-right.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">向右</span>
+            <span class="kit-icon-cell__slug">caret-right</span>
+          </div>
+          <div class="kit-icon-cell" title="caret-up">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/caret-up.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">收起</span>
+            <span class="kit-icon-cell__slug">caret-up</span>
+          </div>
+          <div class="kit-icon-cell" title="check">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/check.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">勾选</span>
+            <span class="kit-icon-cell__slug">check</span>
+          </div>
+          <div class="kit-icon-cell" title="checks">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/checks.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">已完成</span>
+            <span class="kit-icon-cell__slug">checks</span>
+          </div>
+          <div class="kit-icon-cell" title="copy">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/copy.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">复制</span>
+            <span class="kit-icon-cell__slug">copy</span>
+          </div>
+          <div class="kit-icon-cell" title="copy-simple">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/copy-simple.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">复制简</span>
+            <span class="kit-icon-cell__slug">copy-simple</span>
+          </div>
+          <div class="kit-icon-cell" title="dots-three">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/dots-three.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">更多</span>
+            <span class="kit-icon-cell__slug">dots-three</span>
+          </div>
+          <div class="kit-icon-cell" title="download">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">下载</span>
+            <span class="kit-icon-cell__slug">download</span>
+          </div>
+          <div class="kit-icon-cell" title="envelope">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">信封</span>
+            <span class="kit-icon-cell__slug">envelope</span>
+          </div>
+          <div class="kit-icon-cell" title="envelope-simple">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">全部任务</span>
+            <span class="kit-icon-cell__slug">envelope-simple</span>
+          </div>
+          <div class="kit-icon-cell" title="eye">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/eye.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">显示</span>
+            <span class="kit-icon-cell__slug">eye</span>
+          </div>
+          <div class="kit-icon-cell" title="eye-slash">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/eye-slash.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">隐藏</span>
+            <span class="kit-icon-cell__slug">eye-slash</span>
+          </div>
+          <div class="kit-icon-cell" title="file-doc">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-doc.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">DOC</span>
+            <span class="kit-icon-cell__slug">file-doc</span>
+          </div>
+          <div class="kit-icon-cell" title="file-image">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-image.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">图片</span>
+            <span class="kit-icon-cell__slug">file-image</span>
+          </div>
+          <div class="kit-icon-cell" title="file-magnifying-glass">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-magnifying-glass.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">查文件</span>
+            <span class="kit-icon-cell__slug">file-magnifying-glass</span>
+          </div>
+          <div class="kit-icon-cell" title="file-pdf">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-pdf.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">PDF</span>
+            <span class="kit-icon-cell__slug">file-pdf</span>
+          </div>
+          <div class="kit-icon-cell" title="file-plus">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-plus.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">新建文件</span>
+            <span class="kit-icon-cell__slug">file-plus</span>
+          </div>
+          <div class="kit-icon-cell" title="file-text">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-text.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">文本</span>
+            <span class="kit-icon-cell__slug">file-text</span>
+          </div>
+          <div class="kit-icon-cell" title="files">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">记录与处理</span>
+            <span class="kit-icon-cell__slug">files</span>
+          </div>
+          <div class="kit-icon-cell" title="folder">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/folder.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">任务文件夹</span>
+            <span class="kit-icon-cell__slug">folder</span>
+          </div>
+          <div class="kit-icon-cell" title="funnel">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/funnel.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">筛选</span>
+            <span class="kit-icon-cell__slug">funnel</span>
+          </div>
+          <div class="kit-icon-cell" title="gear-six">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">设置</span>
+            <span class="kit-icon-cell__slug">gear-six</span>
+          </div>
+          <div class="kit-icon-cell" title="grid-four">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/grid-four.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">宫格</span>
+            <span class="kit-icon-cell__slug">grid-four</span>
+          </div>
+          <div class="kit-icon-cell" title="house">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/house.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">首页</span>
+            <span class="kit-icon-cell__slug">house</span>
+          </div>
+          <div class="kit-icon-cell" title="magnifying-glass">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">搜索</span>
+            <span class="kit-icon-cell__slug">magnifying-glass</span>
+          </div>
+          <div class="kit-icon-cell" title="note-pencil">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/note-pencil.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">笔记</span>
+            <span class="kit-icon-cell__slug">note-pencil</span>
+          </div>
+          <div class="kit-icon-cell" title="paper-plane-tilt">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/paper-plane-tilt.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">发送</span>
+            <span class="kit-icon-cell__slug">paper-plane-tilt</span>
+          </div>
+          <div class="kit-icon-cell" title="paperclip">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/paperclip.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">附件</span>
+            <span class="kit-icon-cell__slug">paperclip</span>
+          </div>
+          <div class="kit-icon-cell" title="pen-nib">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pen-nib.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">签署</span>
+            <span class="kit-icon-cell__slug">pen-nib</span>
+          </div>
+          <div class="kit-icon-cell" title="pencil-line">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-line.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">编辑</span>
+            <span class="kit-icon-cell__slug">pencil-line</span>
+          </div>
+          <div class="kit-icon-cell" title="pencil-simple">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">编辑简</span>
+            <span class="kit-icon-cell__slug">pencil-simple</span>
+          </div>
+          <div class="kit-icon-cell" title="plus">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/plus.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">添加</span>
+            <span class="kit-icon-cell__slug">plus</span>
+          </div>
+          <div class="kit-icon-cell" title="puzzle-piece">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/puzzle-piece.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">插件</span>
+            <span class="kit-icon-cell__slug">puzzle-piece</span>
+          </div>
+          <div class="kit-icon-cell" title="question">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/question.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">帮助</span>
+            <span class="kit-icon-cell__slug">question</span>
+          </div>
+          <div class="kit-icon-cell" title="share-network">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/share-network.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">分享</span>
+            <span class="kit-icon-cell__slug">share-network</span>
+          </div>
+          <div class="kit-icon-cell" title="sign-out">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/sign-out.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">退出</span>
+            <span class="kit-icon-cell__slug">sign-out</span>
+          </div>
+          <div class="kit-icon-cell" title="signature">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/signature.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">签名</span>
+            <span class="kit-icon-cell__slug">signature</span>
+          </div>
+          <div class="kit-icon-cell" title="squares-four">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/squares-four.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">模板</span>
+            <span class="kit-icon-cell__slug">squares-four</span>
+          </div>
+          <div class="kit-icon-cell" title="stack">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/stack.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">堆叠</span>
+            <span class="kit-icon-cell__slug">stack</span>
+          </div>
+          <div class="kit-icon-cell" title="trash">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/trash.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">删除</span>
+            <span class="kit-icon-cell__slug">trash</span>
+          </div>
+          <div class="kit-icon-cell" title="tree-structure">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/tree-structure.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">结构</span>
+            <span class="kit-icon-cell__slug">tree-structure</span>
+          </div>
+          <div class="kit-icon-cell" title="upload">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/upload.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">上传</span>
+            <span class="kit-icon-cell__slug">upload</span>
+          </div>
+          <div class="kit-icon-cell" title="user">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/user.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">用户</span>
+            <span class="kit-icon-cell__slug">user</span>
+          </div>
+          <div class="kit-icon-cell" title="users">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/users.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">多人</span>
+            <span class="kit-icon-cell__slug">users</span>
+          </div>
+          <div class="kit-icon-cell" title="x">
+            <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/x.svg" alt="" /></span>
+            <span class="kit-icon-cell__name">关闭</span>
+            <span class="kit-icon-cell__slug">x</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- —— 基础组件 —— -->
+      <section class="kit-panel" id="panel-button" hidden>
+        <h1>Button 按钮</h1>
+        <p class="en">.contract-launch / .resend-button / .filter-popover__apply</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=button</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=button" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Button 按钮" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=button"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-search" hidden>
+        <h1>Search 搜索框</h1>
+        <p class="en">.envelope-search</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=search</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=search" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Search 搜索框" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=search"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-input" hidden>
+        <h1>Input 输入框</h1>
+        <p class="en">.ns-field__input（新建文件夹）</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=input</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=input" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Input 输入框" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=input"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-select" hidden>
+        <h1>Select 下拉框</h1>
+        <p class="en">.filter-trigger / .filter-popover__op</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=select</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=select" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Select 下拉框" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=select"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-checkbox" hidden>
+        <h1>Checkbox 勾选框</h1>
+        <p class="en">列表 / 列设置 accent-color 品牌蓝</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=checkbox</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=checkbox" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Checkbox 勾选框" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=checkbox"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-radio" hidden>
+        <h1>Radio 单选</h1>
+        <p class="en">.filter-popover__options</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=radio</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radio" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-md" title="Radio 单选" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radio"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-table" hidden>
+        <h1>Table 列表</h1>
+        <p class="en">.envelope-table</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=table</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=table" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-table" title="Table 列表" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=table"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-progress" hidden>
+        <h1>Progress 进度条</h1>
+        <p class="en">.envelope-track</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=progress</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=progress" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Progress 进度条" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=progress"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-chip" hidden>
+        <h1>Chip 筛选芯片</h1>
+        <p class="en">.filter-chip</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=chip</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=chip" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-sm" title="Chip 筛选芯片" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=chip"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-popover" hidden>
+        <h1>Popover 浮窗</h1>
+        <p class="en">.filter-popover</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=popover</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=popover" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-xl" title="Popover 浮窗" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=popover"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-menu" hidden>
+        <h1>Menu 菜单</h1>
+        <p class="en">.filter-popover__op-menu</p>
+        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=menu</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=menu" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-md" title="Menu 菜单" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=menu"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-modal" hidden>
+        <h1>Modal 对话框</h1>
+        <p class="en">自典型页抽取 · .ns-modal-mask + .ns-modal</p>
+        <div class="kit-doc__note">
+          禁止自造确认框。典型页实例：<strong>设置列表列</strong>、<strong>新建文件夹</strong>（同源嵌入，改典型页即改此处）。
+          直链：<a href="http://127.0.0.1:8956/versions/0.1/signing-task-list/signing-tasks.html#contracts" target="_blank" rel="noopener">迭代稿协议页</a>
+        </div>
+        <h2 class="kit-sec">设置列表列</h2>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实弹窗 · embed=modal-col</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=modal-col" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--modal" title="设置列表列" src="pages/typical/signing-task-list/signing-tasks.html?embed=modal-col"></iframe>
+        </div>
+        <h2 class="kit-sec">新建文件夹</h2>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实弹窗 · embed=modal-folder</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=modal-folder" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--modal-sm" title="新建文件夹" src="pages/typical/signing-task-list/signing-tasks.html?embed=modal-folder"></iframe>
+        </div>
+      </section>
+
+      <!-- —— 业务组件 —— -->
+      <section class="kit-panel" id="panel-biz-topbar" hidden>
+        <h1>Topbar 全局顶栏</h1>
+        <p class="en">业务组件 · 自典型页抽取 · Libra · 顶栏</p>
+        <div class="kit-doc__note">与典型页 <strong>同一顶栏 DOM</strong>（改典型页即改此处）。图标保持典型页原顶栏 SVG，勿擅自换成 Icons 面板里的另一套。文档：<code>components/business/README.md</code></div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实模块嵌入 · embed=topbar</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=topbar" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--topbar" title="Topbar 业务组件" src="pages/typical/signing-task-list/signing-tasks.html?embed=topbar"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-biz-contract-sidebar" hidden>
+        <h1>ContractSidebar 协议侧栏</h1>
+        <p class="en">业务组件 · 自典型页抽取</p>
+        <div class="kit-doc__note">与典型页 <code>data-aip-business="contract-sidebar"</code> 同一 DOM/样式（可交互）。文档：<code>docs/business/contract-sidebar.md</code></div>
+        <div class="kit-biz-embed kit-biz-embed--sidebar">
+          <div class="kit-biz-embed__bar">
+            <span>真实模块嵌入 · embed=sidebar</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=sidebar" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--sidebar" title="协议侧栏业务组件" src="pages/typical/signing-task-list/signing-tasks.html?embed=sidebar"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel kit-panel--biz-wide" id="panel-biz-task-list" hidden>
+        <h1>TaskList 任务列表</h1>
+        <p class="en">业务组件 · 自典型页抽取 · 完整内容区</p>
+        <div class="kit-doc__note">与典型页 <code>data-aip-business="task-list"</code> 同一 DOM/样式：标题与访问范围、搜索、日期/状态/发起人/快速视图浮窗、导出/刷新、批量条、任务表、分页。文档：<code>docs/business/task-list.md</code></div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实模块嵌入 · embed=task-list（可交互，非简化稿）</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=task-list" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--task" title="任务列表业务组件" src="pages/typical/signing-task-list/signing-tasks.html?embed=task-list"></iframe>
+        </div>
+      </section>
+
+      <!-- —— 典型页面 —— -->
+      <section class="kit-panel kit-panel--page" id="panel-page-signing-task-list" hidden>
+        <h1>协议 · 签署任务列表</h1>
+        <p class="en">第一个典型页面 · pages/typical/signing-task-list/</p>
+        <div class="kit-doc__note">
+          契约见 <code>docs/templates/list-page.md</code>。壳 = Topbar + ContractSidebar + TaskList。
+          唯一视觉：Libra · 顶栏。规范令牌统一 <code>--aip-*</code>。
+        </div>
+        <div class="kit-page-preview">
+          <div class="kit-page-preview__bar">
+            <span>可交互嵌入 · 真实典型页</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe
+            class="kit-page-preview__frame"
+            title="签署任务列表典型页"
+            src="pages/typical/signing-task-list/signing-tasks.html"
+          ></iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="ui-kit.js"></script>
+</body>
+</html>
