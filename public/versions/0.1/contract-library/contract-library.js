@@ -2581,8 +2581,25 @@
     const pageNavBtn = $('#pdfPageNavBtn');
     const pageNavMenu = $('#pdfPageNavMenu');
     const pageNavLabel = $('#pdfPageNavLabel');
+    const pageNavHotspot = $('#pdfPageNavHotspot');
     const zoomTrigger = $('#pdfZoomTrigger');
     const zoomMenu = $('#pdfZoomMenu');
+    /** 滚动停顿后隐藏页码的定时器 */
+    let pageNavContextTimer = 0;
+
+    /**
+     * 按浏览上下文显示页码（滚动中出现；停滚后收起，悬停/展开时不收）。
+     * @param {boolean} [force] 强制立即显示
+     */
+    function revealPageNavContext(force) {
+      if (!pageNavHotspot || pdfPages.length < 2) return;
+      pageNavHotspot.classList.add('is-context');
+      window.clearTimeout(pageNavContextTimer);
+      pageNavContextTimer = window.setTimeout(() => {
+        if (pageNavHotspot.matches(':hover') || pageNavHotspot.classList.contains('is-open')) return;
+        pageNavHotspot.classList.remove('is-context');
+      }, force ? 2200 : 1800);
+    }
 
     /**
      * 同步页码标签与下拉选中态。
@@ -2726,9 +2743,10 @@
       if (!e.target.closest('.pdf-tool-group')) closeZoomMenu();
     });
 
-    /** 滚动时根据可视区更新当前页 */
+    /** 滚动时根据可视区更新当前页，并露出页码跳转入口 */
     pdfView?.addEventListener('scroll', () => {
       if (!pdfView || !pdfPages.length) return;
+      revealPageNavContext();
       const mid = pdfView.scrollTop + pdfView.clientHeight * 0.35;
       let best = 0;
       let bestDist = Infinity;
@@ -2739,6 +2757,15 @@
       });
       if (best !== pdfPageIdx) setPdfPageIdx(best);
     }, { passive: true });
+
+    pageNavHotspot?.addEventListener('mouseenter', () => {
+      window.clearTimeout(pageNavContextTimer);
+      pageNavHotspot.classList.add('is-context');
+    });
+    pageNavHotspot?.addEventListener('mouseleave', () => {
+      if (pageNavHotspot.classList.contains('is-open')) return;
+      revealPageNavContext(true);
+    });
 
     $('#pdfZoomOut')?.addEventListener('click', () => {
       if (pdfZoom > ZOOM_MIN) setPdfZoom(pdfZoom - ZOOM_STEP);

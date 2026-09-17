@@ -2890,7 +2890,7 @@
       background: var(--libra-bg-sunken);
     }
     .pdf-view { flex: 1; overflow: auto; padding: 24px; }
-    /* 底部分页下拉：默认隐藏，仅悬停底部热区后出现 */
+    /* 底部分页下拉：默认隐藏；悬停热区 / 滚动浏览 / 展开时出现 */
     .pdf-page-nav-hotspot {
       position: absolute; left: 50%; bottom: 0; z-index: 6;
       transform: translateX(-50%);
@@ -2898,6 +2898,12 @@
       display: flex; align-items: flex-end; justify-content: center;
       padding-bottom: 14px;
       box-sizing: border-box;
+      pointer-events: none; /* 默认不挡滚动；显式时再打开 */
+    }
+    .pdf-page-nav-hotspot.is-context,
+    .pdf-page-nav-hotspot.is-open,
+    .pdf-page-nav-hotspot:hover {
+      pointer-events: auto;
     }
     .pdf-page-nav {
       position: relative;
@@ -2906,6 +2912,7 @@
       transition: opacity 0.18s ease;
     }
     .pdf-page-nav-hotspot:hover .pdf-page-nav,
+    .pdf-page-nav-hotspot.is-context .pdf-page-nav,
     .pdf-page-nav-hotspot.is-open .pdf-page-nav,
     .pdf-page-nav.is-open {
       opacity: 1;
@@ -3998,7 +4005,7 @@
   </div>
 
   <script src="assets/components/fdd-home/home-mount.js"></script>
-  <script src="contract-library.js?v=20260917ar"></script>
+  <script src="contract-library.js?v=20260917as"></script>
   <script>
     /**
      * @typedef {{id:string,subject:string,parties:string,statusKey:string,statusText:string,progress:number,date:string,time:string,action:string}} TaskRow
