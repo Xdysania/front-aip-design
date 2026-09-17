@@ -2764,7 +2764,10 @@
     });
     pageNavHotspot?.addEventListener('mouseleave', () => {
       if (pageNavHotspot.classList.contains('is-open')) return;
-      revealPageNavContext(true);
+      window.clearTimeout(pageNavContextTimer);
+      pageNavContextTimer = window.setTimeout(() => {
+        pageNavHotspot.classList.remove('is-context');
+      }, 500);
     });
 
     $('#pdfZoomOut')?.addEventListener('click', () => {
