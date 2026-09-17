@@ -170,7 +170,7 @@
     sortKey: 'archivedAt',
     sortDir: 'desc',
     page: 1,
-    pageSize: 8,
+    pageSize: 10,
     selected: new Set(),
     columns: ['name', 'status', 'parties', 'type', 'amount', 'effectiveDate', 'expiryDate'],
     hiddenCols: new Set(),
@@ -207,18 +207,18 @@
 
   function statusCell(c) {
     const s = computeStatus(c);
-    if (s.hint) return `<span class="tag aip-lib-tag--gray aip-lib-tag-dot">${s.hint}</span>`;
+    if (s.hint) return `<span class="aip-lib-tag aip-lib-tag--gray aip-lib-tag-dot">${s.hint}</span>`;
     const map = { 待生效: 'aip-lib-tag--gray', 生效中: 'aip-lib-tag--green', 已到期: 'aip-lib-tag--red', 即将到期: 'aip-lib-tag--orange', 即将生效: 'aip-lib-tag--blue' };
-    let html = s.main ? `<span class="tag aip-lib-tag-dot ${map[s.main] || 'aip-lib-tag--gray'}">${s.main}</span>` : '';
-    if (s.sub) html += `<span class="tag ${map[s.sub] || 'aip-lib-tag--gray'}">${s.sub}</span>`;
+    let html = s.main ? `<span class="aip-lib-tag aip-lib-tag-dot ${map[s.main] || 'aip-lib-tag--gray'}">${s.main}</span>` : '';
+    if (s.sub) html += `<span class="aip-lib-tag ${map[s.sub] || 'aip-lib-tag--gray'}">${s.sub}</span>`;
     return html || '<span class="empty-cell">—</span>';
   }
 
   function sourceHtml(c) {
     if (c.source === 'fasc') {
-      return `<span class="aip-lib-cell-source">签署任务：<a href="../signing-task-list/signing-tasks.html" target="_blank" rel="noopener">${esc(c.sourceTask)}</a></span>`;
+      return `<small>签署任务：<a href="../signing-task-list/signing-tasks.html" target="_blank" rel="noopener">${esc(c.sourceTask)}</a></small>`;
     }
-    return `<span class="aip-lib-cell-source">本地上传：<button type="button" class="aip-lib-link-btn" data-open-upload-records>查看记录</button></span>`;
+    return `<small>本地上传：<button type="button" class="aip-lib-link-btn" data-open-upload-records>查看记录</button></small>`;
   }
 
   function cellValue(c, colId) {
@@ -250,14 +250,18 @@
     const head = $('#contractHead'), body = $('#contractBody');
     const cols = visibleColumns();
     head.innerHTML = `<tr>
-      <th style="width:36px"><input type="checkbox" class="checkbox" id="checkAll" aria-label="全选当前页" /></th>
+      <th><input type="checkbox" id="checkAll" aria-label="全选当前页" /></th>
       ${cols.map((id) => {
         const col = ALL_COLUMNS.find((x) => x.id === id) || { name: (fieldOf(id) || {}).name || id };
         const sortable = ['name', 'effectiveDate', 'expiryDate', 'archivedAt'].includes(id);
-        const mark = listState.sortKey === id ? `<span class="sort-mark">${listState.sortDir === 'asc' ? '▲' : '▼'}</span>` : '';
-        return `<th class="${sortable ? 'sortable' : ''}" data-sort="${sortable ? id : ''}">${esc(col.name)}${mark}</th>`;
+        const ico = listState.sortKey === id ? (listState.sortDir === 'asc' ? '▲' : '▼') : '';
+        return `<th${sortable ? ` data-sort="${id}" class="is-sortable"` : ''}>${esc(col.name)}${sortable ? ` <span class="sort-ico">${ico}</span>` : ''}</th>`;
       }).join('')}
-      <th style="width:96px">操作</th>
+      <th class="col-settings-th" aria-label="操作与列设置">
+        <button type="button" class="col-settings-btn" id="colBtn" aria-label="设置列表列" aria-haspopup="dialog">
+          <svg class="ico" width="17" height="17" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
+        </button>
+      </th>
     </tr>`;
 
     const rows = filteredContracts();
@@ -269,25 +273,28 @@
     $('#totalText').textContent = `共 ${rows.length} 份合同`;
 
     body.innerHTML = pageRows.map((c) => `<tr data-id="${c.id}">
-      <td><input type="checkbox" class="checkbox row-check" ${listState.selected.has(c.id) ? 'checked' : ''} aria-label="选择" /></td>
+      <td><input type="checkbox" class="row-check" ${listState.selected.has(c.id) ? 'checked' : ''} aria-label="选择" /></td>
       ${cols.map((id) => {
         if (id === 'name') {
-          return `<td><div class="aip-lib-cell-name">
+          return `<td>
             <button type="button" class="envelope-name" data-open-detail title="${esc(c.name)}">${esc(c.name)}</button>
             ${sourceHtml(c)}
-          </div></td>`;
+          </td>`;
         }
         const editable = ['status', 'parties', 'type', 'amount', 'effectiveDate', 'expiryDate', 'biz'].includes(id) || (fieldOf(id) && fieldOf(id).source === 'custom');
-        return `<td><div style="display:flex;align-items:center;gap:4px;">
-          <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${cellValue(c, id)}</span>
+        return `<td><span class="aip-lib-cell-with-edit">
+          <span>${cellValue(c, id)}</span>
           ${editable ? `<button type="button" class="aip-lib-cell-edit" data-edit-cell="${id}" aria-label="编辑">${iconEdit}</button>` : ''}
-        </div></td>`;
+        </span></td>`;
       }).join('')}
       <td>
-        <div class="aip-lib-menu-wrap aip-lib-more-wrap">
-          <button type="button" class="aip-lib-more-button row-more" aria-haspopup="menu" aria-label="更多">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
-          </button>
+        <div class="row-actions">
+          <button type="button" class="resend-button" data-download="${c.id}">下载</button>
+          <span class="more-wrap">
+            <button type="button" class="more-button row-more" aria-haspopup="menu" aria-label="更多操作">
+              <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
+            </button>
+          </span>
         </div>
       </td>
     </tr>`).join('');
@@ -318,8 +325,10 @@
   }
 
   function bindTableEvents(pageRows) {
+    // 表头操作列「设置列表列」（对齐签署任务页：图标内嵌表头）
+    $('#colBtn')?.addEventListener('click', () => { closeMenus(); openColModal(); });
     // 排序
-    $$('#contractHead th.sortable').forEach((th) => th.addEventListener('click', () => {
+    $$('#contractHead th.is-sortable').forEach((th) => th.addEventListener('click', () => {
       const key = th.dataset.sort;
       if (listState.sortKey === key) listState.sortDir = listState.sortDir === 'asc' ? 'desc' : 'asc';
       else { listState.sortKey = key; listState.sortDir = 'asc'; }
@@ -349,6 +358,9 @@
       });
       $('[data-open-detail]', tr)?.addEventListener('click', () => openDetail(c));
       $('[data-open-upload-records]', tr)?.addEventListener('click', () => openUploadRecords());
+      $('[data-download]', tr)?.addEventListener('click', () => {
+        toast(`演示：下载「${c.name}」PDF`);
+      });
       $('.row-more', tr).addEventListener('click', (e) => {
         e.stopPropagation();
         closeMenus();
@@ -674,7 +686,8 @@
 
   // 弹窗内草稿态
   let colDraft = null;
-  $('#colBtn').addEventListener('click', () => { closeMenus(); openColModal(); });
+  // colBtn 在表头操作列内，renderTable 每次重建 → 绑定移到 bindTableEvents
+  // $('#colBtn').addEventListener('click', () => { closeMenus(); openColModal(); });
   $$('#colSettingsModal [data-modal-close]').forEach((b) => b.addEventListener('click', () => { $('#colSettingsModal').hidden = true; }));
   $('#colSettingsModal').addEventListener('mousedown', (e) => { if (e.target.id === 'colSettingsModal') $('#colSettingsModal').hidden = true; });
 
@@ -1351,7 +1364,7 @@
           </select>
           <button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" type="button" id="recClear">清除筛选</button>
         </div>
-        <div class="aip-lib-table-shell"><table class="aip-lib-table">
+        <div class="envelope-table-shell"><table class="envelope-table">
           <thead><tr>
             <th class="sortable" data-rs="createdAt">创建时间</th>
             <th class="sortable" data-rs="creator">创建者</th>
@@ -1362,7 +1375,7 @@
           </tr></thead>
           <tbody id="recBody"></tbody>
         </table>
-        <div class="aip-lib-empty-state" id="recEmpty" hidden>
+        <div class="empty-state" id="recEmpty" hidden>
           <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/files.svg" alt="" /></span>
           <p>未找到匹配的文件上传记录</p>
         </div></div>
@@ -1500,7 +1513,7 @@
         <select class="edit-select" id="typeCatFilter" style="width:150px"><option value="">全部合同类型分类</option>${TYPE_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
         <div class="toolbar-right"><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" type="button" id="newTypeBtn" ${contractTypes.filter((t) => t.source === 'custom').length >= 200 ? 'disabled title="已达 200 个自定义类型上限"' : ''}>新建类型</button></div>
       </div>
-      <div class="aip-lib-table-shell"><table class="aip-lib-table">
+      <div class="envelope-table-shell"><table class="envelope-table">
         <thead><tr><th>类型名称</th><th>关联字段数</th><th>关联文件数</th><th>合同类型分类</th><th>来源</th><th style="width:130px">操作</th></tr></thead>
         <tbody id="typeBody"></tbody>
       </table></div>`;
@@ -1594,7 +1607,7 @@
         <select class="edit-select" id="tfSource" style="width:120px"><option value="">全部来源</option><option value="system">系统预置</option><option value="custom">企业自定义</option></select>
         <div class="toolbar-right"><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" type="button" id="addFieldBtn">添加字段</button></div>
       </div>
-      <div class="aip-lib-table-shell"><table class="aip-lib-table">
+      <div class="envelope-table-shell"><table class="envelope-table">
         <thead><tr><th>字段名称</th><th>数据类型</th><th>字段分类</th><th>来源</th><th style="width:110px">操作</th></tr></thead>
         <tbody id="tfBody"></tbody>
       </table></div>`;
@@ -1682,7 +1695,7 @@
           <select class="edit-select" id="fdSource" style="width:120px"><option value="">全部来源</option><option value="system">系统预置</option><option value="custom">企业自定义</option></select>
           <div class="toolbar-right"><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" type="button" id="newFieldBtn">新建字段</button></div>
         </div>
-        <div class="aip-lib-table-shell"><table class="aip-lib-table">
+        <div class="envelope-table-shell"><table class="envelope-table">
           <thead><tr><th>字段名称</th><th>数据类型</th><th>字段分类</th><th>来源</th><th style="width:90px">操作</th></tr></thead>
           <tbody id="fdBody"></tbody>
         </table></div>
@@ -1804,6 +1817,58 @@
       toast('字段创建成功');
     });
   }
+
+  /* ================= 表格横向滚动阴影 ================= */
+  (function bindTableScrollShadow() {
+    const shell = document.getElementById('contractTableShell');
+    if (!shell) return;
+    const sync = () => {
+      shell.classList.toggle('is-scrolled-x', shell.scrollLeft > 0);
+    };
+    shell.addEventListener('scroll', sync, { passive: true });
+    sync();
+  })();
+
+  /* ================= 分页条数 ================= */
+  (function bindPageSize() {
+    const wrap = document.getElementById('pageSize');
+    const trigger = document.getElementById('pageSizeTrigger');
+    const menu = document.getElementById('pageSizeMenu');
+    const label = document.getElementById('pageSizeLabel');
+    if (!wrap || !trigger || !menu || !label) return;
+
+    const close = () => {
+      wrap.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = !wrap.classList.contains('is-open');
+      wrap.classList.toggle('is-open', open);
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    menu.querySelectorAll('button[data-value]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = Number(btn.getAttribute('data-value') || '10');
+        listState.pageSize = next;
+        listState.page = 1;
+        label.textContent = `${next} / 页`;
+        menu.querySelectorAll('button[data-value]').forEach((el) => {
+          const on = el.getAttribute('data-value') === String(next);
+          el.classList.toggle('is-selected', on);
+          el.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        close();
+        renderTable();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) close();
+    });
+  })();
 
   /* ================= 启动 ================= */
   // 侧栏交互（发起签署菜单/任务文件夹/记录与处理）由复用骨架的主脚本统一初始化，此处不再重复绑定。

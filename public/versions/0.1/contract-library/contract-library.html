@@ -552,12 +552,19 @@
       background: var(--fdd-line-soft);
     }
     .nav-tool {
+      position: relative;
       width: 100%; height: 48px; padding: 11px 15px 11px 23px;
       display: flex; align-items: center; gap: 12px;
       border: 0; background: transparent;
       color: var(--fdd-ink); font-size: 14px; text-align: left;
     }
     .nav-tool:hover { background: var(--fdd-bg-hover); }
+    /* 合同库 / 协议集选中：与 .nav-btn.active 同款 */
+    .nav-tool.active { background: var(--fdd-bg-active); font-weight: 600; }
+    .nav-tool.active::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      border-radius: 0; background: var(--fdd-brand);
+    }
     .nav-tool .badge-new {
       margin-left: auto; flex-shrink: 0;
       min-width: 24px; height: 20px; padding: 0 6px;
@@ -1687,6 +1694,16 @@
     .envelope-state.is-completed button {
       border-bottom: 0; font-size: 14px; line-height: 20px; font-weight: 400;
     }
+    /* 表头操作列内嵌「设置列表列」（对齐签署任务页 col-settings） */
+    .col-settings-th { text-align: right; }
+    .col-settings-btn {
+      width: 32px; height: 32px; margin-left: auto;
+      display: inline-grid; place-items: center;
+      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2);
+      cursor: pointer;
+    }
+    .col-settings-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+
     .more-wrap { position: relative; }
     .more-button {
       width: 32px; height: 32px; margin-left: 4px;
@@ -1886,14 +1903,18 @@
     html[data-shell="libra"] .contract-launch { border-radius: 8px; font-weight: 600; }
     html[data-shell="libra"] .nav-btn,
     html[data-shell="libra"] .nav-tool { border-radius: 8px; }
-    html[data-shell="libra"] .nav-btn.active { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); }
-    html[data-shell="libra"] .nav-btn.active .aip-icon { color: var(--fdd-brand); }
+    html[data-shell="libra"] .nav-btn.active,
+    html[data-shell="libra"] .nav-tool.active { background: rgba(0, 89, 239, 0.1); color: var(--fdd-brand); }
+    html[data-shell="libra"] .nav-btn.active .aip-icon,
+    html[data-shell="libra"] .nav-tool.active .aip-icon { color: var(--fdd-brand); }
     html[data-shell="libra"] .nav-btn.active .aip-icon__svg,
+    html[data-shell="libra"] .nav-tool.active .aip-icon__svg,
     html[data-shell="libra"] .folder-module-head.is-active .aip-icon__svg,
     html[data-shell="libra"] .folder-tree-row.active .aip-icon__svg {
       filter: invert(18%) sepia(99%) saturate(7000%) hue-rotate(217deg) brightness(96%) contrast(101%);
     }
     html[data-shell="libra"] .nav-btn.active::before,
+    html[data-shell="libra"] .nav-tool.active::before,
     html[data-shell="libra"] .folder-tree-row.active::before,
     html[data-shell="libra"] .folder-module-head.is-active::before,
     html[data-shell="libra"] .folder-item.active::before { display: none; }
@@ -2347,60 +2368,34 @@
     }
     .aip-lib-toolbar-text-btn:hover { background: var(--fdd-bg-hover); }
 
-    /* —— 表格（对齐全部任务 envelope-table） —— */
-    .aip-lib-table-shell {
-      position: relative; width: 100%; border: 0; border-radius: 0; background: #fff;
-      box-shadow: none; overflow: auto; max-height: clamp(300px, calc(100vh - 300px), 640px);
-      border-bottom: 1px solid var(--fdd-line);
-    }
-    table.aip-lib-table {
-      width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0;
-      background: #fff; font-size: 14px; line-height: 19.6px;
-    }
-    .aip-lib-table thead { position: sticky; top: 0; z-index: 2; background: #fff; }
-    .aip-lib-table th, .aip-lib-table td {
-      padding: 0 16px; text-align: left; border-bottom: 1px solid var(--fdd-line); vertical-align: middle;
-    }
-    .aip-lib-table thead tr { height: var(--fdd-table-head-h); }
-    .aip-lib-table tbody tr { height: var(--fdd-table-row-h); }
-    .aip-lib-table tbody tr { transition: background-color 0.12s; }
-    .aip-lib-table tbody tr:hover { background: var(--fdd-bg-hover); }
-    .aip-lib-table tbody tr:hover td:last-child { background: #fff; }
-    .aip-lib-table thead th {
-      font-weight: 500; color: var(--fdd-ink); background: #fff; white-space: nowrap; user-select: none;
-    }
-    .aip-lib-table thead th.sortable { cursor: pointer; }
-    .aip-lib-table thead th .sort-mark { display: inline-block; margin-left: 4px; font-size: 11px; color: var(--fdd-brand); }
-    .aip-lib-table th:first-child, .aip-lib-table td:first-child { width: 48px; min-width: 48px; padding-left: 16px; }
-    /* 操作列：sticky 贴右 + 左侧弥散渐变，盖住横向滚出内容 */
-    .aip-lib-table th:last-child, .aip-lib-table td:last-child {
-      width: 96px; min-width: 96px; text-align: right;
-      position: sticky; right: 0; z-index: 2; background: #fff;
-      box-shadow: -10px 0 18px -6px rgba(28, 43, 51, 0.12); overflow: visible;
-    }
-    .aip-lib-table th:last-child::before, .aip-lib-table td:last-child::before {
-      content: ""; position: absolute; top: 0; bottom: 0; left: -20px; width: 20px;
-      background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 55%, #fff);
-      pointer-events: none;
-    }
-    .aip-lib-table thead th:last-child { z-index: 4; }
-    .aip-lib-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .aip-lib-table td:nth-child(2) { white-space: normal; }
-
-    /* 名称列（.envelope-name 用骨架规范样式；合同库仅补双行截断与来源/编辑） */
-    .aip-lib-cell-name { display: flex; flex-direction: column; gap: 3px; min-width: 220px; }
-    .aip-lib-cell-name .envelope-name { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .aip-lib-cell-source { font-size: 13px; color: var(--fdd-ink-muted); display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .aip-lib-cell-source a, .aip-lib-link-btn {
+    /*
+     * 合同库列表：直接复用上方骨架 `.envelope-table*` / `.envelope-name` / `.more-button`。
+     * 此处仅保留合同库特有单元格（来源副文案、状态标签、行内编辑）。
+     */
+    .envelope-table thead th.is-sortable { cursor: pointer; white-space: nowrap; }
+    .envelope-table thead th .sort-ico { color: var(--fdd-brand); }
+    .aip-lib-link-btn {
       border: 0; background: none; padding: 0; color: var(--fdd-brand); cursor: pointer; font-size: 13px;
     }
-    .aip-lib-cell-source a:hover, .aip-lib-link-btn:hover { text-decoration: underline; }
+    .aip-lib-link-btn:hover { text-decoration: underline; }
+    .envelope-table td small .aip-lib-link-btn,
+    .envelope-table td small a {
+      color: var(--fdd-brand); font-size: inherit;
+    }
     .aip-lib-cell-edit {
       width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent;
       color: var(--fdd-ink-3); display: inline-grid; place-items: center; cursor: pointer; opacity: 0;
+      flex-shrink: 0;
     }
-    td:hover .aip-lib-cell-edit { opacity: 1; }
+    .envelope-table td:hover .aip-lib-cell-edit { opacity: 1; }
     .aip-lib-cell-edit:hover { background: var(--fdd-brand-soft); color: var(--fdd-brand); }
+    .aip-lib-cell-with-edit {
+      display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
+      min-width: 0;
+    }
+    .aip-lib-cell-with-edit > span {
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .aip-lib-tag {
       display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--fdd-radius-pill);
       font-size: 12px; white-space: nowrap;
@@ -2413,24 +2408,33 @@
     .aip-lib-tag + .aip-lib-tag { margin-left: 4px; }
     .aip-lib-tag-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 5px; }
     .empty-cell { color: var(--fdd-ink-3); }
-    /* 操作列「更多」按钮 */
-    .more-button {
-      width: 32px; height: 32px; display: inline-grid; place-items: center;
-      border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink); cursor: pointer;
+    .envelope-table input[type="checkbox"] {
+      width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand); vertical-align: middle;
     }
-    .more-button:hover { background: var(--fdd-bg-hover); }
-    .aip-lib-more-wrap { position: relative; display: inline-block; }
+    /* 弹层内列表也走 envelope-table 时，限制高度即可 */
+    .ns-modal .envelope-table-shell,
+    .overlay-panel .envelope-table-shell,
+    .drawer-body .envelope-table-shell {
+      max-height: min(480px, 55vh);
+    }
 
     /* —— 分页（对齐全部任务：左页大小 / 右翻页钮） —— */
     .aip-lib-table-foot { display: flex; align-items: center; justify-content: space-between; height: 48px; color: var(--fdd-ink); font-size: 13px; }
+    .envelope-pagination.aip-lib-table-foot { display: flex; }
     .aip-lib-pagination { display: flex; align-items: center; gap: 4px; }
-    .aip-lib-pagination button {
+    .aip-lib-pagination button,
+    #aip-lib-pagination button {
       width: 28px; height: 28px; border: 0; border-radius: var(--fdd-radius);
       background: transparent; color: var(--fdd-ink); cursor: pointer; font-size: 13px;
     }
-    .aip-lib-pagination button:hover:not([disabled]):not(.active) { background: var(--fdd-bg-hover); }
-    .aip-lib-pagination button.active { background: var(--fdd-brand-soft); color: var(--fdd-brand); font-weight: 600; }
-    .aip-lib-pagination button[disabled] { opacity: 0.25; cursor: not-allowed; }
+    .aip-lib-pagination button:hover:not([disabled]):not(.active),
+    #aip-lib-pagination button:hover:not([disabled]):not(.active) { background: var(--fdd-bg-hover); }
+    .aip-lib-pagination button.active,
+    #aip-lib-pagination button.active { background: var(--fdd-brand-soft); color: var(--fdd-brand); font-weight: 600; }
+    .aip-lib-pagination button[disabled],
+    #aip-lib-pagination button[disabled] { opacity: 0.25; cursor: not-allowed; }
+    #aip-lib-pagination { display: inline-flex; align-items: center; gap: 4px; }
+    .pager-btns.aip-lib-pagination { margin-left: auto; gap: 8px; }
 
     /* —— 批量操作条（.batch-bar/.batch-btn 用骨架规范样式；合同库仅补「清除选择」变体） —— */
     .batch-bar { z-index: 110; }
@@ -2758,7 +2762,7 @@
           </div>
         </div>
         <div class="contract-nav-scroll">
-          <button class="nav-btn nav-primary active" type="button" data-href="../signing-task-list/signing-tasks.html">
+          <button class="nav-btn nav-primary" type="button" data-href="../signing-task-list/signing-tasks.html">
             <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="envelope-simple">
               <img class="aip-icon__svg" src="assets/icons/phosphor/regular/envelope-simple.svg" alt="" />
             </span>
@@ -2839,6 +2843,7 @@
 
     <div class="app-main" id="appMain">
       <div class="view-home" id="viewHome" data-aip-home data-lazy></div>
+      <main class="contracts-page-content">
       <div class="contracts-workspace">
         <!-- 顶部：合同库/签署任务切换 + 上传合同 + 管理 -->
         <div class="lib-topbar">
@@ -2895,27 +2900,38 @@
             <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新列表">
               <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
             </button>
-            <button class="toolbar-icon-btn" type="button" id="colBtn" aria-label="自定义列" aria-haspopup="dialog" title="自定义列">
-              <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
-            </button>
           </div>
         </div>
 
-        <!-- 表格 -->
-        <div class="aip-lib-table-shell">
-          <table class="aip-lib-table" id="contractTable">
+        <!-- 表格：复用全部任务 envelope-table 骨架 -->
+        <div class="envelope-table-shell" id="contractTableShell">
+          <table class="envelope-table" id="contractTable">
             <thead id="contractHead"></thead>
             <tbody id="contractBody"></tbody>
           </table>
-          <div class="aip-lib-empty-state" id="emptyState" hidden>
+          <div class="empty-state" id="emptyState" hidden>
             <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-magnifying-glass.svg" alt="" /></span>
             <p>未找到匹配的合同</p>
             <small>试试调整搜索关键词或筛选条件</small>
           </div>
         </div>
-        <div class="aip-lib-table-foot">
-          <span id="totalText">共 0 份合同</span>
-          <div class="aip-lib-pagination" id="aip-lib-pagination"></div>
+        <div class="envelope-pagination aip-lib-table-foot">
+          <div class="page-size" id="pageSize">
+            <button class="page-size-trigger" type="button" id="pageSizeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="每页结果数">
+              <span id="pageSizeLabel">10 / 页</span>
+            </button>
+            <svg class="caret" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+            <div class="page-size-menu" id="pageSizeMenu" role="listbox">
+              <button type="button" role="option" data-value="5">5 / 页</button>
+              <button type="button" role="option" data-value="10" class="is-selected" aria-selected="true">10 / 页</button>
+              <button type="button" role="option" data-value="25">25 / 页</button>
+              <button type="button" role="option" data-value="50">50 / 页</button>
+            </div>
+          </div>
+          <div class="pager-btns aip-lib-pagination" id="aip-lib-pagination-wrap">
+            <span id="totalText">共 0 份合同</span>
+            <span id="aip-lib-pagination"></span>
+          </div>
         </div>
         <div class="batch-bar" id="batchBar">
           <span id="batchCount">已选 0 份</span>
@@ -2929,6 +2945,11 @@
           </button>
           <button type="button" class="batch-btn batch-btn--clear" id="batchClear">清除选择</button>
         </div>
+      </div>
+      <div class="legacy-page" id="legacyPage">
+        <h2 id="legacyTitle">原有页面</h2>
+        <p id="legacyDesc"></p>
+        <button type="button" class="legacy-back" id="legacyBack">返回来源列表</button>
       </div>
     </main>
     </div>
@@ -4524,11 +4545,16 @@
 
     /** 侧栏「状态导航」与「任务文件夹 / 记录与处理」互斥选中 */
     function syncSidebarActive() {
+      /* 合同库独立页：默认选中「合同库」，不点亮「全部任务」；进文件夹 / 记录与处理后让出选中 */
+      const libBtn = document.getElementById('navContractLib');
+      const onLibPage = !!libBtn;
+      const libOwnsSelection = onLibPage && !currentFolder && !currentLegacy;
+
       document.querySelectorAll('.nav-primary').forEach((el) => {
-        el.classList.toggle('active', !currentFolder && !currentLegacy && currentNav === 'all');
+        el.classList.toggle('active', !libOwnsSelection && !currentFolder && !currentLegacy && currentNav === 'all');
       });
       document.querySelectorAll('.contract-secondary-items .nav-secondary').forEach((el) => {
-        el.classList.toggle('active', !currentFolder && !currentLegacy && el.getAttribute('data-nav') === currentNav);
+        el.classList.toggle('active', !libOwnsSelection && !currentFolder && !currentLegacy && el.getAttribute('data-nav') === currentNav);
       });
       const head = document.getElementById('folderModuleHead');
       /* 只有目录本身高亮；模块头不因选中目录而高亮（同一时刻只一个选中项） */
@@ -4540,6 +4566,11 @@
       document.querySelectorAll('[data-record]').forEach((el) => {
         el.classList.toggle('active', !!currentLegacy && el.getAttribute('data-record') === currentLegacy);
       });
+      if (libBtn) {
+        libBtn.classList.toggle('active', libOwnsSelection);
+        if (libOwnsSelection) libBtn.setAttribute('aria-current', 'page');
+        else libBtn.removeAttribute('aria-current');
+      }
     }
 
     /** 文件夹树渲染（PRD 6.2：层级缩进 20px、结构父级、计数、按需展开） */
@@ -4676,8 +4707,8 @@
           return `<div class="row-actions">
             ${t.primary ? `<button class="resend-button${['签署', '填写', '定稿'].includes(t.primary) ? ' is-solid' : ''}" type="button" data-primary="${t.id}">${t.primary}</button>` : ''}
             ${(t.more && t.more.length) ? `
-            <span class="aip-lib-more-wrap">
-              <button class="aip-lib-more-button" type="button" aria-label="更多操作" data-more="${t.id}">
+            <span class="more-wrap">
+              <button class="more-button" type="button" aria-label="更多操作" data-more="${t.id}">
                 <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
               </button>
 
