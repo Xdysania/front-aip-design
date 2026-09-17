@@ -1,12 +1,18 @@
 # AIP 设计稿
 
-法大大 AIP（FASC）产品的可交互 HTML 设计稿预览站。发布方式对齐海外签 `front-oversea-design`：仓库静态页 + Dockerfile/Nginx，在稳豸构建后得到内网预览地址。
+法大大 AIP（FASC）产品的可交互 HTML 设计稿预览站。
+
+## 在线预览
+
+**GitHub Pages：** https://xdysania.github.io/front-aip-design/
+
+推送 `main` 后由 Actions 自动发布 `public/`。
 
 ## 目录
 
 ```text
 front-aip-design/
-├── public/                 # 实际页面（稳豸镜像只打包这里）
+├── public/                 # 实际页面（稳豸镜像 / GitHub Pages 均发布这里）
 │   ├── index.html          # 总导航
 │   ├── versions.json
 │   ├── shared/
