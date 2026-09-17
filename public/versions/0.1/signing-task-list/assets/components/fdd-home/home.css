@@ -61,7 +61,7 @@
   .ds-nav button.is-active::after {
     content: "";
     position: absolute; left: 0; right: 0; bottom: 0;
-    height: 3px; background: rgb(28, 43, 51);
+    height: 3px; background: var(--fdd-brand, #0059ef);
   }
 
   .ds-topbar__right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
@@ -122,44 +122,64 @@
     font-size: 14px; font-weight: 600;
   }
 
-  /* ===== Home shell（真站 IAM-home-container）===== */
+  /* ===== Home shell（对齐协议模块 Libra 双卡片骨架）===== */
   .ds-home {
     position: relative;
     flex: 1;
-    background: #fff;
-    overflow: visible;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    /* 与 .contracts-page-content 同缝：上 6 / 右 10 / 下 24 / 左 8 */
+    padding: 6px 10px 24px 8px;
+    background: transparent;
+    overflow: hidden;
+    min-height: 0;
   }
-  /* 顶部淡蓝白灰，向下过渡到纯白 */
-  .ds-home::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background-image: linear-gradient(180deg, #f0f4fa 0%, #f7f9fc 22%, #ffffff 42%);
-  }
-  .ds-home > * { position: relative; z-index: 1; }
+  /* 协议模块已是灰底 + 双卡，首页不再铺渐变整幅白底 */
+  .ds-home::before { display: none; }
+  .ds-home > * { position: relative; z-index: 1; min-width: 0; }
 
-  /* ===== 首页左侧对话栏（参考 LibraTech 悬浮侧栏节奏）===== */
+  /* ===== 首页左侧对话栏（对齐 .contract-sidebar 悬浮卡片）===== */
   .ds-home__main {
+    flex: 1 1 0%;
     min-width: 0;
-    margin-left: 264px; /* 给左侧固定侧栏让位 */
+    min-height: 0;
+    margin-left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e6e9ee;
+    border-radius: 10px;
+    box-shadow: var(--lt-shadow-sm, 0 1px 2px 0 #161a1b0f);
+    box-sizing: border-box;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .ds-homeside {
-    /* 固定钉在视口左侧、顶栏(64px)之下；主区滚动时侧栏保持可见 */
-    position: fixed;
-    left: 0;
-    top: 64px;
-    z-index: 30;
+    position: relative;
+    left: auto;
+    top: auto;
+    z-index: 1;
+    flex: 0 0 264px;
     width: 264px;
-    height: calc(100vh - 64px);
+    max-width: 264px;
+    height: calc(100vh - var(--fdd-header-h, 64px) - 30px);
+    max-height: calc(100vh - var(--fdd-header-h, 64px) - 30px);
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 12px 12px 16px;
     box-sizing: border-box;
-    background: rgba(28, 43, 51, 0.03);
-    border-right: 1px solid rgba(28, 43, 51, 0.08);
+    background: #fafbfc;
+    border: 1px solid #e6e9ee;
+    border-radius: 12px;
+    box-shadow: var(--lt-shadow-sm, 0 1px 2px 0 #161a1b0f);
+    overflow: hidden;
   }
   .ds-homeside__top {
     flex: none;
@@ -170,41 +190,49 @@
   .ds-newchat {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    height: 40px;
-    border: 0;
-    border-radius: 8px;
-    background: rgb(28, 43, 51);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    transition: background-color 0.15s;
-  }
-  .ds-newchat:hover { background: rgba(28, 43, 51, 0.85); }
-  .ds-newchat svg { width: 18px; height: 18px; fill: currentColor; }
-  .ds-homeside__search {
-    display: flex;
-    align-items: center;
+    justify-content: space-between;
     gap: 8px;
     width: 100%;
     height: 36px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    border: 1px solid rgba(28, 43, 51, 0.14);
+    padding: 0 6px 0 8px;
+    border: 0;
     border-radius: 8px;
-    background: #fff;
-    color: rgba(28, 43, 51, 0.5);
+    background: transparent;
+    color: rgba(28, 43, 51, 0.88);
     font-size: 14px;
+    font-weight: 500;
     line-height: 1;
-    cursor: text;
-    transition: border-color 0.15s, color 0.15s;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
   }
-  .ds-homeside__search:hover { border-color: rgba(28, 43, 51, 0.4); color: rgba(28, 43, 51, 0.7); }
-  .ds-homeside__search svg { width: 16px; height: 16px; fill: rgba(28, 43, 51, 0.7); flex: none; }
+  .ds-newchat:hover {
+    background: rgba(28, 43, 51, 0.05);
+    color: rgba(28, 43, 51, 0.95);
+  }
+  .ds-newchat__lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .ds-newchat__trail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    color: rgba(28, 43, 51, 0.7);
+  }
+  .ds-newchat svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    flex: none;
+  }
+  .ds-homeside__search {
+    display: none !important;
+  }
 
   .ds-homeside__scroll {
     flex: 1;
@@ -267,17 +295,18 @@
     flex-direction: column;
     align-items: center;
     gap: 0;
-    padding: 64px 24px 68px;
-    max-width: 1040px;
-    margin: 0 auto;
+    padding: 24px 32px;
+    max-width: 680px;
+    margin: auto;
     box-sizing: border-box;
     width: 100%;
+    flex: 0 0 auto;
   }
   .ds-agent-title {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     text-align: center;
   }
   .ds-agent-hello,
@@ -288,35 +317,36 @@
     -webkit-font-smoothing: antialiased;
   }
   .ds-agent-hello {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 18px;
+    line-height: 26px;
     font-weight: 500;
     color: rgba(28, 43, 51, 0.72);
   }
   .ds-agent-ask {
-    font-size: 48px;
-    line-height: 60px;
+    font-size: 26px;
+    line-height: 34px;
     font-weight: 600;
     color: rgba(28, 43, 51, 0.92);
   }
 
   .ds-chatbox {
     width: 100%;
-    margin-top: 44px;
+    margin-top: 20px;
     background: #fff;
     border: 1px solid rgba(28, 43, 51, 0.1);
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(28, 43, 51, 0.06), 0 1px 2px rgba(28, 43, 51, 0.04);
-    padding: 18px 18px 14px;
+    box-shadow: 0 1px 2px rgba(28, 43, 51, 0.04);
+    padding: 12px 14px 10px;
     text-align: left;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-height: 96px;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
   }
   .ds-chatbox:focus-within {
-    border-color: rgba(28, 43, 51, 0.12);
-    box-shadow: 0 16px 48px rgba(28, 43, 51, 0.1), 0 6px 20px rgba(28, 43, 51, 0.06);
+    border-color: rgba(28, 43, 51, 0.18);
+    box-shadow: 0 4px 16px rgba(28, 43, 51, 0.06);
   }
   .ds-chatbox__input {
     width: 100%;
@@ -325,47 +355,82 @@
     outline: none;
     resize: none;
     font: inherit;
-    font-size: 18px;
-    line-height: 28px;
+    font-size: 15px;
+    line-height: 22px;
     color: rgba(28, 43, 51, 0.9);
-    min-height: 72px;
-    padding: 0 2px 8px;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 0;
     box-sizing: border-box;
   }
-  .ds-chatbox__input::placeholder { color: rgba(28, 43, 51, 0.45); }
+  .ds-chatbox__input::placeholder { color: rgba(28, 43, 51, 0.4); }
   .ds-chatbox__bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding-top: 2px;
+    padding-top: 0;
+    margin-top: auto;
+  }
+  .ds-chatbox__tools-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ds-chatbox__tools-pop {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    z-index: 20;
+    min-width: 168px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #fff;
+    border: 1px solid #e6e9ee;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(22, 26, 27, 0.12);
+  }
+  .ds-chatbox__tools-pop[hidden] { display: none !important; }
+  .ds-chatbox__tools-pop .ds-chat-btn {
+    width: 100%;
+    justify-content: flex-start;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+    background: transparent;
+  }
+  .ds-chatbox__tools-pop .ds-chat-btn:hover {
+    background: rgba(0, 89, 239, 0.08);
   }
   .ds-chatbox__tools {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     flex-wrap: wrap;
   }
+  .ds-chatbox__tools--end { margin-left: auto; }
   .ds-chat-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 14px;
+    gap: 4px;
+    height: 28px;
+    padding: 0 8px;
     border-radius: 8px;
     border: 1px solid transparent;
-    background: rgba(28, 43, 51, 0.05);
-    color: rgba(28, 43, 51, 0.78);
-    font-size: 16px;
+    background: transparent;
+    color: rgba(28, 43, 51, 0.62);
+    font-size: 13px;
     font-weight: 500;
     line-height: 1;
     cursor: pointer;
     transition: background-color 0.15s, border-color 0.15s, color 0.15s;
   }
   .ds-chat-btn:hover {
-    background: rgba(0, 89, 239, 0.08);
-    color: #0059ef;
+    background: rgba(28, 43, 51, 0.05);
+    color: rgba(28, 43, 51, 0.9);
   }
   .ds-chat-btn--active {
     background: rgba(0, 89, 239, 0.1);
@@ -381,20 +446,43 @@
   .ds-chat-btn--ghost {
     border-color: transparent;
     background: transparent;
-    color: rgba(28, 43, 51, 0.62);
+    color: rgba(28, 43, 51, 0.55);
+    font-weight: 500;
   }
   .ds-chat-btn--ghost:hover {
     background: rgba(28, 43, 51, 0.05);
     border-color: transparent;
-    color: rgba(28, 43, 51, 0.9);
+    color: rgba(28, 43, 51, 0.85);
+  }
+  .ds-chat-btn--model {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+  }
+  .ds-chat-btn--model:hover {
+    background: rgba(28, 43, 51, 0.06);
+    color: rgba(28, 43, 51, 0.88);
   }
   .ds-chat-btn--icon {
-    width: 36px;
+    width: 28px;
+    height: 28px;
     padding: 0;
+    background: transparent;
+    color: rgba(28, 43, 51, 0.55);
+  }
+  .ds-chat-btn--icon:hover {
+    background: rgba(28, 43, 51, 0.06);
+    color: rgba(28, 43, 51, 0.85);
+  }
+  .ds-chatbox__tools-toggle.is-open,
+  .ds-chatbox__tools-wrap.is-open .ds-chatbox__tools-toggle {
+    background: rgba(28, 43, 51, 0.06);
+    color: rgba(28, 43, 51, 0.9);
   }
   .ds-chat-btn--primary {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     border-radius: 50%;
     border-color: transparent;
@@ -408,49 +496,53 @@
   }
   .ds-chat-btn--primary:disabled,
   .ds-chat-btn--primary.is-disabled {
-    background: rgba(28, 43, 51, 0.12);
-    color: #fff;
+    background: rgba(28, 43, 51, 0.08);
+    color: rgba(28, 43, 51, 0.28);
     cursor: not-allowed;
   }
   .ds-chat-btn--primary:disabled:hover,
   .ds-chat-btn--primary.is-disabled:hover {
-    background: rgba(28, 43, 51, 0.12);
-    color: #fff;
+    background: rgba(28, 43, 51, 0.08);
+    color: rgba(28, 43, 51, 0.28);
   }
 
   .ds-agent-disclaimer {
-    margin: 12px 0 0;
-    color: rgba(28, 43, 51, 0.55);
-    font-size: 12px;
-    line-height: 18px;
+    flex: none;
+    width: 100%;
+    margin: 0;
+    padding: 0 24px 18px;
+    color: rgba(28, 43, 51, 0.45);
+    font-size: 11px;
+    line-height: 16px;
     text-align: center;
+    box-sizing: border-box;
   }
 
   .ds-prompts {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 14px;
   }
   .ds-prompts__heading {
-    margin: 0 0 10px;
-    font-size: 13px;
+    margin: 0 0 8px;
+    font-size: 12px;
     font-weight: 500;
-    line-height: 20px;
+    line-height: 18px;
     color: rgba(28, 43, 51, 0.45);
     text-align: left;
   }
   .ds-prompts__grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
   .ds-prompt {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
-    padding: 14px 14px 12px;
+    gap: 4px;
+    padding: 10px 12px;
     border: 1px solid rgba(28, 43, 51, 0.08);
-    border-radius: 12px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.88);
     box-shadow: none;
     cursor: pointer;
@@ -477,14 +569,14 @@
     opacity: 0.85;
   }
   .ds-prompt__title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    line-height: 20px;
+    line-height: 18px;
     color: rgba(28, 43, 51, 0.9);
   }
   .ds-prompt__desc {
-    font-size: 12px;
-    line-height: 18px;
+    font-size: 11px;
+    line-height: 16px;
     color: rgba(28, 43, 51, 0.5);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -493,10 +585,10 @@
   }
   @media (max-width: 1100px) {
     .ds-prompts__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
-  @media (max-width: 560px) {
+  @media (max-width: 720px) {
     .ds-prompts__grid {
       grid-template-columns: 1fr;
     }
@@ -537,6 +629,7 @@
 /* 内容区与上方 hero 同宽（max 1040 / 左右 24 → 内容 992），左右边距对齐 */
   .ds-content {
     max-width: 1040px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 24px;
     box-sizing: border-box;
@@ -546,6 +639,11 @@
     flex-direction: column;
     gap: 40px;
     padding: 28px 0 48px;
+    min-width: 0;
+  }
+  /* 首页下部「协议动态 / 模板 / 推荐 / 页脚」整段暂隐 */
+  .ds-content {
+    display: none !important;
   }
 
   /* Drop banner：真站 vr-dropzone-banner
@@ -974,13 +1072,18 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
   font-family: "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", Helvetica, Arial, sans-serif;
   color: rgba(28, 43, 51, 0.9);
   -webkit-font-smoothing: antialiased;
-  background: #f5f7f8;
+  background: #f3f5f8;
 }
 [data-aip-home] > .ds-home {
-  flex: 1 1 auto;
-  min-height: calc(100vh - 64px);
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
 }

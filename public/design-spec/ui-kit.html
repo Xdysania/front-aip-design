@@ -215,6 +215,7 @@
             <li><a href="#select">Select 下拉框</a></li>
             <li><a href="#checkbox">Checkbox 勾选框</a></li>
             <li><a href="#radio">Radio 单选</a></li>
+            <li><a href="#datepicker">DatePicker 日期选择器</a></li>
           </ul>
         </div>
         <div class="kit-nav__section">
@@ -272,7 +273,7 @@
           <thead><tr><th>层级</th><th>内容</th></tr></thead>
           <tbody>
             <tr><td>基本元素</td><td>Colors / Typography / Spacing / Radius / Shadow / Icons</td></tr>
-            <tr><td>基础组件</td><td>Button / Search / Input / Select / Checkbox / Radio / Table / Progress / Chip / Popover / Menu / Modal</td></tr>
+            <tr><td>基础组件</td><td>Button / Search / Input / Select / Checkbox / Radio / DatePicker / Table / Progress / Chip / Popover / Menu / Modal</td></tr>
             <tr><td>业务组件</td><td>Topbar · ContractSidebar · TaskList</td></tr>
             <tr><td>典型页面</td><td>协议 · 签署任务列表</td></tr>
           </tbody>
@@ -649,7 +650,7 @@
 
       <section class="kit-panel" id="panel-search" hidden>
         <h1>Search 搜索框</h1>
-        <p class="en">.envelope-search</p>
+        <p class="en">.envelope-search（前置放大镜 + 可选清除）</p>
         <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
         <div class="kit-biz-embed">
           <div class="kit-biz-embed__bar">
@@ -662,8 +663,8 @@
 
       <section class="kit-panel" id="panel-input" hidden>
         <h1>Input 输入框</h1>
-        <p class="en">.ns-field__input（新建文件夹）</p>
-        <div class="kit-doc__note">禁止自造演示。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
+        <p class="en">.envelope-input（由 .envelope-search 去掉搜索图标）</p>
+        <div class="kit-doc__note">禁止自造演示。与 Search 同壳（白底边框 / 32 高 / focus 蓝圈），仅无前置放大镜。样式与 class 均来自典型页 <code>pages/typical/signing-task-list/signing-tasks.html</code>（Libra · 顶栏），改典型页即改此处。</div>
         <div class="kit-biz-embed">
           <div class="kit-biz-embed__bar">
             <span>真实样式 · embed=basics&amp;sec=input</span>
@@ -709,6 +710,23 @@
             <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radio" target="_blank" rel="noopener">新窗口打开</a>
           </div>
           <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-md" title="Radio 单选" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=radio"></iframe>
+        </div>
+      </section>
+
+      <section class="kit-panel" id="panel-datepicker" hidden>
+        <h1>DatePicker 日期选择器</h1>
+        <p class="en">.libra-dp · .libra-dp__field · .libra-dp__float</p>
+        <div class="kit-doc__note">
+          规范真源对齐「日期」筛选「介于」态（条件下拉 + 起止只读输入 + 日历浮层）。
+          样式令牌见 <code>aip-design-system.css</code> 的 DatePicker 段；
+          <strong>禁止</strong>使用原生 <code>&lt;input type="date"&gt;</code>。
+        </div>
+        <div class="kit-biz-embed">
+          <div class="kit-biz-embed__bar">
+            <span>真实样式 · embed=basics&amp;sec=datepicker</span>
+            <a href="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=datepicker" target="_blank" rel="noopener">新窗口打开</a>
+          </div>
+          <iframe class="kit-biz-embed__frame kit-biz-embed__frame--basics-md" style="min-height:480px" title="DatePicker 日期选择器" src="pages/typical/signing-task-list/signing-tasks.html?embed=basics&sec=datepicker"></iframe>
         </div>
       </section>
 

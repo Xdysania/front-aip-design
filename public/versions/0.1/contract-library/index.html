@@ -26,17 +26,82 @@
 
   <main class="hero">
     <section class="hero__panel" aria-labelledby="portal-title">
-      <p class="hero__eyebrow">AIP 0.1 · 法大大 FASC</p>
+      <p class="hero__eyebrow">AIP 0.1 + 0.2 · 法大大 FASC</p>
       <h1 id="portal-title" class="hero__title">合同库</h1>
-      <p class="hero__lead">签后文件管理入口：FASC 已完成签署任务自动同步入库 + 本地上传；合同列表（搜索/筛选/自定义列）、详情抽屉（PDF 预览/字段定位/附件/编辑）、本地上传三段式、文件上传记录、合同类型与字段管理（PRD v0.6 · TAPD 1092515）。</p>
+      <p class="hero__lead">签后文件管理入口：FASC 已完成签署任务自动同步入库 + 本地上传；合同列表（搜索/筛选/自定义列）、详情抽屉（PDF 预览/字段定位/附件/编辑）、本地上传三段式、文件上传记录、合同类型与字段管理（0.1 · TAPD 1092515）。0.2 新增 AI 合同信息提取：入库后自动识别类型、提取字段并标记「AI 待确认」，逐字段核对原文后确认，减少抄录且每条建议可查原文、可纠正、可追责（TAPD 1092698）。</p>
 
+      <h2 class="portal-group-title">0.1 合同库基础</h2>
       <div class="portal-cards">
-        <a class="portal-card" href="contract-library.html" data-updated-at="2026-09-16T17:00:00" data-cursor="hover">
-          <span class="portal-card__title">合同库（列表 / 详情抽屉 / 上传合同 / 文件上传记录 / 合同类型 / 字段管理）</span>
+        <a class="portal-card" href="contract-library.html" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同列表（搜索/筛选/自定义列/排序/分页/批量）</span>
           <time class="portal-card__updated"></time>
         </a>
-        <a class="portal-card" href="contract-library.html#upload-records" data-updated-at="2026-09-16T17:00:00" data-cursor="hover">
-          <span class="portal-card__title">文件上传记录（直达：任务状态 / 失败文件 / 查询文件）</span>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同详情（PDF 预览 / 字段分组 / 文档内搜索 / 字段定位 / 附件 / 编辑）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=upload" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">本地上传（选择 → 确认 → 进度 三段式弹窗）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=upload-records" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">文件上传记录（任务状态 / 失败文件 / 查询文件 / 删除）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=type" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同类型管理（列表 / 新建 / 编辑 / 删除）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=type-new" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">新建类型（弹窗：名称必填 / 分类 / AI 识别开关与定义）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=type-fields" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">类型字段列表（类型关联字段 / 添加字段 / 编辑 / 移除）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=field" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">字段管理（列表 / 新建 / 编辑）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=field-new" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">新建字段（弹窗：名称/数据类型/选项配置/分类/AI 提取开关与定义）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+      </div>
+
+      <h2 class="portal-group-title">0.2 协议库 · AI 合同信息提取</h2>
+      <div class="portal-cards">
+        <a class="portal-card" href="contract-library.html" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同列表 · AI 待确认（淡紫底 ✦ 单元格 / 类型待确认 / 待复核的 AI 建议筛选）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同详情 · 复核栏（识别类型 + 适用字段数 + 待复核建议数 + 复核全部入口）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同详情 · 复核态（逐字段「接受 AI 建议」+ 取消/保存，保存后转已确认）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">条款原文定位（字段「定位原文」→ 左栏 PDF 滚动到对应页并高亮条款）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">合同类型更正（类型待确认 → 确认/修改类型，改类型触发新代重新提取）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=detail" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">异常与降级（部分内容未提取 / 未提取 / 无提取结果，保留当前值可人工编辑）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=type-new" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">类型管理 · AI 识别开关（自定义类型启用 AI + 识别定义 100～1000 字）</span>
+          <time class="portal-card__updated"></time>
+        </a>
+        <a class="portal-card" href="contract-library.html?view=field-new" data-updated-at="2026-09-17T10:30:00" data-cursor="hover">
+          <span class="portal-card__title">字段管理 · AI 提取开关（自定义字段启用 AI + 提取定义 100～1000 字）</span>
           <time class="portal-card__updated"></time>
         </a>
       </div>

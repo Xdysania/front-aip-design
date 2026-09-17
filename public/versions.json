@@ -1,29 +1,29 @@
 {
-    "versions": [
+  "versions": [
+    {
+      "id": "0.1",
+      "name": "0.1",
+      "open": true,
+      "requirements": [
         {
-            "id": "0.1",
-            "name": "0.1",
-            "open": true,
-            "requirements": [
-                {
-                    "id": "signing-task-list",
-                    "title": "签署任务列表结构调整",
-                    "href": "versions/0.1/signing-task-list/",
-                    "updatedAt": "2026-09-15T12:24:08"
-                },
-                {
-                    "id": "contract-library",
-                    "title": "合同库",
-                    "href": "versions/0.1/contract-library/",
-                    "updatedAt": "2026-09-16T17:00:00"
-                },
-                {
-                    "id": "workbench-framework",
-                    "title": "工作台整体框架调整",
-                    "href": "versions/0.1/workbench-framework/",
-                    "updatedAt": "2026-09-16T15:35:00"
-                }
-            ]
+          "id": "signing-task-list",
+          "title": "签署任务列表结构调整",
+          "href": "versions/0.1/signing-task-list/",
+          "updatedAt": "2026-09-15T12:24:08"
+        },
+        {
+          "id": "contract-library",
+          "title": "合同库",
+          "href": "versions/0.1/contract-library/",
+          "updatedAt": "2026-09-17T16:09:54"
+        },
+        {
+          "id": "workbench-framework",
+          "title": "工作台整体框架调整",
+          "href": "versions/0.1/workbench-framework/",
+          "updatedAt": "2026-09-16T15:35:00"
         }
-    ]
+      ]
+    }
+  ]
 }

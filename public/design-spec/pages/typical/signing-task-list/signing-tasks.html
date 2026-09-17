@@ -265,10 +265,17 @@
     .view-home {
       display: none;
       flex: 1; min-height: 0;
-      overflow: auto;
+      overflow: hidden; /* 双卡片内部各自滚动，外层不整页滚 */
     }
     body[data-view="home"] .view-home { display: flex; }
     body[data-view="home"] .contracts-page-content { display: none !important; }
+    /* 首页：约束横向，避免双卡撑出视口 */
+    body[data-view="home"] .page-shell,
+    body[data-view="home"] .app-main {
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
     /* 非侧栏皮肤：首页仍全宽（隐藏合同侧栏） */
     body[data-view="home"] .contract-sidebar { display: none; }
     body[data-view="contracts"] .view-home { display: none; }
@@ -603,6 +610,20 @@
     }
     .envelope-search__clear:not([hidden]) { display: grid; place-items: center; }
     .envelope-search__clear:hover { color: var(--fdd-ink); }
+    /* Input：与 Search 同壳（白底边框圆角/32 高/focus 蓝圈），无前置搜索图标 */
+    .envelope-input {
+      position: relative;
+      width: 100%; max-width: 360px; min-width: 160px; height: 32px; margin: 0; padding: 0 10px;
+      display: flex; align-items: center; box-sizing: border-box;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff;
+    }
+    .envelope-input:focus-within { border-color: var(--fdd-brand); outline: 2px solid var(--fdd-brand-soft); outline-offset: 0; }
+    .envelope-input input {
+      flex: 1; min-width: 0; border: 0; outline: 0; background: transparent;
+      font-size: 14px; color: var(--fdd-ink);
+    }
+    .envelope-input input::placeholder { color: var(--fdd-ink-3); }
     .envelope-filters {
       display: flex; flex-wrap: nowrap; align-items: center; gap: 0; flex: 1; min-width: 0;
     }
@@ -690,6 +711,8 @@
       box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
       color: var(--fdd-ink);
     }
+    .filter-popover[data-place-x="end"] { left: auto; right: 0; }
+    .filter-popover[data-place-y="above"] { top: auto; bottom: calc(100% + 10px); }
     .filter-popover[hidden] { display: none !important; }
     .filter-popover::before {
       content: ""; position: absolute; top: -6px; left: 28px;
@@ -698,6 +721,11 @@
       border-left: 1px solid rgba(28, 43, 51, 0.08);
       border-top: 1px solid rgba(28, 43, 51, 0.08);
       transform: rotate(45deg);
+    }
+    .filter-popover[data-place-x="end"]::before { left: auto; right: 28px; }
+    .filter-popover[data-place-y="above"]::before {
+      top: auto; bottom: -6px;
+      transform: rotate(225deg);
     }
     .filter-popover__title {
       margin: 0 0 16px; font-size: 16px; font-weight: 700; line-height: 22px;
@@ -1268,11 +1296,12 @@
     .libra-dp__day:hover { background: var(--fdd-bg-hover); }
     .libra-dp__day.is-muted { color: var(--fdd-ink-3); }
     .libra-dp__day.is-today { box-shadow: inset 0 0 0 1px var(--fdd-brand); color: var(--fdd-brand); }
+    /* 图1规范：选中日为品牌蓝描边，非实心填充 */
     .libra-dp__day.is-selected {
-      background: var(--fdd-brand); color: #fff; font-weight: 600;
-      box-shadow: none;
+      background: transparent; color: var(--fdd-brand); font-weight: 600;
+      box-shadow: inset 0 0 0 1.5px var(--fdd-brand);
     }
-    .libra-dp__day.is-selected:hover { background: var(--fdd-brand-hover); color: #fff; }
+    .libra-dp__day.is-selected:hover { background: var(--fdd-brand-soft); color: var(--fdd-brand); }
     .libra-dp__foot {
       display: flex; align-items: center; justify-content: space-between;
       margin-top: 8px; padding-top: 8px;
@@ -1663,17 +1692,17 @@
     .more-button:hover { background: var(--fdd-bg-hover); }
     .row-menu {
       position: fixed; z-index: 90;
-      width: 168px; padding: 4px;
+      width: max-content; min-width: 0; max-width: min(240px, calc(100vw - 24px)); padding: 4px;
       border: 1px solid var(--fdd-line); border-radius: 6px;
       background: #fff;
       box-shadow: var(--fdd-shadow-menu);
       animation: nsPopoverIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .row-menu button {
-      width: 100%; height: 32px; padding: 0 10px;
+      width: 100%; height: 32px; padding: 0 12px;
       display: flex; align-items: center; gap: 8px;
       border: 0; border-radius: var(--fdd-radius); background: transparent;
-      text-align: left; font-size: 13px;
+      text-align: left; font-size: 13px; white-space: nowrap;
     }
     .row-menu button:hover { background: #f1f4f6; }
     .row-menu button.danger { color: var(--fdd-danger); }
@@ -1906,7 +1935,8 @@
     html[data-shell="libra"] .scope-switch { background: #f3f5f8; }
     html[data-shell="libra"] .resend-button { border-radius: 8px; }
     html[data-shell="libra"] .filter-trigger,
-    html[data-shell="libra"] .envelope-search { border-radius: 8px; }
+    html[data-shell="libra"] .envelope-search,
+    html[data-shell="libra"] .envelope-input { border-radius: 8px; }
     html[data-shell="libra"] .filter-chip { border-radius: 8px; }
     html[data-shell="libra"] .filter-popover__cancel,
     html[data-shell="libra"] .filter-popover__apply,
@@ -1914,7 +1944,8 @@
     html[data-shell="libra"] .ns-modal__foot .btn-solid,
     html[data-shell="libra"] .batch-bar button,
     html[data-shell="libra"] .page-size-trigger { border-radius: 8px; }
-    html[data-shell="libra"] .envelope-search:focus-within { outline: none; box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
+    html[data-shell="libra"] .envelope-search:focus-within,
+    html[data-shell="libra"] .envelope-input:focus-within { outline: none; box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
 
     html[data-shell="libra"] {
       --fdd-brand: #0059ef;
@@ -2097,6 +2128,15 @@
     html[data-skin="libra-top"] .contracts-page-content {
       margin-top: var(--libra-top-card-gap);
       min-height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap) - 24px);
+    }
+    /* 首页双卡：顶缝与协议内容卡一致（仅 libra-top-card-gap，勿再叠 6px） */
+    html[data-skin="libra-top"] [data-aip-home] .ds-home {
+      padding-top: var(--libra-top-card-gap);
+      min-height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap));
+    }
+    html[data-skin="libra-top"] [data-aip-home] .ds-homeside {
+      height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap) - 24px);
+      max-height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap) - 24px);
     }
     html[data-skin="libra-top"] .page-shell {
       min-height: calc(100vh - 6px - var(--fdd-header-h) - var(--libra-top-card-gap));
@@ -2370,7 +2410,8 @@
     html[data-kit-embed="basics"][data-kit-sec="popover"] #kit-sec-popover,
     html[data-kit-embed="basics"][data-kit-sec="menu"] #kit-sec-menu,
     html[data-kit-embed="basics"][data-kit-sec="progress"] #kit-sec-progress,
-    html[data-kit-embed="basics"][data-kit-sec="table"] #kit-sec-table { display: block; }
+    html[data-kit-embed="basics"][data-kit-sec="table"] #kit-sec-table,
+    html[data-kit-embed="basics"][data-kit-sec="datepicker"] #kit-sec-datepicker { display: block; }
 
     .kit-basics__sec { margin: 0 0 28px; scroll-margin-top: 16px; }
     .kit-basics__sec > h2 {
@@ -6125,12 +6166,15 @@
     </section>
 
     <section class="kit-basics__sec" data-kit-sec="input" id="kit-sec-input">
+      <!-- [AI 规范：Input] 与 Search 同壳；容器 .envelope-input；内层仅 <input>；禁止前置放大镜；禁自造边框/高度 -->
       <h2>Input 输入框</h2>
-      <p>典型页：#newFolderModal .ns-field__input</p>
-      <div class="kit-basics__box" style="max-width:360px">
-        <label class="ns-field" style="display:flex;flex-direction:column;gap:6px">
-          <span class="ns-field__label" style="font-size:13px;font-weight:500">文件夹名称</span>
-          <input type="text" class="ns-field__input" placeholder="请输入文件夹名称" style="height:36px;padding:0 12px;border:1px solid var(--fdd-line-strong);border-radius:var(--fdd-radius);background:#fff" />
+      <p>典型页：.envelope-input（由 .envelope-search 去掉搜索图标沉淀）</p>
+      <div class="kit-basics__box kit-basics__box--input">
+        <label class="ns-field kit-basics__field">
+          <span class="ns-field__label">文件夹名称</span>
+          <span class="envelope-input">
+            <input type="text" placeholder="请输入文件夹名称" aria-label="文件夹名称" />
+          </span>
         </label>
       </div>
     </section>
@@ -6225,6 +6269,99 @@
       <div class="kit-basics__box" style="max-width:280px;display:flex;flex-direction:column;gap:14px">
         <div class="envelope-track"><i style="width:66%"></i></div>
         <div class="envelope-track"><i style="width:100%"></i></div>
+      </div>
+    </section>
+
+    <section class="kit-basics__sec" data-kit-sec="datepicker" id="kit-sec-datepicker">
+      <h2>DatePicker 日期选择器</h2>
+      <p>规范 class：.libra-dp / .libra-dp__field / .libra-dp__float · 禁止原生 type=date</p>
+      <div class="kit-basics__box kit-basics__box--subtle kit-basics__pop-host" style="min-height:420px">
+        <div class="filter-popover is-date-picker is-date-between" style="position:relative;top:0;left:0;display:block">
+          <h3 class="filter-popover__title">日期</h3>
+          <div class="filter-popover__op-wrap">
+            <button type="button" class="filter-popover__op" aria-haspopup="listbox" aria-expanded="false">
+              <span class="filter-popover__op-label">介于</span>
+              <span class="filter-popover__op-caret" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </span>
+            </button>
+          </div>
+          <div class="filter-popover__date-extra">
+            <div class="filter-popover__date-row filter-popover__date-row--pair">
+              <div class="libra-dp">
+                <div class="libra-dp__field is-open">
+                  <input class="libra-dp__input" type="text" readonly placeholder="开始日期" value="" aria-label="开始日期" />
+                  <button type="button" class="libra-dp__cal-ico" tabindex="-1" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="libra-dp">
+                <div class="libra-dp__field">
+                  <input class="libra-dp__input" type="text" readonly placeholder="结束日期" value="" aria-label="结束日期" />
+                  <button type="button" class="libra-dp__cal-ico" tabindex="-1" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-popover__actions">
+            <button type="button" class="filter-popover__cancel">取消</button>
+            <button type="button" class="filter-popover__apply">应用</button>
+          </div>
+        </div>
+        <div class="libra-dp__float" style="position:absolute;top:168px;left:24px;z-index:2" role="dialog" aria-label="选择日期示意">
+          <div class="libra-dp__nav">
+            <span class="libra-dp__month">2026年09月</span>
+            <span class="libra-dp__nav-btns">
+              <button type="button" class="libra-dp__nav-btn" aria-label="上个月"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button type="button" class="libra-dp__nav-btn" aria-label="下个月"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+            </span>
+          </div>
+          <div class="libra-dp__week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="libra-dp__grid">
+            <button type="button" class="libra-dp__day is-muted">30</button>
+            <button type="button" class="libra-dp__day is-muted">31</button>
+            <button type="button" class="libra-dp__day">1</button>
+            <button type="button" class="libra-dp__day">2</button>
+            <button type="button" class="libra-dp__day">3</button>
+            <button type="button" class="libra-dp__day">4</button>
+            <button type="button" class="libra-dp__day">5</button>
+            <button type="button" class="libra-dp__day">6</button>
+            <button type="button" class="libra-dp__day">7</button>
+            <button type="button" class="libra-dp__day">8</button>
+            <button type="button" class="libra-dp__day">9</button>
+            <button type="button" class="libra-dp__day">10</button>
+            <button type="button" class="libra-dp__day">11</button>
+            <button type="button" class="libra-dp__day">12</button>
+            <button type="button" class="libra-dp__day">13</button>
+            <button type="button" class="libra-dp__day">14</button>
+            <button type="button" class="libra-dp__day">15</button>
+            <button type="button" class="libra-dp__day">16</button>
+            <button type="button" class="libra-dp__day is-selected">17</button>
+            <button type="button" class="libra-dp__day">18</button>
+            <button type="button" class="libra-dp__day">19</button>
+            <button type="button" class="libra-dp__day">20</button>
+            <button type="button" class="libra-dp__day">21</button>
+            <button type="button" class="libra-dp__day">22</button>
+            <button type="button" class="libra-dp__day">23</button>
+            <button type="button" class="libra-dp__day">24</button>
+            <button type="button" class="libra-dp__day">25</button>
+            <button type="button" class="libra-dp__day">26</button>
+            <button type="button" class="libra-dp__day">27</button>
+            <button type="button" class="libra-dp__day">28</button>
+            <button type="button" class="libra-dp__day">29</button>
+            <button type="button" class="libra-dp__day">30</button>
+            <button type="button" class="libra-dp__day is-muted">1</button>
+            <button type="button" class="libra-dp__day is-muted">2</button>
+            <button type="button" class="libra-dp__day is-muted">3</button>
+          </div>
+          <div class="libra-dp__foot">
+            <button type="button">清除</button>
+            <button type="button">今天</button>
+          </div>
+        </div>
       </div>
     </section>
 

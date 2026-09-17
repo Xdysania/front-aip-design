@@ -124,6 +124,17 @@ a {
   color: var(--muted);
 }
 
+/* —— 分组小标题（0.1 / 0.2 story 分组） —— */
+.portal-group-title {
+  margin: 32px 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-align: left;
+}
+.portal-group-title:first-of-type { margin-top: 28px; }
+
 /* —— 内页卡片网格（与外层折叠列表区分） —— */
 .portal-cards {
   display: grid;

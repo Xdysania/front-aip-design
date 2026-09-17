@@ -184,9 +184,12 @@ html.aip-app body {
 
 /* ==========================================================================
    基础组件 · Search / Input
+   Search = .envelope-search（典型页）/ .aip-search（别名），前置放大镜
+   Input  = .envelope-input（典型页）/ .aip-input（别名），同壳无图标
    ========================================================================== */
 .aip-search,
-.aip-input {
+.aip-input,
+.envelope-input {
   height: var(--aip-control-h);
   padding: 0 10px;
   display: inline-flex;
@@ -198,13 +201,17 @@ html.aip-app body {
   box-sizing: border-box;
 }
 .aip-search { width: 284px; min-width: 160px; }
+.aip-input,
+.envelope-input { width: 100%; max-width: 360px; min-width: 160px; }
 .aip-search:focus-within,
-.aip-input:focus-within {
+.aip-input:focus-within,
+.envelope-input:focus-within {
   border-color: var(--aip-brand);
   box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16);
 }
 .aip-search input,
-.aip-input input {
+.aip-input input,
+.envelope-input input {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -214,7 +221,8 @@ html.aip-app body {
   color: var(--aip-ink);
 }
 .aip-search input::placeholder,
-.aip-input input::placeholder { color: var(--aip-ink-3); }
+.aip-input input::placeholder,
+.envelope-input input::placeholder { color: var(--aip-ink-3); }
 
 /* ==========================================================================
    基础组件 · Select / Dropdown trigger
@@ -857,3 +865,200 @@ html[data-aip-shell="libra"] .aip-task-list {
 .aip-icon__svg { display: block; width: 1em; height: 1em; }
 .aip-icon--sm { font-size: 16px; width: 16px; height: 16px; }
 .aip-icon--md { font-size: 20px; width: 20px; height: 20px; }
+
+/* ==========================================================================
+   DatePicker 日期选择器（.libra-dp）
+   真源形态：签署任务列表「日期」筛选 · 条件「介于」+ 起止输入 + 日历浮层
+   禁止使用原生 <input type="date">；输入框只读，日历由 .libra-dp__float 弹出
+   ========================================================================== */
+
+.libra-dp { display: block; min-width: 0; }
+
+.libra-dp__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 6px 0 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--aip-line-strong);
+  border-radius: var(--aip-radius);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.libra-dp__field:hover { border-color: var(--aip-ink-3); }
+.libra-dp__field.is-open,
+.libra-dp__field:focus-within {
+  border-color: var(--aip-brand);
+  box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16);
+}
+.libra-dp__field input,
+.libra-dp__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-md);
+  cursor: pointer;
+}
+.libra-dp__field input::placeholder,
+.libra-dp__input::placeholder { color: var(--aip-ink-3); }
+
+.libra-dp__cal-ico {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.libra-dp__cal-ico:hover { background: var(--aip-bg-hover); color: var(--aip-ink); }
+
+.libra-dp__float {
+  position: fixed;
+  z-index: 200;
+  width: 280px;
+  padding: 12px;
+  border-radius: var(--aip-radius-sm);
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(28, 43, 51, 0.18);
+  color: var(--aip-ink);
+  isolation: isolate;
+}
+.libra-dp__float[hidden] { display: none !important; }
+
+.libra-dp__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.libra-dp__month {
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  font-size: var(--aip-font-size-md);
+  font-weight: var(--aip-font-weight-semibold);
+  color: var(--aip-ink);
+}
+.libra-dp__nav-btns { display: inline-flex; gap: 2px; }
+.libra-dp__nav-btn {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink-2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.libra-dp__nav-btn:hover { background: var(--aip-bg-hover); color: var(--aip-ink); }
+
+.libra-dp__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+.libra-dp__week span {
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: var(--aip-font-size-xs);
+  color: var(--aip-ink-3);
+}
+
+.libra-dp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.libra-dp__day {
+  height: 32px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-ink);
+  font-size: var(--aip-font-size-sm);
+  cursor: pointer;
+}
+.libra-dp__day:hover { background: var(--aip-bg-hover); }
+.libra-dp__day.is-muted { color: var(--aip-ink-3); }
+/* 图1：选中日为品牌蓝描边方块（非实心填充） */
+.libra-dp__day.is-today,
+.libra-dp__day.is-selected {
+  box-shadow: inset 0 0 0 1.5px var(--aip-brand);
+  color: var(--aip-brand);
+  font-weight: var(--aip-font-weight-semibold);
+  background: transparent;
+}
+.libra-dp__day.is-selected:hover {
+  background: var(--aip-brand-soft);
+  color: var(--aip-brand);
+}
+
+.libra-dp__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--aip-line-soft);
+  background: #fff;
+}
+.libra-dp__foot button {
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--aip-radius);
+  background: transparent;
+  color: var(--aip-brand);
+  font-size: var(--aip-font-size-sm);
+  font-weight: var(--aip-font-weight-medium);
+  cursor: pointer;
+}
+.libra-dp__foot button:hover { background: var(--aip-brand-soft); }
+
+/* 日期筛选浮层：介于态宽度 */
+.filter-popover.is-date-picker {
+  width: 320px;
+  min-width: 300px;
+  max-width: min(360px, calc(100vw - 24px));
+}
+.filter-popover.is-date-between {
+  width: 400px;
+  min-width: 360px;
+  max-width: min(440px, calc(100vw - 24px));
+}
+.filter-popover__date-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filter-popover__date-row--pair {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+}
+.filter-popover__date-row--pair .libra-dp {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 筛选浮窗边界规则：右溢出 → data-place-x=end（右贴齐）；下溢出 → data-place-y=above（向上） */
+.filter-popover[data-place-x="end"] { left: auto; right: 0; }
+.filter-popover[data-place-y="above"] { top: auto; bottom: calc(100% + 10px); }
+.filter-popover[data-place-x="end"]::before { left: auto; right: 28px; }
+.filter-popover[data-place-y="above"]::before {
+  top: auto; bottom: -6px;
+  transform: rotate(225deg);
+}

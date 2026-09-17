@@ -87,6 +87,7 @@
     .wb-avatar-menu { width: 292px; }
     .wb-viewport { position: relative; }
     .wb-view { transition: opacity .18s; }
+    .wb-view[hidden] { display: none !important; }
     .wb-view--main { position: relative; }
     /* 子视图：正常布局位（不绝对定位），高度随内容自适应；打开子视图时隐藏主视图 */
     .wb-view--sub {
@@ -132,11 +133,22 @@
     .wb-menu-item__badge + .wb-menu-item__caret { margin-left: 6px; }
     .wb-menu-sep { height: 1px; margin: 4px 10px; background: var(--aip-line-soft); }
     .wb-menu-foot { padding: 6px; border-top: 1px solid var(--aip-line-soft); }
-    /* 收纳分组（语言/隐私条款/注册协议） */
-    .wb-menu-group__items { padding: 2px 0 2px 0; }
-    .wb-menu-group__items .wb-menu-item { padding-left: 34px; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); height: 34px; }
+    /* 更多：左侧弹出的次级浮层（语言/隐私条款/注册协议） */
+    .wb-menu-group { position: relative; }
     .wb-menu-group__caret { margin-left: auto; color: var(--aip-ink-3); transition: transform .15s; }
-    .wb-menu-group__toggle[aria-expanded="false"] .wb-menu-group__caret { transform: rotate(-90deg); }
+    .wb-menu-group__toggle[aria-expanded="true"] { background: var(--aip-bg-hover); }
+    .wb-menu-group__toggle[aria-expanded="true"] .wb-menu-group__caret { transform: rotate(180deg); }
+    .wb-submenu {
+      position: fixed; z-index: 91;
+      width: 156px; padding: 6px;
+      background: #fff; border-radius: var(--aip-radius-lg);
+      box-shadow: var(--aip-shadow-menu);
+      animation: wbSubPop .15s cubic-bezier(.22,1,.36,1);
+      transform-origin: right center;
+    }
+    .wb-submenu[hidden] { display: none !important; }
+    @keyframes wbSubPop { from { opacity: 0; transform: translateX(4px) scale(.98); } }
+    .wb-submenu .wb-menu-item { height: 34px; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); }
     /* 退出登录：黑色文字、无图标 */
     .wb-menu-foot .wb-menu-item--logout { color: var(--aip-ink); }
     .wb-menu-foot .wb-menu-item--logout:hover { background: var(--aip-bg-hover); }
@@ -267,7 +279,6 @@
     }
     .wb-tasks__toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
     .wb-tasks__toolbar .aip-search { flex: 1; max-width: 420px; }
-    .wb-tasks__spacer { flex: 1; }
 
     /* 顶部来源 Tab */
     .wb-tasks-tabs { display: inline-flex; align-items: center; gap: 4px; padding: 3px; border-radius: var(--aip-radius); background: var(--aip-bg-page); }
@@ -284,12 +295,13 @@
     }
     .wb-tab-count {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 20px; height: 18px; padding: 0 5px; margin-left: 2px;
-      border-radius: var(--aip-radius-pill); background: var(--aip-bg-muted);
+      min-width: 20px; height: 20px; padding: 0 6px; margin-left: 2px;
+      border-radius: var(--aip-radius-pill); background: var(--aip-bg-hover);
       color: var(--aip-ink-2); font-size: 11px; font-weight: var(--aip-font-weight-medium);
       vertical-align: 1px;
     }
-    .wb-tasks-tabs button.is-on .wb-tab-count { background: var(--aip-bg-active); color: var(--aip-brand); }
+    /* 选中/未选中保持同一个浅色圆底，仅数字颜色随选中态变蓝 */
+    .wb-tasks-tabs button.is-on .wb-tab-count { background: var(--aip-bg-hover); color: var(--aip-brand); }
 
     /* 已应用筛选 chip */
     .wb-tasks__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; min-height: 0; }
@@ -328,8 +340,8 @@
     .wb-task-group .aip-table th:last-child, .wb-task-group .aip-table td:last-child { padding-right: 12px; text-align: left; }
 
     /* 大卡片底部分页：固定底部（flex 项）、与卡片同宽、顶部分隔线 */
-    .wb-tasks-card #pagerCard .wb-pager {
-      margin: 0 -22px; padding: 14px 22px;
+    .wb-tasks-card #pagerCard .envelope-pagination {
+      margin: 0 -22px; padding: 0 22px;
       border-top: 1px solid var(--aip-line-soft);
       flex-shrink: 0;
     }
@@ -359,19 +371,57 @@
     .wb-partial__retry { margin-left: auto; border: 0; background: transparent; color: var(--aip-brand); font-weight: var(--aip-font-weight-medium); }
     .wb-partial__retry:hover { text-decoration: underline; }
 
-    /* 分页 */
-    .wb-pager { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid var(--aip-line-soft); }
-    .wb-pager__total { color: var(--aip-ink-3); font-size: var(--aip-font-size-sm); }
-    .wb-pager__size { display: flex; align-items: center; gap: 6px; color: var(--aip-ink-3); font-size: var(--aip-font-size-sm); }
-    .wb-pager__size select { height: 28px; padding: 0 6px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-xs); background: #fff; }
-    .wb-pager__nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-    .wb-pager__btn {
-      min-width: 30px; height: 30px; padding: 0 8px; border: 1px solid var(--aip-line); border-radius: var(--aip-radius-xs);
-      background: #fff; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm);
+    /* ============ 分页（AIP 规范组件：.envelope-pagination > .page-size + .pager-btns，禁自造页码条） ============ */
+    .envelope-pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 48px; border-top: 1px solid var(--aip-line-soft);
+      color: var(--aip-ink); font-size: 13px;
     }
-    .wb-pager__btn:hover:not(:disabled) { border-color: var(--aip-brand); color: var(--aip-brand); }
-    .wb-pager__btn.is-on { background: var(--aip-brand); border-color: var(--aip-brand); color: #fff; }
-    .wb-pager__btn:disabled { opacity: .4; cursor: not-allowed; }
+    /* 每页条数：左侧，菜单向上弹出 */
+    .page-size { position: relative; display: inline-flex; align-items: center; }
+    .page-size-trigger {
+      appearance: none; -webkit-appearance: none;
+      height: 28px; min-width: 84px; margin: 0; padding: 0 28px 0 10px;
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--aip-line-strong); border-radius: var(--aip-radius);
+      background: #fff; color: var(--aip-ink);
+      font-size: 13px; font-weight: 400; line-height: 20px;
+      white-space: nowrap; cursor: pointer; text-align: left;
+    }
+    .page-size-trigger:hover { border-color: var(--aip-ink); }
+    .page-size-trigger:focus-visible { outline: 2px solid var(--aip-brand); outline-offset: 2px; }
+    .page-size > .caret {
+      position: absolute; right: 6px; top: 50%;
+      width: 16px; height: 16px; margin-top: -8px;
+      color: var(--aip-ink); pointer-events: none;
+    }
+    .page-size.is-open .page-size-trigger { border-color: var(--aip-brand); box-shadow: var(--aip-shadow-menu); }
+    .page-size-menu {
+      position: absolute; left: 0; bottom: calc(100% + 4px); z-index: 30;
+      min-width: 100%; padding: 4px 0;
+      border: 1px solid var(--aip-line); border-radius: var(--aip-radius);
+      background: #fff; box-shadow: var(--aip-shadow-menu);
+      display: none;
+    }
+    .page-size.is-open .page-size-menu { display: block; }
+    .page-size-menu button {
+      width: 100%; height: 28px; padding: 0 10px;
+      display: flex; align-items: center;
+      border: 0; background: transparent;
+      color: var(--aip-ink); font-size: 13px; line-height: 20px; text-align: left;
+      white-space: nowrap; cursor: pointer;
+    }
+    .page-size-menu button:hover { background: var(--aip-bg-hover); }
+    .page-size-menu button.is-selected { background: var(--aip-bg-hover); font-weight: 500; }
+    .pager-btns { display: inline-flex; gap: 4px; align-items: center; margin-left: auto; }
+    .pager-btns > span { color: var(--aip-ink-3); }
+    .pager-btns > span b { color: var(--aip-ink); font-weight: var(--aip-font-weight-semibold); }
+    .pager-btns button {
+      width: 28px; height: 28px; border: 0; border-radius: var(--aip-radius);
+      background: transparent; color: var(--aip-ink);
+    }
+    .pager-btns button:disabled { opacity: .25; cursor: not-allowed; }
+    .pager-btns button:not(:disabled):hover { background: var(--aip-bg-hover); }
 
     /* ============ 任务筛选弹窗（640px 居中） ============ */
     .wb-filter-modal { width: 640px; max-width: calc(100vw - 48px); }
@@ -513,9 +563,9 @@
                 <div class="wb-menu-group">
                   <button class="wb-menu-item wb-menu-group__toggle" type="button" id="moreGroupToggle" aria-expanded="false" aria-controls="moreGroupItems">
                     <span class="wb-menu-item__label">更多</span>
-                    <svg class="wb-menu-group__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    <svg class="wb-menu-group__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
                   </button>
-                  <div class="wb-menu-group__items" id="moreGroupItems" hidden>
+                  <div class="wb-submenu" id="moreGroupItems" hidden role="menu" aria-label="更多">
                     <button class="wb-menu-item" type="button" role="menuitem" data-toast="语言（子视图：中文 / English）">
                       <span class="wb-menu-item__label">语言</span>
                     </button>
@@ -670,9 +720,9 @@
               </div>
 
               <div class="aip-nav-section">
-                <button class="aip-nav-item aip-nav-item--tool" type="button" data-toast="进入合同库（原有页面）">
+                <button class="aip-nav-item aip-nav-item--tool" type="button" data-toast="进入协议库（原有页面）">
                   <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" /></span>
-                  合同库
+                  协议库
                 </button>
                 <button class="aip-nav-item aip-nav-item--tool" type="button" data-toast="进入协议集（原有页面）">
                   <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/cards.svg" alt="" /></span>
@@ -743,9 +793,13 @@
             <tbody id="contractTbody"></tbody>
           </table>
 
-          <div class="wb-pager" style="border-top:1px solid var(--aip-line-soft)">
-            <span class="wb-pager__total" id="contractTotal">共 0 条</span>
-            <div class="wb-pager__nav" id="contractPager"></div>
+          <div class="envelope-pagination">
+            <div class="pager-btns">
+              <span id="contractTotal">共 0 条</span>
+              <span id="contractPageInfo">第 <b>1</b> 页</span>
+              <button type="button" id="contractPrev" aria-label="上一页">‹</button>
+              <button type="button" id="contractNext" aria-label="下一页">›</button>
+            </div>
           </div>
         </div>
       </div>
@@ -763,11 +817,6 @@
             <button type="button" role="tab" class="is-on" data-tab="sign" aria-selected="true">签署任务 <span class="wb-tab-count" data-count="sign"></span></button>
             <button type="button" role="tab" data-tab="approval" aria-selected="false">审批任务 <span class="wb-tab-count" data-count="approval"></span></button>
           </div>
-          <div class="wb-tasks__spacer"></div>
-          <button class="wb-tool-btn" type="button" id="refreshBtn" data-toast="刷新当前列表">
-            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
-            刷新
-          </button>
         </div>
 
         <div class="wb-partial" id="partialBar" hidden>
@@ -804,14 +853,25 @@
 
         <!-- 分页 -->
         <div id="pagerCard">
-          <div class="wb-pager" id="pager">
-            <span class="wb-pager__total" id="pagerTotal">共 0 条</span>
-            <label class="wb-pager__size">每页
-              <select id="pageSize" aria-label="每页条数">
-                <option>10</option><option>20</option><option>30</option><option>50</option>
-              </select> 条
-            </label>
-            <div class="wb-pager__nav" id="pagerNav"></div>
+          <div class="envelope-pagination" id="pager">
+            <div class="page-size" id="pageSize">
+              <button class="page-size-trigger" type="button" id="pageSizeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="每页结果数">
+                <span id="pageSizeLabel">10 / 页</span>
+              </button>
+              <svg class="caret" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg>
+              <div class="page-size-menu" id="pageSizeMenu" role="listbox">
+                <button type="button" role="option" data-value="10" class="is-selected" aria-selected="true">10 / 页</button>
+                <button type="button" role="option" data-value="20" aria-selected="false">20 / 页</button>
+                <button type="button" role="option" data-value="30" aria-selected="false">30 / 页</button>
+                <button type="button" role="option" data-value="50" aria-selected="false">50 / 页</button>
+              </div>
+            </div>
+            <div class="pager-btns">
+              <span id="pagerTotal">共 0 条</span>
+              <span id="pagerInfo">第 <b>1</b> 页</span>
+              <button type="button" id="pagerPrev" aria-label="上一页">‹</button>
+              <button type="button" id="pagerNext" aria-label="下一页">›</button>
+            </div>
           </div>
         </div>
        </div>
@@ -913,7 +973,7 @@
     function closeMenu (menu, btn) {
       menu.hidden = true;
       btn.setAttribute("aria-expanded", "false");
-      if (menu === avatarMenu) resetSub();
+      if (menu === avatarMenu) { resetSub(); closeMoreGroup(); }
     }
     function closeAllMenus () {
       if (!helpMenu.hidden) closeMenu(helpMenu, helpBtn);
@@ -943,30 +1003,45 @@
     $("#openCorpSub").addEventListener("click", function () { showSub("corpSub"); });
     $("#openProdSub").addEventListener("click", function () { showSub("prodSub"); });
     $$("[data-back]", avatarMenu).forEach(function (b) {
-      b.addEventListener("click", function () { avatarMenu.classList.remove("show-sub"); });
+      b.addEventListener("click", resetSub);
     });
-    // 更多分组（语言/隐私条款/注册协议）折叠
+    // 更多分组（语言/隐私条款/注册协议）：左侧次级浮层
+    function closeMoreGroup () {
+      var t = $("#moreGroupToggle"), i = $("#moreGroupItems");
+      if (t && i) { i.hidden = true; t.setAttribute("aria-expanded", "false"); }
+    }
     (function () {
       var toggle = $("#moreGroupToggle"), items = $("#moreGroupItems");
       if (toggle && items) {
+        var place = function () {
+          var r = toggle.getBoundingClientRect();
+          items.style.left = Math.max(8, r.left - items.offsetWidth - 8) + "px";
+          items.style.top = (r.top - 6) + "px";
+        };
         toggle.addEventListener("click", function (e) {
           e.stopPropagation();
           var open = items.hidden;
           items.hidden = !open;
           toggle.setAttribute("aria-expanded", open ? "true" : "false");
+          if (open) place();
         });
       }
     })();
+    // 菜单内交互收尾：进入子视图 / 点击任意跳转项时收掉次级浮层
+    avatarMenu.addEventListener("click", function (e) {
+      if (e.target.closest("#openCorpSub, #openProdSub, [data-toast]")) closeMoreGroup();
+    });
 
     /* 点外部 / Esc 关闭 */
     document.addEventListener("click", function (e) {
-      if (!e.target.closest(".wb-anchor")) closeAllMenus();
+      if (!e.target.closest(".wb-anchor") && !e.target.closest(".wb-submenu")) closeAllMenus();
     });
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       // 先关退出确认，再退菜单子视图，再关最上层菜单
       if (!logoutMask.hidden) { closeLogout(); return; }
-      if (!avatarMenu.hidden && avatarMenu.classList.contains("show-sub")) { avatarMenu.classList.remove("show-sub"); return; }
+      if (!$("#moreGroupItems").hidden) { closeMoreGroup(); return; }
+      if (!avatarMenu.hidden && avatarMenu.classList.contains("show-sub")) { resetSub(); return; }
       closeAllMenus();
     });
 
@@ -1023,7 +1098,7 @@
 
     var taskGroups = $("#taskGroups"), stateCard = $("#stateCard"), pagerCard = $("#pagerCard");
     var stateEmpty = $("#stateEmpty"), stateNoHit = $("#stateNoHit"), stateSourceDead = $("#stateSourceDead");
-    var partialBar = $("#partialBar"), pager = $("#pager"), pagerTotal = $("#pagerTotal"), pagerNav = $("#pagerNav");
+    var partialBar = $("#partialBar"), pager = $("#pager"), pagerTotal = $("#pagerTotal");
     var STATUS_CLS = { "已完成": "done" };
 
     function filteredTasks () {
@@ -1105,23 +1180,12 @@
     }
 
     function renderPager (pages) {
-      pagerNav.innerHTML = "";
-      function btn (label, page, opts) {
-        opts = opts || {};
-        var b = document.createElement("button");
-        b.type = "button"; b.className = "wb-pager__btn" + (opts.on ? " is-on" : "");
-        b.textContent = label;
-        if (opts.disabled) b.disabled = true;
-        else b.addEventListener("click", function () { state.page = page; renderTasks(); });
-        pagerNav.appendChild(b);
-      }
-      btn("‹", state.page - 1, { disabled: state.page <= 1 });
-      var window = 5, from = Math.max(1, Math.min(state.page - 2, pages - window + 1)), to = Math.min(pages, from + window - 1);
-      if (from > 1) { btn("1", 1, { on: state.page === 1 }); if (from > 2) { var d = document.createElement("span"); d.textContent = "…"; d.style.color = "var(--aip-ink-3)"; pagerNav.appendChild(d); } }
-      for (var p = from; p <= to; p++) btn(String(p), p, { on: p === state.page });
-      if (to < pages) { if (to < pages - 1) { var d2 = document.createElement("span"); d2.textContent = "…"; d2.style.color = "var(--aip-ink-3)"; pagerNav.appendChild(d2); } btn(String(pages), pages, { on: state.page === pages }); }
-      btn("›", state.page + 1, { disabled: state.page >= pages });
+      $("#pagerInfo").innerHTML = "第 <b>" + state.page + "</b> 页";
+      $("#pagerPrev").disabled = state.page <= 1;
+      $("#pagerNext").disabled = state.page >= pages;
     }
+    $("#pagerPrev").addEventListener("click", function () { if (state.page > 1) { state.page--; renderTasks(); } });
+    $("#pagerNext").addEventListener("click", function () { state.page++; renderTasks(); });
 
     /* 顶部来源 Tab */
     $("#taskTabs").addEventListener("click", function (e) {
@@ -1136,10 +1200,35 @@
       renderTasks();
     });
 
-    /* 每页条数 */
-    $("#pageSize").addEventListener("change", function () {
-      state.pageSize = parseInt(this.value, 10); state.page = 1; renderTasks();
-    });
+    /* 每页条数（AIP page-size 浮层） */
+    (function () {
+      var root = $("#pageSize"), trigger = $("#pageSizeTrigger"),
+          label = $("#pageSizeLabel"), menu = $("#pageSizeMenu");
+      function closeSize () {
+        root.classList.remove("is-open");
+        trigger.setAttribute("aria-expanded", "false");
+      }
+      trigger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var open = root.classList.toggle("is-open");
+        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      document.addEventListener("click", function (e) { if (!e.target.closest("#pageSize")) closeSize(); });
+      menu.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-value]");
+        if (!b) return;
+        $$("button", menu).forEach(function (x) {
+          var on = x === b;
+          x.classList.toggle("is-selected", on);
+          x.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        label.textContent = b.textContent;
+        state.pageSize = parseInt(b.getAttribute("data-value"), 10);
+        state.page = 1;
+        closeSize();
+        renderTasks();
+      });
+    })();
 
     /* 来源失效态：回到签署任务 */
     $("#clearFilterBtn2").addEventListener("click", function () {
@@ -1186,7 +1275,7 @@
         { id: 12, name: "项目外包开发合同（草稿）", sub: "我发起 · 技术部", status: "草稿", prog: 0, time: "2026-09-03 20:11", files: 2, op: "编辑", views: ["all", "draft"] }
       ];
       var cstate = { nav: "all", scope: "mine", q: "", page: 1, pageSize: 8 };
-      var titleEl = $("#contractTitle"), tbody = $("#contractTbody"), totalEl = $("#contractTotal"), pagerEl = $("#contractPager");
+      var titleEl = $("#contractTitle"), tbody = $("#contractTbody"), totalEl = $("#contractTotal");
 
       function filtered () {
         var nav = CNAV[cstate.nav];
@@ -1217,19 +1306,12 @@
           '</tr>';
         }).join("") || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--aip-ink-3)">当前没有符合条件的签署任务</td></tr>';
         totalEl.textContent = "共 " + total + " 条";
-        pagerEl.innerHTML = "";
-        function pb (label, page, opts) {
-          opts = opts || {};
-          var b = document.createElement("button");
-          b.type = "button"; b.className = "wb-pager__btn" + (opts.on ? " is-on" : "");
-          b.textContent = label;
-          if (opts.disabled) b.disabled = true; else b.addEventListener("click", function () { cstate.page = page; render(); });
-          pagerEl.appendChild(b);
-        }
-        pb("‹", cstate.page - 1, { disabled: cstate.page <= 1 });
-        for (var p = 1; p <= pages; p++) pb(String(p), p, { on: p === cstate.page });
-        pb("›", cstate.page + 1, { disabled: cstate.page >= pages });
+        $("#contractPageInfo").innerHTML = "第 <b>" + cstate.page + "</b> 页";
+        $("#contractPrev").disabled = cstate.page <= 1;
+        $("#contractNext").disabled = cstate.page >= pages;
       }
+      $("#contractPrev").addEventListener("click", function () { if (cstate.page > 1) { cstate.page--; render(); } });
+      $("#contractNext").addEventListener("click", function () { cstate.page++; render(); });
       function esc (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
       // 侧栏导航

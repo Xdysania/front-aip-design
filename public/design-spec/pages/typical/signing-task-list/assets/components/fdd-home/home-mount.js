@@ -58,7 +58,7 @@
        */
       const sync = () => {
         ta.style.height = 'auto';
-        ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+        ta.style.height = Math.min(Math.max(ta.scrollHeight, 44), 120) + 'px';
         if (sendBtn) {
           const hasText = ta.value.trim().length > 0;
           sendBtn.disabled = !hasText;
@@ -69,10 +69,30 @@
       ta.addEventListener('input', sync);
       sync();
 
-      const toolGroup = box.querySelector('.ds-chatbox__tools[role="group"]');
-      if (toolGroup) {
+      const toolWrap = box.querySelector('.ds-chatbox__tools-wrap');
+      const toolToggle = /** @type {HTMLButtonElement|null} */ (box.querySelector('.ds-chatbox__tools-toggle'));
+      const toolPop = /** @type {HTMLElement|null} */ (box.querySelector('.ds-chatbox__tools-pop'));
+      if (toolWrap && toolToggle && toolPop) {
+        /**
+         * @param {boolean} open
+         */
+        const setToolsOpen = (open) => {
+          toolPop.hidden = !open;
+          toolToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          toolWrap.classList.toggle('is-open', open);
+        };
+        toolToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setToolsOpen(toolPop.hidden);
+        });
+        toolPop.addEventListener('click', (e) => e.stopPropagation());
+        document.addEventListener('click', () => setToolsOpen(false));
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setToolsOpen(false);
+        });
+
         const toolBtns = /** @type {HTMLButtonElement[]} */ (
-          Array.from(toolGroup.querySelectorAll('.ds-chat-btn:not(.ds-chat-btn--icon)'))
+          Array.from(toolPop.querySelectorAll('.ds-chat-btn'))
         );
         toolBtns.forEach((btn) => {
           btn.addEventListener('click', () => {
@@ -85,8 +105,29 @@
               btn.classList.add('ds-chat-btn--active');
               btn.setAttribute('aria-pressed', 'true');
             }
+            setToolsOpen(false);
           });
         });
+      } else {
+        const toolGroup = box.querySelector('.ds-chatbox__tools[role="group"]');
+        if (toolGroup) {
+          const toolBtns = /** @type {HTMLButtonElement[]} */ (
+            Array.from(toolGroup.querySelectorAll('.ds-chat-btn:not(.ds-chat-btn--icon)'))
+          );
+          toolBtns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const wasActive = btn.classList.contains('ds-chat-btn--active');
+              toolBtns.forEach((item) => {
+                item.classList.remove('ds-chat-btn--active');
+                item.setAttribute('aria-pressed', 'false');
+              });
+              if (!wasActive) {
+                btn.classList.add('ds-chat-btn--active');
+                btn.setAttribute('aria-pressed', 'true');
+              }
+            });
+          });
+        }
       }
     });
 
