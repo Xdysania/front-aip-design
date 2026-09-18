@@ -276,7 +276,7 @@
       max-width: 100%;
       overflow: hidden;
     }
-    /* 非侧栏皮肤：首页仍全宽（隐藏合同侧栏） */
+    /* 非侧栏皮肤：首页仍全宽（隐藏协议侧栏） */
     body[data-view="home"] .contract-sidebar { display: none; }
     body[data-view="contracts"] .view-home { display: none; }
     body[data-view="contracts"] .page-shell { display: flex; }
@@ -2688,7 +2688,7 @@
       padding: 0 8px 0 34px;
     }
     html[data-skin="line"][data-shell="libra"] .folder-module-toggle {
-      /* 与全部任务 / 合同库 图标左缘对齐 */
+      /* 与全部任务 / 协议库 图标左缘对齐 */
       padding: 0 4px 0 10px;
       gap: 8px;
       font-size: 14px;
@@ -2965,7 +2965,7 @@
   </header>
 
   <div class="page-shell" id="viewContracts">
-    <aside class="contract-sidebar" aria-label="合同侧栏">
+    <aside class="contract-sidebar" aria-label="协议侧栏">
       <div class="contract-side-inner">
         <div class="libra-rail-head" id="libraRailHead" aria-hidden="true"></div>
         <div class="libra-rail-primary" id="libraRailPrimary" aria-hidden="true">
@@ -3041,7 +3041,7 @@
           </div>
 
           <div class="nav-section">
-            <!-- 合同库：跳转独立设计稿；本页不再内嵌合同库视图 -->
+            <!-- 协议库：跳转独立设计稿；本页不再内嵌协议库视图 -->
             <button class="nav-tool" type="button" data-href="../contract-library/contract-library.html" id="navContractLib">
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
                 <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
@@ -3969,7 +3969,7 @@
     }
 
     /**
-     * 顶栏 Tab：首页 / 合同（首页复用 components/home）
+     * 顶栏 Tab：首页 / 协议（首页复用 components/home）
      * @param {'home'|'contracts'} view
      * @param {{push?:boolean}} [opts]
      */
@@ -4033,7 +4033,7 @@
       setAppView(initial, { push: false });
     })();
 
-    /* 合同库同页视图切换已移除：侧栏「合同库」改为 data-href 跳转独立页
+    /* 协议库同页视图切换已移除：侧栏「协议库」改为 data-href 跳转独立页
     document.body.addEventListener('click', (e) => {
       const libBtn = e.target.closest('[data-lib-view]');
       if (!libBtn) return;
@@ -6811,7 +6811,7 @@
       }
     });
 
-    /** 通用 data-href 站内跳转（如合同库设计稿） */
+    /** 通用 data-href 站内跳转（如协议库设计稿） */
     document.body.addEventListener('click', (e) => {
       const linkBtn = /** @type {HTMLElement} */ (e.target).closest('[data-href]');
       if (linkBtn) window.location.href = linkBtn.getAttribute('data-href');

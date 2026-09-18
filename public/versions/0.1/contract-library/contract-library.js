@@ -1,5 +1,5 @@
 /*
- * AIP 0.1 · 合同库（PRD v0.6）
+ * AIP 0.1 · 协议库（PRD v0.6）
  * 纯前端演示：内存数据 + DOM 渲染，无后端。
  */
 (function () {
@@ -7,7 +7,7 @@
 
   /* ================= 数据 ================= */
 
-  // 合同类型（FIELD-AIP-029 固定枚举，对齐 Category：General / Termination / Renewal / Payment / Legal and Compliance / Other）
+  // 协议类型（FIELD-AIP-029 固定枚举，对齐 Category：General / Termination / Renewal / Payment / Legal and Compliance / Other）
   const TYPE_CATEGORIES = ['通用', '终止', '续约', '付款', '法律与合规', '其他'];
   // 字段分类（协议字段分类固定枚举：00 通用 / 10 终止 / 20 续约 / 30 付款 / 40 法律与合规 / 99 其他）
   const FIELD_CATEGORIES = ['通用', '终止', '续约', '付款', '法律与合规', '其他'];
@@ -23,9 +23,9 @@
 
   // 字段库（7 个基础标准字段对所有类型默认关联且不可移除）
   const fieldDefs = [
-    { id: 'f-name', name: '合同名称', type: 'text', category: '通用', source: 'system', base: true },
+    { id: 'f-name', name: '协议名称', type: 'text', category: '通用', source: 'system', base: true },
     { id: 'f-party', name: '签约主体', type: 'party', category: '通用', source: 'system', base: true },
-    { id: 'f-amount', name: '合同总金额', type: 'money', category: '付款', source: 'system', base: true },
+    { id: 'f-amount', name: '协议总金额', type: 'money', category: '付款', source: 'system', base: true },
     { id: 'f-sign', name: '签署时间', type: 'date', category: '通用', source: 'system', base: true },
     { id: 'f-effective', name: '生效日', type: 'date', category: '通用', source: 'system', base: true },
     { id: 'f-expiry', name: '到期日', type: 'date', category: '续约', source: 'system', base: true },
@@ -35,18 +35,18 @@
     { id: 'f-owner', name: '负责人', type: 'text', category: '通用', source: 'custom' },
   ];
 
-  // 合同记录
+  // 协议记录
   let seq = 100;
   const nid = () => 'c' + (seq++);
   const contracts = [
-    { id: nid(), name: '2026年度软件采购合同-杭州xx科技', typeId: 't-payment', statusAuto: true, statusMain: '', statusSub: '', parties: ['杭州xx科技有限公司', '法大大'], amount: 860000.00, signDate: '2026-09-02', effectiveDate: '2026-09-10', expiryDate: '2027-09-09', biz: '采购', source: 'fasc', sourceTask: '软件采购合同签署', sourceTaskId: 'EN202609020018', attachments: [{ name: '报价单.pdf' }, { name: '技术规格书.pdf' }], createdAt: '2026-09-02 18:22', archivedAt: '2026-09-02 18:30', creator: '肖德平', custom: {} },
-    { id: nid(), name: '劳动合同-陈晓（2026续签）', typeId: 't-renewal', statusAuto: true, statusMain: '', statusSub: '', parties: ['陈晓', '法大大'], amount: null, signDate: '2026-08-28', effectiveDate: '2026-10-01', expiryDate: '2029-09-30', biz: '人力资源', source: 'fasc', sourceTask: '陈晓劳动合同续签', sourceTaskId: 'EN202608280102', attachments: [], createdAt: '2026-08-28 14:05', archivedAt: '2026-08-28 14:10', creator: '郭靖宇', custom: {} },
+    { id: nid(), name: '2026年度软件采购协议-杭州xx科技', typeId: 't-payment', statusAuto: true, statusMain: '', statusSub: '', parties: ['杭州xx科技有限公司', '法大大'], amount: 860000.00, signDate: '2026-09-02', effectiveDate: '2026-09-10', expiryDate: '2027-09-09', biz: '采购', source: 'fasc', sourceTask: '软件采购协议签署', sourceTaskId: 'EN202609020018', attachments: [{ name: '报价单.pdf' }, { name: '技术规格书.pdf' }], createdAt: '2026-09-02 18:22', archivedAt: '2026-09-02 18:30', creator: '肖德平', custom: {} },
+    { id: nid(), name: '劳动协议-陈晓（2026续签）', typeId: 't-renewal', statusAuto: true, statusMain: '', statusSub: '', parties: ['陈晓', '法大大'], amount: null, signDate: '2026-08-28', effectiveDate: '2026-10-01', expiryDate: '2029-09-30', biz: '人力资源', source: 'fasc', sourceTask: '陈晓劳动协议续签', sourceTaskId: 'EN202608280102', attachments: [], createdAt: '2026-08-28 14:05', archivedAt: '2026-08-28 14:10', creator: '郭靖宇', custom: {} },
     { id: nid(), name: '渠道合作协议-深圳xx网络', typeId: 't-general', statusAuto: true, statusMain: '', statusSub: '', parties: ['深圳xx网络有限公司', '法大大'], amount: 1200000.00, signDate: '2026-08-15', effectiveDate: '2026-09-01', expiryDate: '2026-12-31', biz: '销售', source: 'fasc', sourceTask: '渠道合作协议签署', sourceTaskId: 'EN202608150077', attachments: [{ name: '渠道政策附件.pdf' }], createdAt: '2026-08-15 11:42', archivedAt: '2026-08-15 11:50', creator: '郭靖宇', custom: { 'f-region': '华南' } },
-    { id: nid(), name: '办公场地租赁合同扫描件.pdf', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '未指定', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:26', creator: '肖德平', scanned: true, custom: {} },
+    { id: nid(), name: '办公场地租赁协议扫描件.pdf', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '未指定', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:26', creator: '肖德平', scanned: true, custom: {} },
     { id: nid(), name: '保密协议-外部顾问李某某', typeId: 't-legal', statusAuto: true, statusMain: '', statusSub: '', parties: ['李某某', '法大大'], amount: null, signDate: '2026-07-20', effectiveDate: '2026-07-20', expiryDate: '2028-07-19', biz: '未指定', source: 'fasc', sourceTask: '顾问保密协议签署', sourceTaskId: 'EN202607200033', attachments: [], createdAt: '2026-07-20 09:18', archivedAt: '2026-07-20 09:25', creator: '敖日根勒', custom: {} },
     { id: nid(), name: '运维外包服务协议-上海xx信息', typeId: 't-general', statusAuto: false, statusMain: '生效中', statusSub: '', parties: ['上海xx信息技术有限公司', '法大大'], amount: 450000.00, signDate: '2026-06-30', effectiveDate: '2026-07-01', expiryDate: '2027-06-30', biz: '采购', source: 'fasc', sourceTask: '运维外包协议签署', sourceTaskId: 'EN202606300091', attachments: [{ name: 'SLA 附件.pdf' }], createdAt: '2026-06-30 17:40', archivedAt: '2026-06-30 17:48', creator: '郭靖宇', custom: { 'f-period': '12 个月' } },
     { id: nid(), name: '旧版代理协议（已终止）.docx', typeId: 't-termination', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '销售', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:27', creator: '肖德平', custom: { 'f-region': '华东' } },
-    { id: nid(), name: '2025年度审计服务合同', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: ['xx会计师事务所', '法大大'], amount: 180000.00, signDate: '2025-12-10', effectiveDate: '2026-01-01', expiryDate: '2026-12-31', biz: '未指定', source: 'fasc', sourceTask: '审计服务合同签署', sourceTaskId: 'EN202512100204', attachments: [], createdAt: '2025-12-10 10:02', archivedAt: '2025-12-10 10:08', creator: '敖日根勒', custom: {} },
+    { id: nid(), name: '2025年度审计服务协议', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: ['xx会计师事务所', '法大大'], amount: 180000.00, signDate: '2025-12-10', effectiveDate: '2026-01-01', expiryDate: '2026-12-31', biz: '未指定', source: 'fasc', sourceTask: '审计服务协议签署', sourceTaskId: 'EN202512100204', attachments: [], createdAt: '2025-12-10 10:02', archivedAt: '2025-12-10 10:08', creator: '敖日根勒', custom: {} },
     { id: nid(), name: '实习生协议-王某某', typeId: 't-general', statusAuto: true, statusMain: '', statusSub: '', parties: ['王某某', '法大大'], amount: null, signDate: '2026-09-05', effectiveDate: '2026-09-08', expiryDate: '2026-09-25', biz: '人力资源', source: 'fasc', sourceTask: '实习生协议签署', sourceTaskId: 'EN202609050045', attachments: [], createdAt: '2026-09-05 16:33', archivedAt: '2026-09-05 16:40', creator: '肖德平', custom: {} },
     { id: nid(), name: '框架采购协议-北京xx办公用品', typeId: 't-payment', statusAuto: true, statusMain: '', statusSub: '', parties: ['北京xx办公用品有限公司', '法大大'], amount: 0.00, signDate: '2026-09-12', effectiveDate: '2026-09-15', expiryDate: '2028-09-30', biz: '采购', source: 'fasc', sourceTask: '框架采购协议签署', sourceTaskId: 'EN202609120011', attachments: [], createdAt: '2026-09-12 13:56', archivedAt: '2026-09-12 14:02', creator: '郭靖宇', custom: {} },
     /* 演示：本地上传后 AI 字段提取中（未生效、无日期；列表名称旁 loading） */
@@ -57,10 +57,10 @@
   const uploadTasks = [
     { id: 'u1', name: 'Upload-5-2026-9-14_093218', creator: '肖德平', createdAt: '2026-09-14 09:32', count: 5, status: 'done', success: 5, fail: 0, mine: true },
     { id: 'u2', name: 'Upload-3-2026-9-10_152014', creator: '肖德平', createdAt: '2026-09-10 15:20', count: 3, status: 'partial', success: 2, fail: 1, mine: true,
-      fails: [{ name: '集团采购合同汇总-加密.pdf', reason: '文件损坏或无法读取' }] },
+      fails: [{ name: '集团采购协议汇总-加密.pdf', reason: '文件损坏或无法读取' }] },
     { id: 'u3', name: 'Upload-8-2026-9-8_104455', creator: '郭靖宇', createdAt: '2026-09-08 10:44', count: 8, status: 'done', success: 8, fail: 0, mine: false },
     { id: 'u4', name: 'Upload-2-2026-9-3_165832', creator: '郭靖宇', createdAt: '2026-09-03 16:58', count: 2, status: 'failed', success: 0, fail: 2, mine: false,
-      fails: [{ name: '扫描合同-第1页.bmp', reason: '文件格式不支持' }, { name: '扫描合同-第2页.bmp', reason: '文件格式不支持' }] },
+      fails: [{ name: '扫描协议-第1页.bmp', reason: '文件格式不支持' }, { name: '扫描协议-第2页.bmp', reason: '文件格式不支持' }] },
     { id: 'u5', name: 'Upload-1-2026-9-1_112009', creator: '敖日根勒', createdAt: '2026-09-01 11:20', count: 1, status: 'done', success: 1, fail: 0, mine: false },
   ];
 
@@ -71,7 +71,7 @@
     failed: { text: '上传失败', cls: 'aip-lib-tag--red' },
   };
 
-  /* ================= 0.2 AI 合同信息提取：状态模型 =================
+  /* ================= 0.2 AI 协议信息提取：状态模型 =================
    * reviewStatus: pending(AI待确认) / confirmed(AI已确认) / manual(人工维护) / none(无建议)
    * source: ai / fasc / system_default / manual
    * evidence: original_terms 原文依据 [{page, term, text}] */
@@ -101,7 +101,7 @@
     return Object.assign({ reviewStatus, source, evidence: evidence || null, confirmedBy: null, confirmedAt: null }, extra || {});
   }
 
-  // 给部分合同挂 AI 提取状态（演示：覆盖 pending/confirmed/manual/none/失败 各态）
+  // 给部分协议挂 AI 提取状态（演示：覆盖 pending/confirmed/manual/none/失败 各态）
   const aiState = {
     // 框架采购协议：多字段待确认（复核主场景；类型无需单独确认）
     '框架采购协议-北京xx办公用品': {
@@ -110,23 +110,23 @@
       fields: {
         'f-name': aiField('confirmed', 'fasc', null, { confirmedBy: '郭靖宇', confirmedAt: '2026-09-12 15:02' }),
         'f-party': aiField('pending', 'ai', [{ page: 1, term: '首部', text: '甲方（委托方）：法大大；乙方（服务方）：北京xx办公用品有限公司。' }]),
-        'f-amount': aiField('pending', 'ai', [{ page: 1, term: '第二条 合同金额与支付', text: '本合同总金额为人民币 0.00 元（大写：以实际金额为准）。' }], { replacedSource: 'system_default' }),
-        'f-effective': aiField('pending', 'ai', [{ page: 1, term: '第三条 合同期限', text: '本合同自 2026-09-15 起生效，至双方权利义务履行完毕之日止。' }]),
+        'f-amount': aiField('pending', 'ai', [{ page: 1, term: '第二条 协议金额与支付', text: '本协议总金额为人民币 0.00 元（大写：以实际金额为准）。' }], { replacedSource: 'system_default' }),
+        'f-effective': aiField('pending', 'ai', [{ page: 1, term: '第三条 协议期限', text: '本协议自 2026-09-15 起生效，至双方权利义务履行完毕之日止。' }]),
         'f-sign': aiField('confirmed', 'fasc', null, { confirmedBy: '郭靖宇', confirmedAt: '2026-09-12 15:02' }),
         'f-biz': aiField('manual', 'manual', null),
       },
     },
-    // 软件采购合同：全部已确认
-    '2026年度软件采购合同-杭州xx科技': {
+    // 软件采购协议：全部已确认
+    '2026年度软件采购协议-杭州xx科技': {
       typeReview: 'confirmed',
       stage: 'done',
       fields: {
         'f-party': aiField('confirmed', 'ai', [{ page: 1, term: '首部', text: '乙方（服务方）：杭州xx科技有限公司。' }], { confirmedBy: '肖德平', confirmedAt: '2026-09-03 10:11' }),
-        'f-amount': aiField('confirmed', 'ai', [{ page: 2, term: '第四条', text: '合同总金额为人民币 860,000.00 元。' }], { confirmedBy: '肖德平', confirmedAt: '2026-09-03 10:11' }),
+        'f-amount': aiField('confirmed', 'ai', [{ page: 2, term: '第四条', text: '协议总金额为人民币 860,000.00 元。' }], { confirmedBy: '肖德平', confirmedAt: '2026-09-03 10:11' }),
       },
     },
     // 办公场地租赁扫描件：部分字段未提取（A4/A5）
-    '办公场地租赁合同扫描件.pdf': {
+    '办公场地租赁协议扫描件.pdf': {
       typeReview: 'none',
       stage: 'partial', // 部分内容未提取
       fields: {
@@ -176,11 +176,11 @@
         stage: 'done',
         fields: {
           'f-party': aiField('pending', 'ai', [{ page: 1, term: '首部', text: '甲方、乙方（演示提取结果，待人工确认）。' }]),
-          'f-amount': aiField('pending', 'ai', [{ page: 1, term: '金额条款', text: '合同总金额待核对。' }]),
+          'f-amount': aiField('pending', 'ai', [{ page: 1, term: '金额条款', text: '协议总金额待核对。' }]),
         },
       };
       renderTable();
-      toast('AI 字段提取完成，请打开合同核对');
+      toast('AI 字段提取完成，请打开协议核对');
     }, 8000);
   }
 
@@ -291,12 +291,12 @@
   }
   /**
    * 通用下拉多选控件（触发器 + 搜索浮层 + 全选 + 复选列表 + 重置/应用 + 已选标签）。
-   * 供「关联合同类型」「添加字段」等处复用。
+   * 供「关联协议类型」「添加字段」等处复用。
    * @param {object} cfg
    * @param {Array<{id:string,name:string,disabled?:boolean,mark?:string}>} cfg.items 可选项；disabled=已存在不可改，mark=右侧灰字（如「已添加」）
    * @param {string} [cfg.placeholder] 触发器占位文案
    * @param {string} [cfg.searchPlaceholder] 搜索框占位
-   * @param {string} [cfg.unit] 全选/已选计数单位（如「个合同类型」「个字段」）
+   * @param {string} [cfg.unit] 全选/已选计数单位（如「个协议类型」「个字段」）
    * @param {(ids:string[])=>void} [cfg.onChange] 应用/移除标签后回调最新选中 id
    */
   function createMselDropdown(cfg) {
@@ -990,14 +990,14 @@
     menu.addEventListener('click', (e) => e.stopPropagation());
   }
 
-  /* ================= 合同列表 ================= */
+  /* ================= 协议列表 ================= */
 
   const ALL_COLUMNS = [
     { id: 'name', name: '名称', fixed: true },
     { id: 'status', name: '状态' },
     { id: 'parties', name: '主体' },
     { id: 'type', name: '类型' },
-    { id: 'amount', name: '合同总金额' },
+    { id: 'amount', name: '协议总金额' },
     { id: 'effectiveDate', name: '生效日', sortable: true },
     { id: 'expiryDate', name: '到期日', sortable: true },
     { id: 'biz', name: '业务条线' },
@@ -1086,7 +1086,7 @@
     const isType = colId === 'type';
     const a = aiOf(c);
     if (!a) return valueHtml;
-    /* 合同类型不再走 AI 待确认态，列表只展示字段级 pending */
+    /* 协议类型不再走 AI 待确认态，列表只展示字段级 pending */
     if (isType) return valueHtml;
     let st = null;
     if (fid) { const f = aiFieldOf(c, fid); if (f) st = f.reviewStatus; }
@@ -1199,7 +1199,7 @@
 
     $('#emptyState').hidden = rows.length > 0;
     $('#contractTable').style.display = rows.length ? '' : 'none';
-    $('#totalText').textContent = `共 ${rows.length} 份合同`;
+    $('#totalText').textContent = `共 ${rows.length} 份协议`;
     const pageInfo = document.getElementById('pageInfo');
     if (pageInfo) pageInfo.innerHTML = `第 <b>${listState.page}</b> 页`;
     const prev = document.getElementById('pagePrev');
@@ -1354,10 +1354,10 @@
   /* ================= 筛选 ================= */
   // 结构对齐全部任务：每个筛选项 = filter-field（trigger 按钮 + filter-popover 面板）
   const FILTER_DEFS = [
-    { id: 'type', name: '合同类型', kind: 'multi', options: () => contractTypes.map((t) => t.name) },
+    { id: 'type', name: '协议类型', kind: 'multi', options: () => contractTypes.map((t) => t.name) },
     { id: 'mainStatus', name: '主状态', kind: 'multi', options: () => ['待生效', '生效中', '已到期'] },
     { id: 'source', name: '来源', kind: 'multi', options: () => ['FASC 签署任务', '本地上传'] },
-    { id: 'amount', name: '合同总金额（元）', kind: 'range' },
+    { id: 'amount', name: '协议总金额（元）', kind: 'range' },
     { id: 'effectiveDate', name: '生效日', kind: 'dateRange' },
     { id: 'expiryDate', name: '到期日', kind: 'dateRange' },
     { id: 'archivedAt', name: '入库时间', kind: 'dateRange' },
@@ -2300,7 +2300,7 @@
 
   /* ================= 批量操作 ================= */
   $('#batchDownload').addEventListener('click', () => {
-    toast(`演示：批量下载 ${listState.selected.size} 份合同 PDF（打包 ZIP，同名附加记录 ID）`);
+    toast(`演示：批量下载 ${listState.selected.size} 份协议 PDF（打包 ZIP，同名附加记录 ID）`);
   });
   $('#batchRemove').addEventListener('click', () => {
     const rows = contracts.filter((c) => listState.selected.has(c.id));
@@ -2311,18 +2311,18 @@
     const n = rows.length;
     const onlyUpload = rows.every((c) => c.source === 'upload');
     openLayer(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
-      <div class="ns-modal__head"><h2>${n === 1 ? '永久移除此合同？' : `永久移除所选 ${n} 份合同？`}</h3>
+      <div class="ns-modal__head"><h2>${n === 1 ? '永久移除此协议？' : `永久移除所选 ${n} 份协议？`}</h3>
       <button class="ns-modal__close" type="button" data-close>${iconClose}</button></div>
-      <div class="ns-modal__body"><p class="ns-modal__note">移除后，当前企业所有成员及超级管理员都将无法访问${n === 1 ? '此合同' : '这些合同'}及其数据。${onlyUpload ? '' : '此操作不会删除原签署任务中的文件，也不会使合同作废。'}</p></div>
+      <div class="ns-modal__body"><p class="ns-modal__note">移除后，当前企业所有成员及超级管理员都将无法访问${n === 1 ? '此协议' : '这些协议'}及其数据。${onlyUpload ? '' : '此操作不会删除原签署任务中的文件，也不会使协议作废。'}</p></div>
       <div class="ns-modal__foot">
         <button class="btn-ghost" type="button" data-close>取消</button>
-        <button class="btn-solid btn-solid--danger" type="button" id="confirmRemove">移除合同</button>
+        <button class="btn-solid btn-solid--danger" type="button" id="confirmRemove">移除协议</button>
       </div>
     </div></div>`);
     $('#confirmRemove').addEventListener('click', () => {
       rows.forEach((c) => { c.removed = true; listState.selected.delete(c.id); });
       closeLayer(); renderTable();
-      toast(`已移除 ${n} 份合同`);
+      toast(`已移除 ${n} 份协议`);
     });
   }
 
@@ -2355,12 +2355,12 @@
       <div class="ns-modal__head"><h2>编辑协议</h2><button class="ns-modal__close" type="button" data-x aria-label="关闭">${iconClose}</button></div>
       <div class="ns-modal__body">
         <div class="ns-field">
-          <label class="ns-field__label">合同类型</label>
+          <label class="ns-field__label">协议类型</label>
           <select class="ns-field__input aip-select-native" id="reType">${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>
         </div>
         <div class="ns-field">
           <div class="row-edit-status-head">
-            <label class="ns-field__label">合同状态</label>
+            <label class="ns-field__label">协议状态</label>
             <span class="drawer-inline-note row-edit-status__auto"><label class="switch switch--sm"><input type="checkbox" id="reAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label>自动计算</span>
           </div>
           <div class="row-edit-status">
@@ -2408,7 +2408,7 @@
       closeSharedDateCalFloat();
       const nameInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-name"] input', wrap));
       const name = nameInput ? nameInput.value.trim() : c.name;
-      if (!name) { const er = $('#reErr', wrap); er.hidden = false; er.textContent = '合同名称不能为空'; return; }
+      if (!name) { const er = $('#reErr', wrap); er.hidden = false; er.textContent = '协议名称不能为空'; return; }
       const effInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-effective"] .libra-dp__input', wrap));
       const expInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-expiry"] .libra-dp__input', wrap));
       const eff = (effInput?.dataset.iso || '') || null;
@@ -2461,7 +2461,7 @@
   $('#manageFieldBtn').addEventListener('click', () => { closeMenus(); openFieldManage(); });
   $('#manageUploadRecordBtn').addEventListener('click', () => { closeMenus(); openUploadRecords(); });
 
-  /* ================= 合同详情整页（8.6） ================= */
+  /* ================= 协议详情整页（8.6） ================= */
   function openDetail(c) {
     const type = typeOf(c.typeId);
     const s = computeStatus(c);
@@ -2469,7 +2469,7 @@
     const statusHtml = s.hint ? `<span class="aip-lib-tag aip-lib-tag--gray aip-lib-tag-dot">${s.hint}</span>`
       : (s.main ? `<span class="aip-lib-tag aip-lib-tag-dot ${statusMap[s.main]}">${s.main}</span>` : '');
 
-    // 详情分组：通用组含合同类型全部字段（不按分类过滤），其余按分类归入 终止/续约/付款/法律与合规，未识别归其他
+    // 详情分组：通用组含协议类型全部字段（不按分类过滤），其余按分类归入 终止/续约/付款/法律与合规，未识别归其他
     const typeFields = type.fields.map((fid) => fieldOf(fid)).filter(Boolean);
     const SPEC_CATS = ['终止', '续约', '付款', '法律与合规'];
     const groups = [{ cat: '通用', fields: typeFields }];
@@ -2491,12 +2491,12 @@
       return (c.custom || {})[f.id] || '—';
     };
     detailReturnFocus = document.activeElement;
-    openLayer(`<div class="detail-page" role="dialog" aria-modal="true" aria-label="合同详情">
+    openLayer(`<div class="detail-page" role="dialog" aria-modal="true" aria-label="协议详情">
       <div class="detail-page__card">
         <div class="drawer-head">
           <button class="detail-page__back" type="button" data-close aria-label="返回">${iconBack}</button>
           <div class="detail-title-wrap">
-            <h2 id="detailTitle" class="detail-title--editable" title="点击编辑合同名称">${esc(c.name)}</h2>
+            <h2 id="detailTitle" class="detail-title--editable" title="点击编辑协议名称">${esc(c.name)}</h2>
           </div>
           <button class="info-detail-edit-btn" type="button" id="detailEdit" aria-label="编辑" title="编辑">
             <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>编辑
@@ -2527,35 +2527,37 @@
                 <h1>${esc(c.name.replace(/\.(pdf|docx?|wps|jpg|png|bmp)$/i, ''))}</h1>
                 <p>甲方（委托方）：${esc(c.parties[1] || '深圳法大大网络科技有限公司')}</p>
                 <p>乙方（服务方）：${esc(c.parties[0] || '—')}</p>
-                <p>根据《中华人民共和国民法典》及相关法律法规，甲乙双方在平等、自愿、公平、诚实信用的基础上，就本合同项下合作事宜，经友好协商，达成如下协议，以资共同遵守。</p>
+                <p>根据《中华人民共和国民法典》及相关法律法规，甲乙双方在平等、自愿、公平、诚实信用的基础上，就本协议项下合作事宜，经友好协商，达成如下协议，以资共同遵守。</p>
                 <h2>第一条 合作内容</h2>
-                <p>乙方按照本合同约定向甲方提供相关产品与服务，具体服务内容、规格及交付标准以双方确认的订单或附件为准。</p>
-                <h2>第二条 合同金额与支付</h2>
-                <p>本合同总金额为人民币 ${c.amount == null ? '—' : Number(c.amount).toLocaleString('zh-CN', { minimumFractionDigits: 2 })} 元（大写：以实际金额为准）。甲方应按照约定的付款节点向乙方支付相应款项。</p>
-                <h2>第三条 合同期限</h2>
-                <p>本合同自 ${c.effectiveDate || '双方签字盖章之日'} 起生效，至 ${c.expiryDate || '双方权利义务履行完毕之日'} 止。${c.signDate ? '双方于 ' + c.signDate + ' 完成签署。' : ''}</p>
+                <p>乙方按照本协议约定向甲方提供相关产品与服务，具体服务内容、规格及交付标准以双方确认的订单或附件为准。</p>
+                <h2>第二条 协议金额与支付</h2>
+                <p>本协议总金额为人民币 ${c.amount == null ? '—' : Number(c.amount).toLocaleString('zh-CN', { minimumFractionDigits: 2 })} 元（大写：以实际金额为准）。甲方应按照约定的付款节点向乙方支付相应款项。</p>
+                <h2>第三条 协议期限</h2>
+                <p>本协议自 ${c.effectiveDate || '双方签字盖章之日'} 起生效，至 ${c.expiryDate || '双方权利义务履行完毕之日'} 止。${c.signDate ? '双方于 ' + c.signDate + ' 完成签署。' : ''}</p>
                 <h2>第四条 违约责任</h2>
-                <p>任何一方违反本合同约定，应承担继续履行、采取补救措施或者赔偿损失等违约责任。因不可抗力导致不能履行合同的，根据不可抗力的影响部分或全部免除责任。</p>
+                <p>任何一方违反本协议约定，应承担继续履行、采取补救措施或者赔偿损失等违约责任。因不可抗力导致不能履行协议的，根据不可抗力的影响部分或全部免除责任。</p>
                 <h2>第五条 争议解决</h2>
-                <p>因本合同引起的或与本合同有关的任何争议，双方应友好协商解决；协商不成的，任何一方均可向有管辖权的人民法院提起诉讼。</p>
+                <p>因本协议引起的或与本协议有关的任何争议，双方应友好协商解决；协商不成的，任何一方均可向有管辖权的人民法院提起诉讼。</p>
               </div>
               <div class="pdf-page pdf-page--zoom" id="pdfPage2">
                 <h1>${esc(c.name.replace(/\.(pdf|docx?|wps|jpg|png|bmp)$/i, ''))}（附页）</h1>
                 <h2>第六条 保密条款</h2>
-                <p>甲乙双方应对在本合同订立和履行过程中知悉的对方商业秘密及其他保密信息严格保密，未经对方书面同意，不得向任何第三方披露。</p>
+                <p>甲乙双方应对在本协议订立和履行过程中知悉的对方商业秘密及其他保密信息严格保密，未经对方书面同意，不得向任何第三方披露。</p>
                 <h2>第七条 通知与送达</h2>
-                <p>双方因履行本合同而相互发出的通知、文件、资料，均以书面形式按本合同载明的地址送达；以电子签署平台发送的，自平台显示送达之时视为送达。</p>
+                <p>双方因履行本协议而相互发出的通知、文件、资料，均以书面形式按本协议载明的地址送达；以电子签署平台发送的，自平台显示送达之时视为送达。</p>
                 <h2>第八条 其他约定</h2>
-                <p>本合同未尽事宜，由双方另行协商并签订补充协议。补充协议与本合同具有同等法律效力；补充协议与本合同不一致的，以补充协议为准。</p>
-                <p>本合同一式两份，甲乙双方各执一份，经双方通过电子签署平台完成签署后生效。</p>
+                <p>本协议未尽事宜，由双方另行协商并签订补充协议。补充协议与本协议具有同等法律效力；补充协议与本协议不一致的，以补充协议为准。</p>
+                <p>本协议一式两份，甲乙双方各执一份，经双方通过电子签署平台完成签署后生效。</p>
                 <p>（演示内容）第 2 页正文……</p>
               </div>
             </div>
             <div class="pdf-page-nav-hotspot" id="pdfPageNavHotspot">
               <div class="pdf-page-nav" id="pdfPageNav">
                 <div class="pdf-page-nav__trigger" role="group" aria-label="页码跳转">
-                  <input type="text" inputmode="numeric" pattern="[0-9]*" class="pdf-page-nav__input" id="pdfPageNavInput" value="1" aria-label="跳转到页码" autocomplete="off" />
-                  <span class="pdf-page-nav__total" id="pdfPageNavTotal">/ 2</span>
+                  <label class="pdf-page-nav__field" for="pdfPageNavInput" title="输入页码后回车跳转">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" class="pdf-page-nav__input" id="pdfPageNavInput" value="1" aria-label="跳转到页码" autocomplete="off" />
+                    <span class="pdf-page-nav__total" id="pdfPageNavTotal">/ 2</span>
+                  </label>
                   <button type="button" class="pdf-page-nav__caret-btn" id="pdfPageNavBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="选择页码">
                     <svg class="pdf-page-nav__caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                   </button>
@@ -2625,12 +2627,12 @@
 
     const renderGroups = (editing) => {
       const statusTypeHtml = `<div class="info-group">
-          <button class="info-group__head" type="button" aria-expanded="true">合同类型
+          <button class="info-group__head" type="button" aria-expanded="true">协议类型
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s;"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="info-group__body">
-            <div class="field-row"><span class="field-label">合同类型</span><span class="field-value">${editing ? `<select class="ns-field__input aip-select-native" id="editType">${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : esc(type.name)}</span></div>
-            <div class="field-row"><span class="field-label">合同状态</span><span class="field-value">${statusHtml}${editing ? `<span class="drawer-inline-note">自动计算 <label class="switch switch--sm"><input type="checkbox" id="editAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label></span><select class="ns-field__input aip-select-native drawer-select-inline" id="editMainStatus" ${c.statusAuto ? 'disabled' : ''}>${['待生效', '生效中', '已到期'].map((sv) => `<option value="${sv}" ${c.statusMain === sv ? 'selected' : ''}>${sv}</option>`).join('')}</select>` : ''}</span></div>
+            <div class="field-row"><span class="field-label">协议类型</span><span class="field-value">${editing ? `<select class="ns-field__input aip-select-native" id="editType">${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : esc(type.name)}</span></div>
+            <div class="field-row"><span class="field-label">协议状态</span><span class="field-value">${statusHtml}${editing ? `<span class="drawer-inline-note">自动计算 <label class="switch switch--sm"><input type="checkbox" id="editAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label></span><select class="ns-field__input aip-select-native drawer-select-inline" id="editMainStatus" ${c.statusAuto ? 'disabled' : ''}>${['待生效', '生效中', '已到期'].map((sv) => `<option value="${sv}" ${c.statusMain === sv ? 'selected' : ''}>${sv}</option>`).join('')}</select>` : ''}</span></div>
           </div>
         </div>`;
       const isFascSource = c.source === 'fasc';
@@ -2761,14 +2763,14 @@
       });
       nameInput.addEventListener('blur', () => {
         const v = nameInput.value.trim();
-        if (!v) { toast('合同名称不能为空'); nameInput.value = c.name; return; }
+        if (!v) { toast('协议名称不能为空'); nameInput.value = c.name; return; }
         if (v === c.name) return;
         c.name = v;
-        // 同步「基本信息」里的合同名称输入框与列表
+        // 同步「基本信息」里的协议名称输入框与列表
         const fName = /** @type {HTMLInputElement|null} */ ($('#infoScroll [data-edit-field="f-name"] input'));
         if (fName) fName.value = v;
         renderTable();
-        toast('合同名称已更新');
+        toast('协议名称已更新');
         // 重建标题输入框以同步值，并重新挂监听（可继续再点标题改名）
         $('#detailTitle').innerHTML = `<input class="ns-field__input drawer-name-input" id="editName" value="${esc(c.name)}" />`;
         bindTitleInlineEdit();
@@ -2837,7 +2839,7 @@
       closeSharedDateCalFloat();
       const nameInput = /** @type {HTMLInputElement|null} */ ($('#infoScroll [data-edit-field="f-name"] input'));
       const name = nameInput ? nameInput.value.trim() : c.name;
-      if (!name) { toast('合同名称不能为空'); return; }
+      if (!name) { toast('协议名称不能为空'); return; }
       const effInput = /** @type {HTMLInputElement|null} */ ($('#infoScroll [data-edit-field="f-effective"] .libra-dp__input'));
       const expInput = /** @type {HTMLInputElement|null} */ ($('#infoScroll [data-edit-field="f-expiry"] .libra-dp__input'));
       const eff = (effInput?.dataset.iso || '') || null;
@@ -2910,13 +2912,17 @@
     }
 
     /**
-     * 同步页码输入框、总数与下拉选中态。
+     * 同步页码输入框宽度、总数与下拉选中态。
      * @param {number} idx
      */
     function setPdfPageIdx(idx) {
       pdfPageIdx = Math.max(0, Math.min(pdfPages.length - 1, idx));
       if (pageNavInput && document.activeElement !== pageNavInput) {
         pageNavInput.value = String(pdfPageIdx + 1);
+      }
+      if (pageNavInput) {
+        const digits = Math.max(1, String(pdfPages.length).length);
+        pageNavInput.style.width = `${Math.max(digits, String(pageNavInput.value || '1').length)}ch`;
       }
       if (pageNavTotal) pageNavTotal.textContent = `/ ${pdfPages.length}`;
       if (pageNavMenu) {
@@ -2937,6 +2943,7 @@
       const n = parseInt(String(raw).trim(), 10);
       if (!Number.isFinite(n) || total < 1) {
         if (pageNavInput) pageNavInput.value = String(pdfPageIdx + 1);
+        setPdfPageIdx(pdfPageIdx);
         return;
       }
       const page = Math.max(1, Math.min(total, n));
@@ -2954,6 +2961,7 @@
       if (!page || !pdfView) return;
       page.scrollIntoView({ block: 'start', behavior: 'smooth' });
       setPdfPageIdx(idx);
+      revealPageNavContext(true);
     }
 
     function closePageNav() {
@@ -3068,11 +3076,13 @@
     });
     pageNavInput?.addEventListener('focus', () => {
       revealPageNavContext(true);
+      pageNavHotspot?.classList.add('is-open');
       pageNavInput.select();
     });
     pageNavInput?.addEventListener('click', (e) => {
       e.stopPropagation();
       closePageNav();
+      pageNavInput.select();
     });
     pageNavInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -3087,11 +3097,17 @@
     });
     pageNavInput?.addEventListener('blur', () => {
       jumpPdfPageFromInput(pageNavInput.value);
+      if (pageNavMenu?.hidden) {
+        pageNavHotspot?.classList.remove('is-open');
+        $('#pdfPageNav')?.classList.remove('is-open');
+      }
     });
     pageNavInput?.addEventListener('input', () => {
       // 仅保留数字，避免非整页输入
-      const digits = pageNavInput.value.replace(/\D/g, '');
+      const digits = pageNavInput.value.replace(/\D/g, '').slice(0, 4);
       if (pageNavInput.value !== digits) pageNavInput.value = digits;
+      const len = Math.max(String(pdfPages.length).length, digits.length || 1);
+      pageNavInput.style.width = `${len}ch`;
     });
     $('.detail-page')?.addEventListener('click', (e) => {
       if (!e.target.closest('#pdfPageNavHotspot')) closePageNav();
@@ -3159,12 +3175,12 @@
     const a = aiOf(c);
     const wrap = document.createElement('div');
     wrap.innerHTML = `<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal ns-modal--fit">
-      <div class="ns-modal__head"><h2>修改合同类型</h2><button class="ns-modal__close" type="button" data-x aria-label="关闭">${iconClose}</button></div>
+      <div class="ns-modal__head"><h2>修改协议类型</h2><button class="ns-modal__close" type="button" data-x aria-label="关闭">${iconClose}</button></div>
       <div class="ns-modal__body">
         <p class="ns-modal__note">更换类型后，共同字段保留、旧类型独有字段隐藏，并将按新类型重新提取字段（AI 来源字段重新提取，人工值保留）。</p>
         <div class="ns-field" style="margin-top:10px;">
-          <label class="ns-field__label" for="tcType">新合同类型<span class="req">*</span></label>
-          <select class="ns-field__input" id="tcType" data-libra-select data-placeholder="请选择合同类型">
+          <label class="ns-field__label" for="tcType">新协议类型<span class="req">*</span></label>
+          <select class="ns-field__input" id="tcType" data-libra-select data-placeholder="请选择协议类型">
             ${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
           </select>
         </div>
@@ -3206,13 +3222,13 @@
     closeUploadOverlay = openOverlayModal(html, { onClose: () => { if (closeUploadOverlay) closeUploadOverlay = null; } });
     return closeUploadOverlay;
   }
-  const DEMO_FILES = ['年度服务合同-2026.pdf', '采购订单-9月.xlsx', '补充协议.docx', '验收单扫描.jpg', '报价单.pdf', '会议纪要.docx'];
+  const DEMO_FILES = ['年度服务协议-2026.pdf', '采购订单-9月.xlsx', '补充协议.docx', '验收单扫描.jpg', '报价单.pdf', '会议纪要.docx'];
 
   function openUpload() {
     uploadState.files = [];
     uploadState.taskName = '';
     openUploadModal(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
-      <div class="ns-modal__head"><h2>上传合同</h2><button class="ns-modal__close" type="button" data-close>${iconClose}</button></div>
+      <div class="ns-modal__head"><h2>上传协议</h2><button class="ns-modal__close" type="button" data-close>${iconClose}</button></div>
       <div class="ns-modal__body">
         <div class="upload-drop" id="uploadDrop">
           <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/upload.svg" alt="" /></span>
@@ -3561,14 +3577,14 @@
     wrap.querySelector('.ns-modal-mask').addEventListener('mousedown', (e) => { if (e.target.classList.contains('ns-modal-mask')) wrap.remove(); });
   }
 
-  /* ================= 合同类型管理（8.1） ================= */
+  /* ================= 协议类型管理（8.1） ================= */
   function openTypeManage() {
     openLayer(`<div class="sheet-mask"><div class="sheet-card">
       <div class="sheet-head">
         <button class="sheet-back" type="button" data-close aria-label="返回协议库">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <h2 id="typeSheetTitle">合同类型</h2>
+        <h2 id="typeSheetTitle">协议类型</h2>
       </div>
       <div class="sheet-body"><div class="sheet-wrap" id="typeSheetBody"></div></div>
     </div></div>`);
@@ -3576,7 +3592,7 @@
   }
 
   function renderTypeList() {
-    $('#typeSheetTitle').textContent = '合同类型';
+    $('#typeSheetTitle').textContent = '协议类型';
     $('#typeSheetBody').innerHTML = `
       <div class="sheet-toolbar">
         <label class="envelope-search">
@@ -3584,11 +3600,11 @@
           <input type="search" id="typeSearch" placeholder="搜索类型名称" aria-label="搜索类型名称" />
         </label>
         <select class="ns-field__input sheet-filter" id="typeSourceFilter"><option value="">全部创建人</option><option value="system">法大大</option><option value="custom">用户</option></select>
-        <select class="ns-field__input sheet-filter" id="typeCatFilter"><option value="">全部合同类型分类</option>${TYPE_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
+        <select class="ns-field__input sheet-filter" id="typeCatFilter"><option value="">全部协议类型分类</option>${TYPE_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
         <div class="toolbar-right"><button class="btn-solid" type="button" id="newTypeBtn" ${contractTypes.filter((t) => t.source === 'custom').length >= 200 ? 'disabled title="已达 200 个自定义类型上限"' : ''}>新建类型</button></div>
       </div>
       <div class="envelope-table-shell"><table class="envelope-table">
-        <thead><tr><th>类型名称</th><th>关联文件数</th><th>合同类型分类</th><th>创建人</th><th class="col-actions-w90">操作</th></tr></thead>
+        <thead><tr><th>类型名称</th><th>关联文件数</th><th>协议类型分类</th><th>创建人</th><th class="col-actions-w90">操作</th></tr></thead>
         <tbody id="typeBody"></tbody>
       </table></div>`;
     const tpState = { size: 10, page: 1, total: () => 0 };
@@ -3631,7 +3647,7 @@
     function confirmDeleteType(t) {
         const wrap = document.createElement('div');
         wrap.innerHTML = `<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal ns-modal--fit">
-          <div class="ns-modal__head"><h2>删除合同类型？</h3></div>
+          <div class="ns-modal__head"><h2>删除协议类型？</h3></div>
           <div class="ns-modal__body"><p class="ns-modal__note">删除后无法恢复该类型。已有文件保留原类型名称和字段，字段值仍可编辑；新文件无法选择该类型。</p></div>
           <div class="ns-modal__foot">
             <button class="btn-ghost" type="button" data-x-cancel>取消</button>
@@ -3640,7 +3656,7 @@
         </div></div>`;
         document.body.appendChild(wrap);
         wrap.querySelector('[data-x-cancel]').addEventListener('click', () => wrap.remove());
-        wrap.querySelector('[data-x-confirm]').addEventListener('click', () => { t.deleted = true; wrap.remove(); render(); toast('已删除合同类型'); });
+        wrap.querySelector('[data-x-confirm]').addEventListener('click', () => { t.deleted = true; wrap.remove(); render(); toast('已删除协议类型'); });
     }
     hydrateSheetSelects($('.sheet-mask'));
     $('#typeSearch').addEventListener('input', render);
@@ -3666,9 +3682,9 @@
           <input class="ns-field__input" id="tmName" type="text" value="${isEdit ? esc(t.name) : ''}" maxlength="50" placeholder="请输入类型名称" />
         </div>
         <div class="ns-field">
-          <label class="ns-field__label" for="tmCat">合同类型分类<span class="req">*</span></label>
-          <select class="ns-field__input" id="tmCat" data-libra-select data-placeholder="请选择合同类型分类">
-            <option value="">请选择合同类型分类</option>
+          <label class="ns-field__label" for="tmCat">协议类型分类<span class="req">*</span></label>
+          <select class="ns-field__input" id="tmCat" data-libra-select data-placeholder="请选择协议类型分类">
+            <option value="">请选择协议类型分类</option>
             ${TYPE_CATEGORIES.map((c) => `<option value="${esc(c)}" ${isEdit && t.category === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}
           </select>
           <div class="ns-field__error" id="tmErr" hidden></div>
@@ -3676,9 +3692,9 @@
         <div class="ns-field">
           <label class="ns-field__label" style="display:flex;align-items:center;gap:8px;">
             <label class="switch"><input type="checkbox" id="tmAiEnabled" ${isEdit && t.aiEnabled ? 'checked' : ''} /><span class="slider"></span></label>
-            AI 识别合同类型
+            AI 识别协议类型
           </label>
-          <div class="ns-field__hint">开启后，AI 可识别新入库合同是否属于该类型；识别定义必填（100～1000 字）。</div>
+          <div class="ns-field__hint">开启后，AI 可识别新入库协议是否属于该类型；识别定义必填（100～1000 字）。</div>
           <textarea class="ns-field__input" id="tmAiDef" rows="3" maxlength="1000" placeholder="描述该类型的判断特征及排除情况" style="margin-top:6px;${isEdit && t.aiEnabled ? '' : 'display:none;'}">${isEdit && t.aiDef ? esc(t.aiDef) : ''}</textarea>
           <div class="ns-field__error" id="tmAiDefErr" hidden></div>
         </div>
@@ -3699,7 +3715,7 @@
       const name = $('#tmName').value.trim();
       const cat = $('#tmCat').value;
       if (!name) { $('#tmErr').hidden = false; $('#tmErr').textContent = '请输入类型名称'; return; }
-      if (!cat) { $('#tmErr').hidden = false; $('#tmErr').textContent = '请选择合同类型分类'; return; }
+      if (!cat) { $('#tmErr').hidden = false; $('#tmErr').textContent = '请选择协议类型分类'; return; }
       if (isEdit) { t.name = name; t.category = cat; }
       else {
         contractTypes.push({ id: 't' + Date.now(), name, category: cat, source: 'custom', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 0 });
@@ -3711,7 +3727,7 @@
 
   function renderTypeFields(typeId) {
     const t = contractTypes.find((x) => x.id === typeId);
-    $('#typeSheetTitle').textContent = `合同类型 · ${t.name}`;
+    $('#typeSheetTitle').textContent = `协议类型 · ${t.name}`;
     $('#typeSheetBody').innerHTML = `
       <div class="sheet-toolbar">
         <button class="btn-ghost" type="button" id="backToTypes">‹ 返回类型列表</button>
@@ -3790,7 +3806,7 @@
       </div>
     </div></div>`;
     document.body.appendChild(wrap);
-    /* 复用关联合同类型同款下拉多选：已添加项禁用并置灰标记，分类作为未添加项右侧提示 */
+    /* 复用关联协议类型同款下拉多选：已添加项禁用并置灰标记，分类作为未添加项右侧提示 */
     const msel = createMselDropdown({
       items: fieldDefs.map((f) => {
         const added = t.fields.includes(f.id);
@@ -3907,19 +3923,19 @@
             <label class="switch"><input type="checkbox" id="fmAiEnabled" ${isEdit && f.aiEnabled ? 'checked' : ''} /><span class="slider"></span></label>
             AI 提取该字段
           </label>
-          <div class="ns-field__hint">开启后，AI 提取合同时会尝试识别该字段的值；提取定义必填（100～1000 字）。${isEdit ? '' : '无关联类型时允许保存并启用，但需关联类型后才会提取。'}</div>
+          <div class="ns-field__hint">开启后，AI 提取协议时会尝试识别该字段的值；提取定义必填（100～1000 字）。${isEdit ? '' : '无关联类型时允许保存并启用，但需关联类型后才会提取。'}</div>
           <textarea class="ns-field__input" id="fmAiDef" rows="3" maxlength="1000" placeholder="描述该字段的提取语义与依据" style="margin-top:6px;${isEdit && f.aiEnabled ? '' : 'display:none;'}">${isEdit && f.aiDef ? esc(f.aiDef) : ''}</textarea>
           <div class="ns-field__error" id="fmAiDefErr" hidden></div>
         </div>
-        ${isEdit ? '' : `<div class="ns-field"><label class="ns-field__label">关联合同类型</label>
+        ${isEdit ? '' : `<div class="ns-field"><label class="ns-field__label">关联协议类型</label>
           <div class="fm-msel" id="fmTypeMsel">
             <button type="button" class="libra-select__trigger fm-msel__trigger" aria-haspopup="true" aria-expanded="false">
-              <span class="libra-select__value is-placeholder" data-msel-value>请选择合同类型（可多选）</span>
+              <span class="libra-select__value is-placeholder" data-msel-value>请选择协议类型（可多选）</span>
               <span class="libra-select__caret" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg></span>
             </button>
             <div class="fm-msel__pop" hidden>
               <div class="fm-msel__search">
-                <input type="search" placeholder="搜索合同类型" aria-label="搜索合同类型" data-msel-search />
+                <input type="search" placeholder="搜索协议类型" aria-label="搜索协议类型" data-msel-search />
                 <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
               </div>
               <div class="fm-msel__list" data-msel-list></div>
@@ -3939,7 +3955,7 @@
     </div></div>`;
     document.body.appendChild(wrap);
     hydrateLibraSelects(wrap);
-    // 关联合同类型：下拉多选（搜索 + 全选 + 多选 + 重置/应用）
+    // 关联协议类型：下拉多选（搜索 + 全选 + 多选 + 重置/应用）
     const fmTypeMsel = $('#fmTypeMsel');
     let fmRelTypes = []; // 已确认（应用）的类型 id
     if (fmTypeMsel) {
@@ -3954,7 +3970,7 @@
       const nameOf = (id) => (allTypes.find((t) => t.id === id) || {}).name || '';
       const renderTags = () => {
         tagsEl.innerHTML = fmRelTypes.map((id) => `<span class="fm-msel__tag">${esc(nameOf(id))}<button type="button" data-tag-remove="${id}" aria-label="移除 ${esc(nameOf(id))}">${iconClose}</button></span>`).join('');
-        valueEl.textContent = fmRelTypes.length ? `已选 ${fmRelTypes.length} 个合同类型` : '请选择合同类型（可多选）';
+        valueEl.textContent = fmRelTypes.length ? `已选 ${fmRelTypes.length} 个协议类型` : '请选择协议类型（可多选）';
         valueEl.classList.toggle('is-placeholder', !fmRelTypes.length);
       };
       const renderList = () => {
@@ -3963,10 +3979,10 @@
         const allOn = matched.length > 0 && matched.every((t) => staged.includes(t.id));
         const rows = [];
         if (!kw) {
-          rows.push(`<button type="button" class="fm-msel__opt" data-msel-all><input type="checkbox" ${allOn ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">全部（${allTypes.length} 个合同类型）</span></button>`);
+          rows.push(`<button type="button" class="fm-msel__opt" data-msel-all><input type="checkbox" ${allOn ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">全部（${allTypes.length} 个协议类型）</span></button>`);
         }
         rows.push(...matched.map((t) => `<button type="button" class="fm-msel__opt" data-msel-id="${t.id}"><input type="checkbox" ${staged.includes(t.id) ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">${esc(t.name)}</span></button>`));
-        if (!matched.length) rows.push('<div class="fm-msel__empty">未找到匹配的合同类型</div>');
+        if (!matched.length) rows.push('<div class="fm-msel__empty">未找到匹配的协议类型</div>');
         listEl.innerHTML = rows.join('');
       };
       const openPop = () => { staged = [...fmRelTypes]; searchEl.value = ''; renderList(); pop.hidden = false; trigger.setAttribute('aria-expanded', 'true'); searchEl.focus(); };

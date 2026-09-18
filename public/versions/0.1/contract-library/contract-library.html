@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>协议库 0.1（AIP）</title>
   <!--
-    AIP 0.1 · 合同库（PRD v0.6 / TAPD 1092515）。
+    AIP 0.1 · 协议库（PRD v0.6 / TAPD 1092515）。
     页面骨架（顶栏/侧栏/弹窗规范/交互脚本）整体复用「全部任务」签署任务页；
-    内容区替换为合同库：列表（搜索/筛选/自定义列/排序/分页）、
-    合同详情整页（PDF 预览：分页 + 百分比缩放；字段分组 + 附件预览 + 编辑态；标题旁返回）、
+    内容区替换为协议库：列表（搜索/筛选/自定义列/排序/分页）、
+    协议详情整页（PDF 预览：分页 + 百分比缩放；字段分组 + 附件预览 + 编辑态；标题旁返回）、
     本地上传（选择 → 确认 → 进度 三段式弹窗）、文件上传记录（全屏浮层 + 失败文件弹窗）、
-    合同类型管理与字段管理（全屏浮层 + 新建/编辑弹窗）。
+    协议类型管理与字段管理（全屏浮层 + 新建/编辑弹窗）。
     来源：FASC 签署任务自动同步 / 本地上传 / 归档初始化。
     皮肤：仅保留 Libra · 顶栏（data-skin=libra-top），与全部任务一致。
   -->
@@ -279,7 +279,7 @@
     }
     body[data-view="home"] .view-home { display: flex; }
     body[data-view="home"] .contracts-page-content { display: none !important; }
-    /* 非侧栏皮肤：首页仍全宽（隐藏合同侧栏） */
+    /* 非侧栏皮肤：首页仍全宽（隐藏协议侧栏） */
     body[data-view="home"] .contract-sidebar { display: none; }
     body[data-view="contracts"] .view-home { display: none; }
     body[data-view="contracts"] .page-shell { display: flex; }
@@ -564,7 +564,7 @@
       color: var(--fdd-ink); font-size: 14px; text-align: left;
     }
     .nav-tool:hover { background: var(--fdd-bg-hover); }
-    /* 合同库 / 协议集选中：与 .nav-btn.active 同款 */
+    /* 协议库 / 协议集选中：与 .nav-btn.active 同款 */
     .nav-tool.active { background: var(--fdd-bg-active); font-weight: 600; }
     .nav-tool.active::before {
       content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
@@ -1745,7 +1745,7 @@
     }
     .col-modal-item:hover { background: var(--fdd-bg-hover); }
     .col-modal-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--fdd-brand); }
-    /* 多选框组（添加字段 / 关联合同类型）：flex 换行、勾框对齐、统一间距 */
+    /* 多选框组（添加字段 / 关联协议类型）：flex 换行、勾框对齐、统一间距 */
     .multi-select-box { display: flex; flex-wrap: wrap; gap: 10px 18px; padding: 2px 0; }
     .multi-select-box .ms-item {
       display: inline-flex; align-items: center; gap: 8px;
@@ -1816,7 +1816,7 @@
       cursor: not-allowed; opacity: 1;
     }
 
-    /* —— 关联合同类型：下拉多选（触发器 + 搜索浮层 + 已选标签） —— */
+    /* —— 关联协议类型：下拉多选（触发器 + 搜索浮层 + 已选标签） —— */
     .fm-msel { position: relative; }
     .fm-msel__pop {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 140;
@@ -1973,7 +1973,7 @@
       padding-bottom: 12px;
     }
     .envelope-table thead tr { height: var(--fdd-table-head-h); }
-    /* 默认列表行高（合同类型/字段管理 sheet 等依赖此高度；勿全局改成 auto，否则 padding:0 时会塌陷） */
+    /* 默认列表行高（协议类型/字段管理 sheet 等依赖此高度；勿全局改成 auto，否则 padding:0 时会塌陷） */
     .envelope-table tbody tr { height: var(--fdd-table-row-h); }
     /* 协议库主表：状态双行需要自适应行高 */
     #contractTable.envelope-table tbody tr {
@@ -2795,7 +2795,7 @@
     }
     .aip-lib-menu-pop button:hover { background: var(--fdd-bg-hover); }
 
-    /* —— 工具栏（对齐全部任务 envelope-controls；与全部任务骨架共用规范类，此处仅合同库特有差异） —— */
+    /* —— 工具栏（对齐全部任务 envelope-controls；与全部任务骨架共用规范类，此处仅协议库特有差异） —— */
     .envelope-controls {
       display: flex; flex-wrap: nowrap; align-items: center; gap: 0;
       margin-bottom: 8px; min-height: 44px; position: relative; z-index: 5;
@@ -2818,7 +2818,7 @@
       background: var(--fdd-line); align-self: center; flex-shrink: 0;
     }
     .aip-lib-filter-sep-applied.is-on { display: inline-block; }
-    /* 下拉面板（合同库特有位移） */
+    /* 下拉面板（协议库特有位移） */
     .aip-lib-filter-popover { top: calc(100% + 10px); }
     .aip-lib-filter-popover__range {
       display: flex; align-items: center; gap: 8px;
@@ -2848,8 +2848,8 @@
     .aip-lib-toolbar-text-btn:hover { background: var(--fdd-bg-hover); }
 
     /*
-     * 合同库列表：直接复用上方骨架 `.envelope-table*` / `.envelope-name` / `.more-button`。
-     * 此处仅保留合同库特有单元格（来源副文案、状态标签、行内编辑）。
+     * 协议库列表：直接复用上方骨架 `.envelope-table*` / `.envelope-name` / `.more-button`。
+     * 此处仅保留协议库特有单元格（来源副文案、状态标签、行内编辑）。
      */
     .envelope-table thead th.is-sortable { cursor: pointer; white-space: nowrap; }
     .envelope-table thead th .sort-ico { color: var(--fdd-brand); }
@@ -2900,7 +2900,7 @@
       display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--fdd-radius-pill);
       font-size: 12px; white-space: nowrap;
     }
-    /* 合同状态：简约样式（去背景色，只留文字色 + 状态点） */
+    /* 协议状态：简约样式（去背景色，只留文字色 + 状态点） */
     .aip-lib-tag { background: transparent; padding: 0; height: auto; }
     .aip-lib-tag--green { color: var(--fdd-success); }
     .aip-lib-tag--orange { color: var(--fdd-warning); }
@@ -2938,7 +2938,7 @@
     .empty-state p { margin: 0 0 6px; font-size: 15px; color: var(--fdd-ink-2); }
     .empty-state small { font-size: 13px; }
 
-    /* —— 合同详情：整页一张大卡（对齐全部任务 / Libra contracts-page-content） —— */
+    /* —— 协议详情：整页一张大卡（对齐全部任务 / Libra contracts-page-content） —— */
     .detail-page {
       /* Libra 产品页表面层级：sunken 底 + 白卡 + 0.5px 线 */
       --libra-ink: #161a1b;
@@ -3179,7 +3179,7 @@
       pointer-events: auto;
     }
     .pdf-page-nav__trigger {
-      height: 28px; min-width: 72px; padding: 0 4px 0 8px;
+      height: 28px; min-width: 72px; padding: 0 4px 0 6px;
       display: inline-flex; align-items: center; justify-content: center; gap: 2px;
       border: 0.5px solid var(--libra-line, #e9eaea);
       border-radius: 8px;
@@ -3194,25 +3194,37 @@
     .pdf-page-nav__trigger:has(.pdf-page-nav__caret-btn[aria-expanded="true"]) {
       background: var(--libra-bg-sunken, #f4f4f4);
     }
+    /* 页码数字区：可点击聚焦，支持直接手输跳转 */
+    .pdf-page-nav__field {
+      display: inline-flex; align-items: center; gap: 2px;
+      height: 22px; padding: 0 4px; margin: 0;
+      border-radius: 4px; cursor: text;
+    }
+    .pdf-page-nav__field:hover { background: rgba(22, 26, 27, 0.04); }
+    .pdf-page-nav__trigger:focus-within .pdf-page-nav__field {
+      background: var(--libra-bg-layer, #fff);
+      box-shadow: 0 0 0 1.5px var(--fdd-brand, #0059ef);
+    }
     .pdf-page-nav__input {
-      width: 1.6em; min-width: 1.2em; max-width: 3em;
-      height: 20px; margin: 0; padding: 0 2px;
-      border: 0; border-radius: 4px;
+      width: 2ch; min-width: 1.5ch; max-width: 4ch;
+      height: 20px; margin: 0; padding: 0;
+      border: 0; border-radius: 0;
       background: transparent;
       color: inherit; font: inherit; font-variant-numeric: tabular-nums;
-      text-align: right; outline: none;
+      text-align: right; outline: none; cursor: text;
       -moz-appearance: textfield;
     }
     .pdf-page-nav__input::-webkit-outer-spin-button,
     .pdf-page-nav__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .pdf-page-nav__input:focus {
-      background: var(--libra-bg-layer, #fff);
-      box-shadow: 0 0 0 1.5px var(--fdd-brand, #0059ef);
+      background: transparent;
+      box-shadow: none;
     }
     .pdf-page-nav__total {
       color: var(--libra-ink-2, #57514b);
       flex-shrink: 0;
       user-select: none;
+      pointer-events: none;
     }
     .pdf-page-nav__caret-btn {
       width: 22px; height: 22px; margin: 0; padding: 0;
@@ -3555,7 +3567,7 @@
       height: auto;
       min-height: 72px;
     }
-    /* 合同类型行：类型名称 + 字段数副标题（对齐 DocuSign 类型列表） */
+    /* 协议类型行：类型名称 + 字段数副标题（对齐 DocuSign 类型列表） */
     .sheet-wrap .envelope-table td:first-child { white-space: normal; }
     .type-row__sub {
       display: block; margin-top: 2px;
@@ -3753,7 +3765,7 @@
     #fmAddOption { margin-top: 8px; }
 
     /* 弹窗内说明文字 / 危险主按钮 / 浮层弹窗内按钮（补骨架未覆盖的规范变体） */
-    /* 上传合同弹窗：拖拽区四周间距对齐（顶部减少 8px，底部与左右 20px 一致） */
+    /* 上传协议弹窗：拖拽区四周间距对齐（顶部减少 8px，底部与左右 20px 一致） */
     .ns-modal:has(#uploadDrop) .ns-modal__body { padding-top: 12px; padding-bottom: 20px; }
 
     .ns-modal__note { margin: 0 0 4px; color: var(--fdd-ink-2); font-size: 14px; line-height: 1.7; }
@@ -3763,7 +3775,7 @@
     /* sheet 内打开的弹窗层级要高于 sheet-mask(z-90) */
     .sheet-mask ~ .ns-modal-mask, body > .ns-modal-mask { z-index: 100; }
 
-    /* —— 0.2 AI 合同信息提取：单元格待确认/来源标识 —— */
+    /* —— 0.2 AI 协议信息提取：单元格待确认/来源标识 —— */
     .ai-cell {
       display: inline-flex; align-items: center; gap: 4px; border-radius: 4px;
       padding: 1px 5px; margin: -1px -5px;
@@ -4022,7 +4034,7 @@
   </header>
 
   <div class="page-shell" id="viewContracts">
-    <aside class="contract-sidebar" aria-label="合同侧栏">
+    <aside class="contract-sidebar" aria-label="协议侧栏">
       <div class="contract-side-inner">
         <div class="libra-rail-head" id="libraRailHead" aria-hidden="true"></div>
         <div class="libra-rail-primary" id="libraRailPrimary" aria-hidden="true">
@@ -4098,7 +4110,7 @@
           </div>
 
           <div class="nav-section">
-            <!-- 合同库：跳转独立设计稿；本页不再内嵌合同库视图 -->
+            <!-- 协议库：跳转独立设计稿；本页不再内嵌协议库视图 -->
             <button class="nav-tool active" type="button" aria-current="page" id="navContractLib">
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
                 <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
@@ -4141,13 +4153,13 @@
       <div class="view-home" id="viewHome" data-aip-home data-lazy></div>
       <main class="contracts-page-content">
       <div class="contracts-workspace">
-        <!-- 顶部：合同库/签署任务切换 + 上传合同 + 管理 -->
+        <!-- 顶部：协议库/签署任务切换 + 上传协议 + 管理 -->
         <div class="lib-topbar">
           <h1 class="lib-title" id="libTitle">协议库</h1>
           <div class="lib-actions">
             <button class="aip-lib-btn aip-lib-btn-primary" type="button" id="uploadBtn">
               <span class="aip-icon aip-icon--sm" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/upload-simple.svg?v=20260917s" alt="" /></span>
-              上传合同
+              上传协议
             </button>
             <div class="aip-lib-menu-wrap">
               <button class="aip-lib-btn aip-lib-btn-secondary" type="button" id="manageBtn" aria-haspopup="menu" aria-expanded="false">
@@ -4158,7 +4170,7 @@
               <div class="aip-lib-menu-pop" id="manageMenu" hidden role="menu" aria-label="管理菜单">
                 <button type="button" role="menuitem" id="manageTypeBtn">
                   <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/tree-structure.svg" alt="" /></span>
-                  合同类型
+                  协议类型
                 </button>
                 <button type="button" role="menuitem" id="manageFieldBtn">
                   <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/note-pencil.svg" alt="" /></span>
@@ -4177,7 +4189,7 @@
         <div class="envelope-controls">
           <label class="envelope-search">
             <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
-            <input type="search" id="searchInput" placeholder="搜索合同名称 / 合同主体，或记录 ID" aria-label="搜索合同" />
+            <input type="search" id="searchInput" placeholder="搜索协议名称 / 协议主体，或记录 ID" aria-label="搜索协议" />
             <button class="envelope-search__clear" type="button" id="searchClear" hidden aria-label="清除搜索">×</button>
           </label>
           <div class="envelope-filters" role="group" aria-label="筛选条件">
@@ -4215,7 +4227,7 @@
           </table>
           <div class="empty-state" id="emptyState" hidden>
             <span class="aip-icon"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-magnifying-glass.svg" alt="" /></span>
-            <p>未找到匹配的合同</p>
+            <p>未找到匹配的协议</p>
             <small>试试调整搜索关键词或筛选条件</small>
           </div>
         </div>
@@ -4233,7 +4245,7 @@
             </div>
           </div>
           <div class="pager-btns">
-            <span id="totalText">共 0 份合同</span>
+            <span id="totalText">共 0 份协议</span>
             <span id="pageInfo">第 <b>1</b> 页</span>
             <button type="button" id="pagePrev" disabled aria-label="上一页">‹</button>
             <button type="button" id="pageNext" disabled aria-label="下一页">›</button>
@@ -4907,7 +4919,7 @@
     }
 
     /**
-     * 顶栏 Tab：首页 / 合同（首页复用 components/home）
+     * 顶栏 Tab：首页 / 协议（首页复用 components/home）
      * @param {'home'|'contracts'} view
      * @param {{push?:boolean}} [opts]
      */
@@ -4971,7 +4983,7 @@
       setAppView(initial, { push: false });
     })();
 
-    /* 合同库同页视图切换已移除：侧栏「合同库」改为 data-href 跳转独立页
+    /* 协议库同页视图切换已移除：侧栏「协议库」改为 data-href 跳转独立页
     document.body.addEventListener('click', (e) => {
       const libBtn = e.target.closest('[data-lib-view]');
       if (!libBtn) return;
@@ -5411,8 +5423,8 @@
      * 徽标 = 被收纳的下拉数 + 被收纳的 chip 数。
      */
     function updateFilterCollapse() {
-      /* 合同库页由 contract-library.js 全权接管筛选折叠与角标（真源 listState.filters），
-         骨架这套按宽度折叠 + activeFilters 角标在合同库会覆盖数字、导致角标空白，直接跳过。 */
+      /* 协议库页由 contract-library.js 全权接管筛选折叠与角标（真源 listState.filters），
+         骨架这套按宽度折叠 + activeFilters 角标在协议库会覆盖数字、导致角标空白，直接跳过。 */
       if (document.getElementById('contractBody')) return;
       const collapseBtn = document.getElementById('filterCollapseBtn');
       const search = document.querySelector('.envelope-search');
@@ -5782,7 +5794,7 @@
 
     /** 侧栏「状态导航」与「任务文件夹 / 记录与处理」互斥选中 */
     function syncSidebarActive() {
-      /* 合同库独立页：默认选中「合同库」，不点亮「全部任务」；进文件夹 / 记录与处理后让出选中 */
+      /* 协议库独立页：默认选中「协议库」，不点亮「全部任务」；进文件夹 / 记录与处理后让出选中 */
       const libBtn = document.getElementById('navContractLib');
       const onLibPage = !!libBtn;
       const libOwnsSelection = onLibPage && !currentFolder && !currentLegacy;
@@ -6012,7 +6024,7 @@
 
     function render() {
       const body = document.getElementById('taskBody');
-      /* 合同库内容区复用本骨架：无任务表格时不渲染任务列表（由 contract-library.js 自行渲染） */
+      /* 协议库内容区复用本骨架：无任务表格时不渲染任务列表（由 contract-library.js 自行渲染） */
       if (!body) return;
       const rows = sortRows(filteredTasks());
       let title = TITLE_MAP[currentNav] || '全部任务';
@@ -6639,7 +6651,7 @@
 
     /** 筛选汇总（PRD 4.5：查找筛选项 + 已应用 + 可用项；内层编辑写草稿，外层保存一次查询） */
     (function bindFilterSummary() {
-      /* 合同库由 contract-library.js 接管筛选汇总，禁止残留的全部任务筛选项污染 */
+      /* 协议库由 contract-library.js 接管筛选汇总，禁止残留的全部任务筛选项污染 */
       if (document.getElementById('contractTable') || document.getElementById('contractBody')) return;
       const modal = document.getElementById('filterSummaryModal');
       const openBtn = document.getElementById('filterCollapseBtn');
@@ -7426,7 +7438,7 @@
     });
 
     /**
-     * 分页大小：任务列表页由本骨架接管；合同库页有 #contractBody，交给 contract-library.js，避免双重绑定。
+     * 分页大小：任务列表页由本骨架接管；协议库页有 #contractBody，交给 contract-library.js，避免双重绑定。
      */
     (function bindPageSize() {
       if (document.getElementById('contractBody')) return;
@@ -7529,7 +7541,7 @@
       }
     });
 
-    /** 通用 data-href 站内跳转（如合同库设计稿） */
+    /** 通用 data-href 站内跳转（如协议库设计稿） */
     document.body.addEventListener('click', (e) => {
       const linkBtn = /** @type {HTMLElement} */ (e.target).closest('[data-href]');
       if (linkBtn) window.location.href = linkBtn.getAttribute('data-href');
@@ -7545,13 +7557,13 @@
       }
     });
 
-    /* 合同库内容区复用本骨架：任务列表无数据表格，初始化仅保留侧栏/顶栏交互，跳过任务表格渲染 */
+    /* 协议库内容区复用本骨架：任务列表无数据表格，初始化仅保留侧栏/顶栏交互，跳过任务表格渲染 */
     /* render(); */
   </script>
   <script>
-    /* 防御：任务表格不存在时跳过自动重载（合同库由 contract-library.js 自行渲染） */
+    /* 防御：任务表格不存在时跳过自动重载（协议库由 contract-library.js 自行渲染） */
     window.addEventListener('load', function () {
-      /* 合同库页无 #taskBody/#taskHead，直接跳过本防御逻辑 */
+      /* 协议库页无 #taskBody/#taskHead，直接跳过本防御逻辑 */
       if (!document.getElementById('taskBody') || !document.getElementById('taskHead')) return;
       setTimeout(function () {
         var rows = document.querySelectorAll('#taskBody tr').length;
