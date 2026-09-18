@@ -85,6 +85,10 @@
   --aip-shadow-dropdown: 0 0 0 1px #161a1b0d, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
   --aip-shadow-menu: 0 0 0 1px #161a1b0d, 0 18px 47px 0 #161a1b08, 0 7.5px 19px 0 #161a1b05, 0 4px 10.5px 0 #161a1b05;
 
+  /* —— 弹窗蒙层（所有 .aip-modal-mask / .ns-modal-mask 必用） —— */
+  --aip-mask-bg: rgba(28, 43, 51, 0.42);
+  --aip-mask-blur: 6px;
+
   /* —— 布局壳 —— */
   --aip-header-h: 56px;
   --aip-sidebar-w: 280px;
@@ -127,6 +131,8 @@
   --fdd-progress-radius: 17px;
   --fdd-shadow-dropdown: var(--aip-shadow-dropdown);
   --fdd-shadow-menu: var(--aip-shadow-menu);
+  --fdd-mask-bg: var(--aip-mask-bg);
+  --fdd-mask-blur: var(--aip-mask-blur);
   --lt-shadow-sm: var(--aip-shadow-sm);
   --lt-shadow-button: var(--aip-shadow-menu);
 }
@@ -354,12 +360,16 @@ html.aip-app body {
 
 /* ==========================================================================
    基础组件 · Modal
+   [AI 规范：Modal 蒙层] 必须用 --aip-mask-bg + --aip-mask-blur（backdrop-filter）；
+   业务页 .ns-modal-mask 同源；禁止仅半透明无模糊。
    ========================================================================== */
 .aip-modal-mask {
   position: fixed;
   inset: 0;
   z-index: 80;
-  background: rgba(28, 43, 51, 0.45);
+  background: var(--aip-mask-bg);
+  -webkit-backdrop-filter: blur(var(--aip-mask-blur));
+  backdrop-filter: blur(var(--aip-mask-blur));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -425,6 +435,32 @@ html.aip-app body {
   vertical-align: middle;
 }
 .aip-table tr:hover td { background: var(--aip-bg-hover); }
+
+/* ==========================================================================
+   基础组件 · Table 勾选列（列表多选）
+   SSOT：典型页 .envelope-table 首列 checkbox（全部任务）
+   - 尺寸 16×16；列宽 48；左 padding 20 / 右 8
+   - accent-color 品牌蓝；半选态靠 JS 设 input.indeterminate = true
+   - 必须加 .envelope-table--check（多表页勿把首列勾选规则套到 sheet 等非勾选表）
+   ========================================================================== */
+.envelope-table--check > thead > tr > th:first-child,
+.envelope-table--check > tbody > tr > td:first-child,
+.envelope-table.envelope-table--check th:first-child,
+.envelope-table.envelope-table--check td:first-child {
+  width: 48px;
+  min-width: 48px;
+  padding-left: 20px;
+  padding-right: 8px;
+}
+.envelope-table--check th:first-child input[type="checkbox"],
+.envelope-table--check td:first-child input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--aip-brand, var(--fdd-brand, #0059ef));
+  cursor: pointer;
+  vertical-align: middle;
+}
 
 /* ==========================================================================
    业务组件 · Topbar（全局顶栏）· 默认即 Libra · 顶栏悬浮卡

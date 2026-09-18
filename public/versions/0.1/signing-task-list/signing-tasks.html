@@ -8,7 +8,7 @@
     AIP 0.1 · 签署任务列表结构调整（r21）。
     在 AIP v1 典型页面基础上实现：一级导航“协议”；全部任务 / 草稿 / 进行中 / 已完成状态入口；
     访问范围（我的签署 / 全部签署）；日期、状态、发起人、快速视图与筛选汇总；任务文件夹独立页；
-    记录与处理五项原页面归集。本页仅保留 Libra · 顶栏皮肤（data-skin=libra-top）；其余皮肤已注释停用。
+    记录与处理五项原页面归集。启用皮肤：Libra · 顶栏（卡片）与 Attio · 细线（无卡片、细线分割）。
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,6 +47,8 @@
       --fdd-progress-radius: 0;
       --fdd-shadow-dropdown: none;
       --fdd-shadow-menu: none;
+      --fdd-mask-bg: rgba(28, 43, 51, 0.42);
+      --fdd-mask-blur: 6px;
     }
 
     /* —— 全局统一滚动条（Libra 暖灰细款，贴边、无轨道底色） —— */
@@ -305,7 +307,8 @@
     /* —— 发起签署 hover 菜单（PRD 2.4：直接创建 / 模板创建 / 批量创建） —— */
     .launch-wrap { position: relative; width: 100%; height: 100%; }
     .contract-launch .launch-caret { margin-left: 0; transition: transform 0.15s; }
-    .launch-wrap:hover .launch-caret,
+    /* 仅 is-hover（延迟后）/ is-open（点击）展开，避免路过按钮时挡住下方「草稿」等入口 */
+    .launch-wrap.is-hover .launch-caret,
     .launch-wrap.is-open .launch-caret { transform: rotate(180deg); }
     .launch-menu {
       position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 60;
@@ -314,11 +317,13 @@
       background: #fff;
       box-shadow: 0 2px 6px rgba(28, 43, 51, 0.06), 0 12px 32px rgba(28, 43, 51, 0.16), 0 24px 64px rgba(28, 43, 51, 0.12);
       opacity: 0; visibility: hidden; transform: translateY(-4px);
+      pointer-events: none;
       transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
     }
-    .launch-wrap:hover .launch-menu,
+    .launch-wrap.is-hover .launch-menu,
     .launch-wrap.is-open .launch-menu {
       opacity: 1; visibility: visible; transform: translateY(0);
+      pointer-events: auto;
     }
     .launch-menu button {
       width: 100%; padding: 8px 10px;
@@ -582,6 +587,7 @@
       margin: 0; font-size: 32px; font-weight: 400; line-height: 40px;
       letter-spacing: -0.32px; color: var(--fdd-ink);
     }
+    .contracts-titlebar h1[hidden] { display: none !important; }
     .title-meta { display: none; }
 
     .envelope-controls {
@@ -591,9 +597,11 @@
     }
     /* 打开筛选浮窗时抬高层级，避免被下方表格 sticky 盖住 */
     .envelope-controls:has(.filter-field.is-open) { z-index: 70; }
+    /* 打开导出菜单时同样抬高（菜单在容器内部，受容器层级限制） */
+    .envelope-controls:has(.export-menu:not([hidden])) { z-index: 70; }
     .envelope-search {
       position: relative;
-      width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
+      width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 8px 6px 0; padding: 0 8px 0 10px;
       display: flex; align-items: center; gap: 8px;
       border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
       background: #fff;
@@ -887,6 +895,91 @@
       background: #fff; color: var(--fdd-ink); font-weight: 600;
       box-shadow: 0 1px 2px rgba(28, 43, 51, 0.12);
     }
+    #scopeSwitch { margin-left: auto; }
+    /* 已完成：标题本身为下拉（已完成任务 → 浮层含协议库入口） */
+    .completed-title-dd {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+    }
+    .completed-title-dd[hidden] { display: none !important; }
+    .completed-title-dd__trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      margin: 0;
+      padding: 0 4px 0 0;
+      border: 0;
+      border-radius: var(--fdd-radius);
+      background: transparent;
+      font: inherit;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 40px;
+      letter-spacing: -0.32px;
+      color: var(--fdd-ink);
+      cursor: pointer;
+    }
+    .completed-title-dd__trigger:hover { background: var(--fdd-bg-hover); }
+    .completed-title-dd__trigger[aria-expanded="true"] { background: var(--fdd-bg-hover); }
+    .completed-title-dd__trigger svg {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      color: var(--fdd-ink-3);
+      transition: transform .15s ease;
+    }
+    .completed-title-dd__trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .completed-title-dd__menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 80;
+      min-width: 168px;
+      padding: 4px;
+      background: #fff;
+      border: 1px solid var(--fdd-line);
+      border-radius: 8px;
+      box-shadow: var(--fdd-shadow-menu, 0 4px 16px rgba(28, 43, 51, 0.14));
+    }
+    .completed-title-dd__menu[hidden] { display: none !important; }
+    .completed-title-dd__menu button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--fdd-ink);
+      text-align: left;
+      cursor: pointer;
+    }
+    .completed-title-dd__menu button:hover { background: var(--fdd-bg-hover); }
+    .completed-title-dd__menu button.is-on { background: var(--fdd-bg-hover); }
+    .completed-title-dd__menu button .dd-check {
+      width: 16px;
+      height: 16px;
+      color: var(--fdd-brand, #0059ef);
+      opacity: 0;
+    }
+    .completed-title-dd__menu button.is-on .dd-check { opacity: 1; }
+    html[data-skin="line"] .completed-title-dd__trigger {
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    html[data-skin="line"] .completed-title-dd__trigger svg { width: 16px; height: 16px; }
+    html[data-shell="libra"] .completed-title-dd__menu { border-radius: 8px; }
+    html[data-shell="libra"] .completed-title-dd__menu button { border-radius: 8px; }
     .toolbar-icon-btn {
       width: 32px; height: 32px; margin-left: 4px;
       display: inline-grid; place-items: center;
@@ -928,22 +1021,58 @@
     .applied-clearall.is-collapsed,
     .applied-clearall[hidden] { display: none !important; }
 
-    /* 批量操作条：DocuSign 布局（计数 + 次按钮 + 更多）+ 当前页 NotaSign/蓝调 token */
+    /* 批量操作条：勾选后高度展开推动列表，内容渐现 */
     .batch-bar {
-      display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       position: relative; z-index: 6;
       width: 100%; box-sizing: border-box;
-      margin: 0 0 12px; padding: 10px 14px;
-      border: 1px solid var(--fdd-line); border-radius: 10px;
+      margin: 0; padding: 0 14px;
+      border: 1px solid transparent; border-radius: 10px;
       background: #fff; color: var(--fdd-ink); font-size: 13px;
+      box-shadow: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      /* 不用 transform：会让内部 fixed 浮层相对条定位而偏移 */
+      transition:
+        max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.24s ease,
+        box-shadow 0.32s ease,
+        opacity 0.22s ease 0.08s;
+    }
+    .batch-bar.is-on {
+      max-height: 80px;
+      min-height: 52px;
+      opacity: 1;
+      margin: 12px 0 16px;
+      padding: 10px 14px;
+      border-color: var(--fdd-line);
       box-shadow: var(--fdd-shadow-menu);
-      animation: nsBatchIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: auto;
+      overflow: visible;
+      z-index: 40;
+      transition:
+        max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.2s ease,
+        box-shadow 0.32s ease,
+        opacity 0.24s ease 0.06s;
     }
-    @keyframes nsBatchIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* 收起：先淡出，再收回高度，列表顺势上移 */
+    .batch-bar:not(.is-on) {
+      min-height: 0;
+      transition:
+        opacity 0.14s ease,
+        max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        margin 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        padding 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        border-color 0.18s ease,
+        box-shadow 0.22s ease;
     }
-    .batch-bar.is-on { display: flex; }
     #batchCount {
       color: var(--fdd-ink-2); font-weight: 500; margin-right: 4px;
       white-space: nowrap; flex-shrink: 0;
@@ -964,9 +1093,9 @@
       color: var(--fdd-ink-2);
     }
     .batch-bar .batch-btn--more:hover { color: var(--fdd-ink); }
-    .batch-more-wrap { position: relative; display: inline-flex; }
+    .batch-more-wrap { position: relative; display: inline-flex; z-index: 1; }
     .batch-more-menu {
-      position: absolute; top: calc(100% + 6px); left: 0; z-index: 40;
+      position: fixed; z-index: 120;
       min-width: 160px; padding: 4px;
       border: 1px solid var(--fdd-line); border-radius: 8px;
       background: #fff; box-shadow: var(--fdd-shadow-menu);
@@ -1022,26 +1151,42 @@
     }
     .mini-popover[hidden] { display: none !important; }
     .mini-popover__head {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
       box-sizing: border-box;
-      margin: 0 -20px 0; padding: 0 20px 15px;
+      margin: 0 -20px 0;
+      /* 右侧略收：关闭钮热区 24px，× 字形居中会显「右空」；用 12px+负边距与左侧 20px 视觉对齐 */
+      padding: 0 12px 15px 20px;
       border-bottom: 1px solid var(--fdd-line-soft);
       font-size: 13px; font-weight: 600; color: var(--fdd-ink);
     }
     .mini-popover__close {
-      width: 24px; height: 24px; border: 0; border-radius: var(--fdd-radius);
-      background: transparent; color: var(--fdd-ink-3); font-size: 14px; cursor: pointer;
-      flex-shrink: 0;
+      width: 24px; height: 24px; margin: 0 -4px 0 0; padding: 0;
+      border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink-3); font-size: 16px; line-height: 1;
+      cursor: pointer; flex-shrink: 0;
+      display: inline-grid; place-items: center;
     }
     .mini-popover__close:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
     .mini-popover__list {
       display: block; box-sizing: border-box;
-      max-height: 260px; overflow: auto;
+      /* 最大约 5 条单行收件人高度，超出内部滚动 */
+      max-height: calc(5 * 38px + 4px);
+      overflow: auto;
       margin: 0; padding: 4px 0 0;
       scrollbar-width: thin; scrollbar-color: rgba(28, 43, 51, 0.18) transparent;
     }
+    .mini-popover__list.is-scrollable {
+      /* 多参与方：底部淡出提示可继续滚动 */
+      mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 18px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 18px), transparent 100%);
+    }
+    .mini-popover__list.is-scrollable.is-scrolled-end {
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
     .mini-popover__item {
       display: block; box-sizing: border-box;
+      min-height: 38px;
       padding: 10px 0;
       border-bottom: 1px solid var(--fdd-line-soft);
     }
@@ -1065,7 +1210,9 @@
     .ns-modal-mask {
       position: fixed; inset: 0; z-index: 80;
       display: grid; place-items: center;
-      background: rgba(28, 43, 51, 0.42);
+      background: var(--fdd-mask-bg, rgba(28, 43, 51, 0.42));
+      -webkit-backdrop-filter: blur(var(--fdd-mask-blur, 6px));
+      backdrop-filter: blur(var(--fdd-mask-blur, 6px));
       animation: nsMaskIn 0.16s ease;
     }
     .ns-modal-mask[hidden] { display: none !important; }
@@ -1610,6 +1757,15 @@
     .envelope-table tbody tr { height: var(--fdd-table-row-h); }
     /* 行 hover：整行（含 sticky 操作列）统一浅底 */
     .envelope-table tbody tr { transition: background-color 0.12s; }
+    /* 列表加载骨架（应用筛选后的过渡态） */
+    .envelope-table tbody tr.row-skeleton:hover td { background: transparent; }
+    .row-skeleton .skeleton-bar {
+      display: block; height: 14px; width: 100%; max-width: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--fdd-bg-muted) 25%, var(--fdd-bg-hover) 50%, var(--fdd-bg-muted) 75%);
+      background-size: 200% 100%;
+      animation: rowSkeletonShimmer 1.1s infinite linear;
+    }
+    @keyframes rowSkeletonShimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
     .envelope-table tbody tr:hover td,
     .envelope-table tbody tr:hover td:last-child {
       background: var(--fdd-bg-hover);
@@ -1617,8 +1773,26 @@
     .envelope-table th {
       font-weight: 500; color: var(--fdd-table-head-color, var(--fdd-ink)); background: #fff;
     }
+    /*
+     * 列表勾选列（SSOT：aip-design-system .envelope-table--check）
+     * 单表页可写在 .envelope-table；多表页必须加 --check 或 #id 限定，避免 sheet 首列被挤窄。
+     */
+    .envelope-table.envelope-table--check th:first-child,
+    .envelope-table.envelope-table--check td:first-child,
     .envelope-table th:first-child,
-    .envelope-table td:first-child { width: 48px; min-width: 48px; }
+    .envelope-table td:first-child {
+      width: 48px; min-width: 48px;
+      /* 勾选列：左侧略增、右侧略收，避免贴左空右 */
+      padding-left: 20px; padding-right: 8px;
+    }
+    .envelope-table.envelope-table--check th:first-child input[type="checkbox"],
+    .envelope-table.envelope-table--check td:first-child input[type="checkbox"],
+    .envelope-table th:first-child input[type="checkbox"],
+    .envelope-table td:first-child input[type="checkbox"] {
+      width: 16px; height: 16px; margin: 0;
+      accent-color: var(--fdd-brand);
+      cursor: pointer; vertical-align: middle;
+    }
     /*
      * 操作列 sticky：左侧立面用 ::before。
      * 注意：tbody td 默认 overflow:hidden 会裁掉伸出的 ::before，故操作列必须 visible，
@@ -1807,22 +1981,28 @@
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-    /* —— 皮肤比对切换器 —— */
-    /* —— 皮肤 / 场景切换：吸附屏幕左缘的把手，悬浮滑出面板 —— */
+    /* —— 皮肤 / 场景切换：吸附屏幕左缘的把手，点击或悬浮滑出面板 —— */
     .dev-switchers {
-      position: fixed; left: 0; bottom: 88px; z-index: 60;
+      position: fixed; left: 0; bottom: 88px; z-index: 9999;
+      /* 避免被侧栏卡片 / 外层框架盖住 */
+      pointer-events: auto;
     }
     .dev-handle {
-      width: 22px; height: 64px;
+      width: 24px; height: 72px;
       display: grid; place-items: center;
-      border: 1px solid var(--fdd-line); border-left: 0;
-      border-radius: 0 8px 8px 0;
-      background: #fff; color: var(--fdd-ink-3);
-      box-shadow: 2px 2px 12px rgba(28, 43, 51, 0.10); cursor: pointer;
-      transition: color 0.15s;
+      border: 1px solid var(--fdd-line-strong, var(--fdd-line)); border-left: 0;
+      border-radius: 0 10px 10px 0;
+      background: #fff; color: var(--fdd-ink-2);
+      box-shadow: 2px 4px 16px rgba(28, 43, 51, 0.16); cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      position: relative; z-index: 1;
     }
-    .dev-handle:hover { color: var(--fdd-brand); }
-    .dev-handle svg { display: block; }
+    .dev-handle:hover,
+    .dev-switchers.is-open .dev-handle {
+      color: var(--fdd-brand); background: #fff;
+    }
+    .dev-handle svg { display: block; transition: transform 0.18s ease; }
+    .dev-switchers.is-open .dev-handle svg { transform: rotate(180deg); }
     .dev-panel {
       position: absolute; left: 0; bottom: -8px;
       display: flex; flex-direction: column; gap: 10px;
@@ -1834,10 +2014,12 @@
       transform: translateX(calc(-100% - 24px));
       transition: transform 0.18s ease;
       pointer-events: none;
+      z-index: 0;
     }
     .dev-switchers:hover .dev-panel,
-    .dev-switchers:focus-within .dev-panel {
-      transform: translateX(22px);
+    .dev-switchers:focus-within .dev-panel,
+    .dev-switchers.is-open .dev-panel {
+      transform: translateX(24px);
       pointer-events: auto;
     }
     .skin-switcher {
@@ -1855,6 +2037,8 @@
     }
     /* 首页（#home）不显示切换器 */
     body[data-view="home"] .dev-switchers { display: none; }
+    /* 细线皮肤侧栏贴左时，把手仍压在侧栏之上 */
+    html[data-skin="line"] .dev-switchers { left: 0; }
 
     /*
      * LibraTech 壳层（data-shell=libra）：DocuSign 结构不变（字号 / 行高 / 布局尺寸保持），
@@ -2034,7 +2218,7 @@
     html[data-shell="libra"] .party-dialog-table input { accent-color: var(--fdd-brand); }
     html[data-shell="libra"] .ns-modal__foot .btn-ghost { background: #f3f5f8; }
     html[data-shell="libra"] .ns-modal__foot .btn-ghost:hover { background: #e8ebef; }
-    html[data-shell="libra"] .batch-bar {
+    html[data-shell="libra"] .batch-bar.is-on {
       background: #fff;
       border-color: #e6e9ee;
       border-radius: 10px;
@@ -2058,12 +2242,12 @@
      */
     html[data-skin="libra-top"] {
       --fdd-header-h: 56px;
-      /* 顶栏卡 ↔ 侧栏/内容卡 竖直间距（原先仅 6px，过挤） */
+      /* 顶栏卡 ↔ 侧栏/内容卡 竖直间距（与协议库、规范典型页一致：10px） */
       --libra-top-card-gap: 10px;
     }
     html[data-skin="libra-top"] body {
       background: #f3f5f8;
-      /* fixed 顶栏脱离文档流，用 padding 占住原高度，避免内容上顶 */
+      /* 只占位 fixed 顶栏本身；卡间距交给侧栏/内容 margin-top，避免双倍 */
       padding-top: calc(6px + var(--fdd-header-h));
     }
     html[data-skin="libra-top"] .app-header {
@@ -2300,6 +2484,404 @@
 
     */
 
+    /*
+     * Attio · 细线（data-skin=line）：
+     * 参考 app.attio.com 列表页——取消悬浮卡片壳，顶栏/侧栏/内容同底平铺，
+     * 分区与表行统一用 1px 细线分割；结构与交互不变，仅视觉层。
+     */
+    html[data-skin="line"] {
+      --fdd-header-h: 52px;
+      --fdd-sidebar-w: 240px;
+      --line-hair: #ebecef;
+      --line-hair-strong: #e2e4e8;
+      --line-side-bg: #f7f7f8;
+    }
+    html[data-skin="line"] body {
+      background: #fff;
+      padding-top: 0;
+    }
+    html[data-skin="line"] .app-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
+      width: 100%;
+      z-index: 50;
+      height: var(--fdd-header-h);
+      padding: 0 20px;
+      align-items: center;
+      background: #fff;
+      border: 0;
+      border-bottom: 1px solid var(--line-hair);
+      border-radius: 0;
+      box-shadow: none;
+    }
+    html[data-skin="line"] .brand {
+      min-width: calc(58px * 0.9);
+      height: calc(29px * 0.9);
+    }
+    html[data-skin="line"] .brand img {
+      height: calc(29px * 0.9);
+      max-height: calc(29px * 0.9);
+    }
+    html[data-skin="line"] .header-left,
+    html[data-skin="line"] .header-right {
+      align-items: center;
+      height: auto;
+      align-self: center;
+    }
+    /* 右侧工具：统一间距；头像比图标按钮大约 6px */
+    html[data-skin="line"] .header-right {
+      gap: 16px;
+    }
+    html[data-skin="line"] .header-tabs {
+      height: auto;
+      align-items: center;
+      /* 项间距拉开，避免挤成一团 */
+      gap: 12px;
+      margin-inline-start: 28px;
+    }
+    html[data-skin="line"] .header-tabs li { height: auto; }
+    html[data-skin="line"] .header-tabs button {
+      height: 28px;
+      padding: 0 6px;
+      border-radius: 6px;
+      /* 继承基线 16px 过重，细线顶栏改为更轻的字阶 */
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 18px;
+      color: var(--fdd-ink-2);
+    }
+    html[data-skin="line"] .header-tabs button::after { display: none; }
+    html[data-skin="line"] .header-tabs button:hover {
+      background: var(--fdd-bg-hover);
+      color: var(--fdd-ink);
+    }
+    html[data-skin="line"] .header-tabs button.active,
+    html[data-skin="line"] .header-tabs button[aria-current="page"] {
+      /* 与 Libra · 顶栏选中一致：浅蓝底 + 品牌蓝字 */
+      background: rgba(0, 89, 239, 0.1);
+      color: var(--fdd-brand);
+      font-weight: 600;
+    }
+    /* 顶栏：去掉「升级」与全局搜索（各皮肤统一） */
+    .app-header .btn-upgrade,
+    .app-header .icon-btn[aria-label="搜索"] {
+      display: none !important;
+    }
+    /* 细线顶栏：头像收小（对齐 Attio 轻顶栏） */
+    html[data-skin="line"] .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      flex: 0 0 28px;
+    }
+    html[data-skin="line"] .icon-btn:hover {
+      background: var(--fdd-bg-hover);
+    }
+    html[data-skin="line"] .icon-btn .ico {
+      width: 18px;
+      height: 18px;
+    }
+    html[data-skin="line"] .avatar-wrap {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 0;
+    }
+    html[data-skin="line"] .avatar {
+      width: 24px;
+      height: 24px;
+      font-size: 10px;
+      border-radius: 50%;
+    }
+    html[data-skin="line"] .page-shell {
+      /* 锁死视口高度，避免分页被撑出屏外导致整页滚动 */
+      height: calc(100vh - var(--fdd-header-h));
+      max-height: calc(100vh - var(--fdd-header-h));
+      min-height: 0;
+      overflow: hidden;
+      background: #fff;
+    }
+    html[data-skin="line"][data-shell="libra"] .page-shell {
+      background: #fff;
+    }
+    html[data-skin="line"] body[data-view="contracts"] {
+      overflow: hidden;
+    }
+    html[data-skin="line"] .app-main {
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* 侧栏：去卡片，右侧细线 + 浅底；整体收紧更精致 */
+    html[data-skin="line"][data-shell="libra"] .contract-sidebar {
+      margin: 0;
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: calc(100vh - var(--fdd-header-h));
+      max-height: calc(100vh - var(--fdd-header-h));
+      min-height: 0;
+      background: var(--line-side-bg);
+      border: 0;
+      border-right: 1px solid var(--line-hair);
+      border-radius: 0;
+      box-shadow: none;
+      overflow: hidden;
+    }
+    html[data-skin="line"][data-shell="libra"] .contract-nav-scroll {
+      /* 相对分割线，首个模块再多 4px 顶距 */
+      padding: 8px 8px 10px;
+    }
+    html[data-skin="line"][data-shell="libra"] .contract-start {
+      /* 按钮增高 8px 后同步加高容器：16+36+8+底缝 4 */
+      height: 64px;
+      flex-basis: 64px;
+      /* 顶缝 16；底缝 +4px，与「全部任务」拉开 */
+      padding: 16px 8px 12px;
+      border-bottom: 1px solid var(--line-hair);
+    }
+    html[data-skin="line"][data-shell="libra"] .contract-launch {
+      height: 36px;
+      padding: 0 10px;
+      gap: 6px;
+      border-radius: 6px;
+      box-shadow: none;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+    html[data-skin="line"][data-shell="libra"] .contract-launch .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .contract-launch .launch-caret {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-btn,
+    html[data-skin="line"][data-shell="libra"] .nav-tool,
+    html[data-skin="line"][data-shell="libra"] .folder-module-head,
+    html[data-skin="line"][data-shell="libra"] .folder-tree-row,
+    html[data-skin="line"][data-shell="libra"] .records-module-toggle {
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 20px;
+      gap: 8px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-primary,
+    html[data-skin="line"][data-shell="libra"] .nav-tool,
+    html[data-skin="line"][data-shell="libra"] .records-module-toggle {
+      height: 36px;
+      padding: 0 8px 0 10px;
+    }
+    html[data-skin="line"][data-shell="libra"] .folder-module-head {
+      /* 左内边距交给 toggle，避免与 head 叠成双倍导致图标错位 */
+      height: 36px;
+      padding: 0 4px 0 0;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-secondary,
+    html[data-skin="line"][data-shell="libra"] .records-module-body .nav-secondary {
+      height: 32px;
+      padding: 0 8px 0 34px;
+    }
+    html[data-skin="line"][data-shell="libra"] .folder-module-toggle {
+      /* 与全部任务 / 合同库 图标左缘对齐 */
+      padding: 0 4px 0 10px;
+      gap: 8px;
+      font-size: 14px;
+    }
+    html[data-skin="line"][data-shell="libra"] .folder-module-more {
+      width: 24px;
+      height: 24px;
+      margin-right: 4px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-btn .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .nav-tool .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .folder-module-toggle .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .records-module-toggle .aip-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-section {
+      /* 模块（分区）之间再拉开 */
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    html[data-skin="line"][data-shell="libra"] .contract-secondary-items {
+      margin-bottom: 4px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-section + .nav-section {
+      margin-top: 12px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-section::before {
+      left: 8px;
+      right: 8px;
+      background: var(--line-hair);
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-tool .badge-new {
+      min-width: 20px;
+      height: 16px;
+      padding: 0 5px;
+      font-size: 10px;
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-btn.active,
+    html[data-skin="line"][data-shell="libra"] .nav-secondary.active,
+    html[data-skin="line"][data-shell="libra"] .folder-module-head.is-active,
+    html[data-skin="line"][data-shell="libra"] .folder-tree-row.active {
+      /* 与 Libra 侧栏选中一致：浅蓝底 + 品牌蓝字/图标 */
+      background: rgba(0, 89, 239, 0.1);
+      color: var(--fdd-brand);
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-btn.active .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .folder-module-head.is-active .aip-icon,
+    html[data-skin="line"][data-shell="libra"] .folder-tree-row.active .folder-tree-item {
+      color: var(--fdd-brand);
+    }
+    html[data-skin="line"][data-shell="libra"] .nav-btn.active .aip-icon__svg,
+    html[data-skin="line"][data-shell="libra"] .folder-module-head.is-active .aip-icon__svg,
+    html[data-skin="line"][data-shell="libra"] .folder-tree-row.active .aip-icon__svg {
+      filter: invert(18%) sepia(99%) saturate(7000%) hue-rotate(217deg) brightness(96%) contrast(101%);
+    }
+    /* 内容区：去卡片，与顶栏/侧栏平铺；分页置底 24px，表格区内滚 */
+    html[data-skin="line"][data-shell="libra"] .contracts-page-content {
+      margin: 0;
+      background: #fff;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      align-self: stretch;
+      width: auto;
+      min-width: 0;
+      box-sizing: border-box;
+      flex: 1;
+      height: auto;
+      max-height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    html[data-skin="line"][data-shell="libra"] .contracts-workspace {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      /* 底距固定 24px：分页永远落在视口内底部 */
+      padding: 12px 28px 24px;
+      box-sizing: border-box;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    html[data-skin="line"] .contracts-titlebar {
+      height: auto;
+      min-height: 32px;
+      /* 相对下方工具栏/分割线，顶栏行底距再收 4px */
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+    html[data-skin="line"] .contracts-titlebar h1 {
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    /* 工具栏底部分割线（对齐 Attio Sorted/Filter 下行线） */
+    html[data-skin="line"] .envelope-controls {
+      margin-bottom: 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line-hair);
+      flex-shrink: 0;
+    }
+    html[data-skin="line"] .filter-applied-card {
+      margin-top: 12px;
+      border: 0;
+      border-bottom: 1px solid var(--line-hair);
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      padding: 10px 0 12px;
+      flex-shrink: 0;
+    }
+    html[data-skin="line"] .applied-row,
+    html[data-skin="line"] .batch-bar {
+      flex-shrink: 0;
+    }
+    html[data-skin="line"] .envelope-table-shell {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      border-bottom: 0;
+      /* 吃掉剩余高度，内部滚动；分页始终在壳底上方 */
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      overflow: auto;
+    }
+    html[data-skin="line"] .envelope-pagination {
+      flex: 0 0 auto;
+      margin-top: 0;
+    }
+    html[data-skin="line"] .envelope-table thead {
+      border-bottom: 1px solid var(--line-hair-strong);
+    }
+    html[data-skin="line"] .envelope-table th,
+    html[data-skin="line"] .envelope-table td {
+      border-bottom: 1px solid var(--line-hair);
+    }
+    html[data-skin="line"] .envelope-table th {
+      font-weight: 500;
+      color: var(--fdd-ink-2);
+      background: #fff;
+    }
+    html[data-skin="line"] .envelope-table tbody tr:hover td,
+    html[data-skin="line"] .envelope-table tbody tr:hover td:last-child {
+      background: #f7f7f8;
+    }
+    html[data-skin="line"][data-shell="libra"] .filter-trigger,
+    html[data-skin="line"][data-shell="libra"] .envelope-search,
+    html[data-skin="line"][data-shell="libra"] .envelope-input,
+    html[data-skin="line"][data-shell="libra"] .resend-button,
+    html[data-skin="line"][data-shell="libra"] .filter-chip,
+    html[data-skin="line"][data-shell="libra"] .page-size-trigger {
+      border-radius: 6px;
+    }
+    html[data-skin="line"][data-shell="libra"] .batch-bar.is-on {
+      border-radius: 8px;
+      border-color: var(--line-hair-strong);
+      box-shadow: 0 4px 16px rgba(22, 26, 27, 0.08);
+    }
+    html[data-skin="line"][data-shell="libra"] .mini-popover,
+    html[data-skin="line"][data-shell="libra"] .filter-popover,
+    html[data-skin="line"][data-shell="libra"] .folder-more-menu,
+    html[data-skin="line"][data-shell="libra"] .export-menu,
+    html[data-skin="line"][data-shell="libra"] .row-menu {
+      border-radius: 8px;
+      border-color: var(--line-hair-strong);
+      box-shadow: 0 8px 24px rgba(22, 26, 27, 0.1);
+    }
+    /* 首页双卡在细线皮肤下同样去悬浮卡感 */
+    html[data-skin="line"] [data-aip-home] .ds-home {
+      padding-top: 0;
+      min-height: calc(100vh - var(--fdd-header-h));
+      background: #fff;
+    }
+    html[data-skin="line"] [data-aip-home] .ds-homeside {
+      height: calc(100vh - var(--fdd-header-h));
+      max-height: calc(100vh - var(--fdd-header-h));
+      margin: 0;
+      border: 0;
+      border-right: 1px solid var(--line-hair);
+      border-radius: 0;
+      box-shadow: none;
+      background: var(--line-side-bg);
+    }
+
     @media (max-width: 960px) {
       .contract-sidebar { display: none; }
       .contracts-workspace { width: calc(100% - 32px); }
@@ -2310,16 +2892,17 @@
   </style>
 </head>
 <body data-view="contracts">
-  <div class="dev-switchers">
-    <div class="dev-handle" id="devFab" aria-label="皮肤与场景切换">
+  <div class="dev-switchers" id="devSwitchers">
+    <button type="button" class="dev-handle" id="devFab" aria-label="皮肤与场景切换" aria-expanded="false" aria-controls="devPanel">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-    </div>
+    </button>
     <div class="dev-panel" id="devPanel">
       <div class="skin-switcher" id="skinSwitcher" role="group" aria-label="视觉版本比对">
         <strong>皮肤</strong>
         <!-- <button type="button" data-skin-set="docusign">DocuSign 风</button> -->
         <!-- <button type="button" data-skin-set="notasign">LibraTech 风</button> -->
         <button type="button" data-skin-set="libra-top" class="is-on">Libra · 顶栏</button>
+        <button type="button" data-skin-set="line">Attio · 细线</button>
         <!-- <button type="button" data-skin-set="libra-rail">Libra · 侧栏</button> -->
       </div>
       <div class="skin-switcher" id="scenarioSwitcher" role="group" aria-label="原型场景比对">
@@ -2463,7 +3046,7 @@
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="briefcase">
                 <img class="aip-icon__svg" src="assets/icons/phosphor/regular/briefcase.svg" alt="" />
               </span>
-              合同库
+              协议库
             </button>
             <button class="nav-tool" type="button" data-toast="演示：进入协议集（原有页面）">
               <span class="aip-icon aip-icon--md" aria-hidden="true" data-icon-slug="cards">
@@ -2503,6 +3086,22 @@
       <div class="contracts-workspace">
         <div class="contracts-titlebar">
           <h1 id="pageTitle">全部任务</h1>
+          <div class="completed-title-dd" id="completedTitleDd" hidden>
+            <button type="button" class="completed-title-dd__trigger" id="completedTitleDdBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="completedTitleDdMenu">
+              <span id="completedTitleDdLabel">已完成任务</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="completed-title-dd__menu" id="completedTitleDdMenu" hidden role="menu">
+              <button type="button" role="menuitem" data-completed-view="docs" class="is-on" aria-current="true">
+                已完成任务
+                <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+              <button type="button" role="menuitem" data-completed-view="library">
+                协议库
+                <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              </button>
+            </div>
+          </div>
           <div class="scope-switch" id="scopeSwitch" role="group" aria-label="访问范围">
             <button type="button" data-scope="mine" class="is-on">我的签署</button>
             <button type="button" data-scope="corp">全部签署</button>
@@ -2671,16 +3270,13 @@
           </div>
           <span class="export-wrap">
             <button class="toolbar-icon-btn" type="button" id="exportBtn" aria-label="导出" aria-haspopup="menu" aria-expanded="false">
-              <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download.svg" alt="" /></span>
+              <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/file-arrow-right.svg" alt="" /></span>
             </button>
             <span class="export-menu" id="exportMenu" hidden role="menu" aria-label="导出">
               <button type="button" role="menuitem" id="exportFiltered">导出当前筛选结果</button>
               <button type="button" role="menuitem" id="exportSelected" disabled>导出选中任务</button>
             </span>
           </span>
-          <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新列表">
-            <span class="aip-icon aip-icon--md" aria-hidden="true"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/arrow-clockwise.svg" alt="" /></span>
-          </button>
         </div>
 
         <div class="applied-row" id="appliedRow"></div>
@@ -2703,7 +3299,7 @@
           </div>
         </div>
         <div class="envelope-table-shell">
-          <table class="envelope-table">
+          <table class="envelope-table envelope-table--check">
             <thead id="taskHead"></thead>
             <tbody id="taskBody"></tbody>
           </table>
@@ -3587,16 +4183,13 @@
 
     /**
      * 切换视觉皮肤（同结构，仅视觉层）。
-     * 本页仅启用 libra-top；其余皮肤入口已注释。
-     * // - docusign：DocuSign 风
-     * // - notasign：LibraTech 悬浮卡片，顶栏仍为通栏产品导航
-     * - libra-top：LibraTech 卡片 + 顶栏悬浮条适配（保留一级导航结构）
-     * // - libra-rail：顶栏收纳进左侧，纯左右形态
-     * @param {'libra-top'|string} skin
+     * - libra-top：LibraTech 卡片 + 顶栏悬浮条
+     * - line：Attio 细线分割（无卡片壳，顶栏/侧栏/内容平铺）
+     * @param {'libra-top'|'line'|string} skin
      */
     function applySkin(skin) {
-      /* 仅保留 Libra · 顶栏 */
-      const next = 'libra-top';
+      const allowed = new Set(['libra-top', 'line']);
+      const next = allowed.has(skin) ? skin : 'libra-top';
       const root = document.documentElement;
       const prev = root.getAttribute('data-skin') || 'libra-top';
       if (prev === 'libra-rail') {
@@ -3604,18 +4197,6 @@
       }
       root.setAttribute('data-skin', next);
       root.setAttribute('data-shell', 'libra');
-      /*
-      const allowed = new Set(['docusign', 'notasign', 'libra-top', 'libra-rail']);
-      const next = allowed.has(skin) ? skin : 'docusign';
-      if (next === 'notasign' || next === 'libra-top' || next === 'libra-rail') {
-        root.setAttribute('data-shell', 'libra');
-      } else {
-        root.removeAttribute('data-shell');
-      }
-      if (next === 'libra-rail') {
-        syncLibraRailChrome(true);
-      }
-      */
       try { localStorage.setItem(SKIN_KEY, next); } catch (_) { /* ignore */ }
       document.querySelectorAll('#skinSwitcher [data-skin-set]').forEach((btn) => {
         btn.classList.toggle('is-on', btn.getAttribute('data-skin-set') === next);
@@ -3625,18 +4206,35 @@
     /* 面板由 CSS :hover 驱动滑出，无需 JS 展开/收起 */
 
     (function bindSkinSwitcher() {
-      /* 强制 Libra · 顶栏；忽略 localStorage 中的其它皮肤 */
-      applySkin('libra-top');
-      /*
-      let saved = 'docusign';
-      try { saved = localStorage.getItem(SKIN_KEY) || 'docusign'; } catch (_) {}
+      let saved = 'libra-top';
+      try {
+        const fromStore = localStorage.getItem(SKIN_KEY);
+        if (fromStore === 'libra-top' || fromStore === 'line') saved = fromStore;
+      } catch (_) { /* ignore */ }
       applySkin(saved);
       document.getElementById('skinSwitcher')?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-skin-set]');
         if (!btn) return;
-        applySkin(btn.getAttribute('data-skin-set') || 'docusign');
+        applySkin(btn.getAttribute('data-skin-set') || 'libra-top');
       });
-      */
+
+      /** 点击把手展开/收起，避免仅靠 hover 时被侧栏挡住点不到 */
+      const root = document.getElementById('devSwitchers');
+      const fab = document.getElementById('devFab');
+      if (root && fab) {
+        fab.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = !root.classList.contains('is-open');
+          root.classList.toggle('is-open', open);
+          fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+          if (!root.classList.contains('is-open')) return;
+          if (root.contains(e.target)) return;
+          root.classList.remove('is-open');
+          fab.setAttribute('aria-expanded', 'false');
+        });
+      }
     })();
 
     /** 列表筛选：触发器 → 浮窗（应用才查询）→ 已应用标签（PRD 4.1/4.3/4.4） */
@@ -3785,7 +4383,7 @@
             closeAll(null);
             selectedIds.clear();
         pageState.page = 1;
-            render();
+            renderWithLoading();
             return;
           }
           const checked = /** @type {HTMLInputElement|null} */ (pop.querySelector(`input[name="filter-${key}"]:checked`));
@@ -3796,7 +4394,7 @@
           toast(`已应用「${FILTER_TITLES[key]}：${label}」`);
           selectedIds.clear();
         pageState.page = 1;
-          render();
+          renderWithLoading();
         });
       });
 
@@ -3949,10 +4547,6 @@
         if (exportWrap && exportWrap.offsetParent !== null) {
           rightGroupW += exportWrap.getBoundingClientRect().width + 8;
         }
-        const refreshBtn = document.getElementById('refreshBtn');
-        if (refreshBtn && refreshBtn.offsetParent !== null) {
-          rightGroupW += refreshBtn.getBoundingClientRect().width + 8;
-        }
         const collapseW = collapseBtn.getBoundingClientRect().width + 8;
         return Math.max(0, controlsWidth - searchW - rightGroupW - collapseW - 16);
       };
@@ -4103,14 +4697,17 @@
         progress: { done: 1, total: 4 }, date: '2026/09/12', time: '14:06', primary: '定稿',
         more: ['下载', '复制', '撤销'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/05', deadline: '2026/09/28', approvalStatus: '审批中', signTemplateId: '—', batchId: '—' },
       { id: 'ST-20260911-004', subject: 'Global Marketing Services Agreement',
-        parties: ['Orbit Media Pte. Ltd.', 'Nora Media Ltd.', 'Lena Zhou', 'Kevin Wu', 'Cindy Lau'],
+        parties: [
+          'Orbit Media Pte. Ltd.', 'Nora Media Ltd.', 'Lena Zhou', 'Kevin Wu', 'Cindy Lau',
+          'Alex Rivera', 'Jordan Park', 'Sam Chen', 'Harper Lee',
+        ],
         statusCode: 'signing', scope: ['mine', 'corp'], folder: 'sales',
         todo: { kind: 'waiting', text: '等待 Orbit Media 签署',
           waiting: [
             { name: 'Orbit Media Pte. Ltd.', time: '2026/09/10 09:12' },
             { name: 'Nora Media Ltd.', time: '2026/09/10 09:12' },
           ] },
-        progress: { done: 2, total: 5 }, date: '2026/09/11', time: '11:07', primary: '催办',
+        progress: { done: 2, total: 9 }, date: '2026/09/11', time: '11:07', primary: '催办',
         more: ['下载', '复制', '转交'] , initiatorName: 'CX', creator: 'CX', createdAt: '2026/09/06', deadline: '2026/09/25', approvalStatus: '—', signTemplateId: 'T-88030', batchId: '—' },
       { id: 'ST-20260911-005', subject: 'Distribution and Reseller Agreement',
         parties: ['Mason Commerce Ltd.'], statusCode: 'signing', scope: ['mine', 'corp'],
@@ -4193,7 +4790,7 @@
       all: '全部任务',
       draft: '草稿',
       active: '进行中',
-      completed: '已完成',
+      completed: '已完成任务',
     };
 
     /** 进行中列表固定集合（九种处理中状态，PRD 3.3） */
@@ -4216,7 +4813,7 @@
     /** 搜索占位随列表变化（PRD 3.1-3.5） */
     const VIEW_SEARCH_PH = {
       all: '搜索全部任务', draft: '搜索草稿', active: '搜索进行中',
-      completed: '搜索已完成', folder: '搜索当前文件夹',
+      completed: '搜索已完成任务', folder: '搜索当前文件夹',
     };
     /* —— 列设置（PRD 5.6）：主题/操作固定，其余可选可排序；按成员+企业+范围持久保存 —— */
     const COL_DEFS = [
@@ -4244,6 +4841,7 @@
     /** 当前生效列（有序、含固定首尾） */
     let activeCols = loadCols();
     let colDraft = null;
+
     function loadCols() {
       try {
         const raw = localStorage.getItem(colStorageKey());
@@ -4515,14 +5113,41 @@
       });
       head.querySelector('#colSettingsBtn')?.addEventListener('click', () => openColSettings());
       head.querySelector('#checkAll')?.addEventListener('change', (e) => {
-        const on = e.target.checked;
+        const on = /** @type {HTMLInputElement} */ (e.target).checked;
+        /** @type {HTMLInputElement} */ (e.target).indeterminate = false;
         document.querySelectorAll('#taskBody [data-row-check]').forEach((c) => {
-          c.checked = on;
+          /** @type {HTMLInputElement} */ (c).checked = on;
           const rid = c.getAttribute('data-row-check');
           if (on) selectedIds.add(rid); else selectedIds.delete(rid);
         });
         syncBatchBar();
       });
+    }
+
+    /**
+     * 同步表头全选：全选 / 半选（indeterminate）/ 未选。
+     * @param {Array<{id:string}>} [pageRows]
+     */
+    function syncCheckAllState(pageRows) {
+      const headCheck = /** @type {HTMLInputElement|null} */ (document.getElementById('checkAll'));
+      if (!headCheck) return;
+      let ids;
+      if (pageRows) {
+        ids = pageRows.map((t) => t.id);
+      } else {
+        ids = [...document.querySelectorAll('#taskBody [data-row-check]')].map((c) => c.getAttribute('data-row-check'));
+      }
+      if (!ids.length) {
+        headCheck.checked = false;
+        headCheck.indeterminate = false;
+        return;
+      }
+      const selected = ids.filter((id) => selectedIds.has(id)).length;
+      const all = selected === ids.length;
+      const none = selected === 0;
+      headCheck.checked = all;
+      headCheck.indeterminate = !all && !none;
+      headCheck.setAttribute('aria-checked', all ? 'true' : (none ? 'false' : 'mixed'));
     }
 
     function sortRows(rows) {
@@ -4537,12 +5162,41 @@
       return arr;
     }
 
+    /* 列表加载过渡：应用筛选等操作后先出骨架 loading，再渲染真实数据 */
+    let __listLoadingTimer = null;
+    function renderWithLoading() {
+      const body = document.getElementById('taskBody');
+      if (body) {
+        const colCount = (typeof activeCols !== 'undefined' ? activeCols.length : 5) + 1;
+        body.innerHTML = Array.from({ length: 6 }).map(() => `
+          <tr class="row-skeleton" aria-hidden="true"><td colspan="${colCount}"><span class="skeleton-bar"></span></td></tr>
+        `).join('');
+      }
+      clearTimeout(__listLoadingTimer);
+      __listLoadingTimer = setTimeout(render, 380);
+    }
+
     function render() {
       const rows = sortRows(filteredTasks());
       const body = document.getElementById('taskBody');
       let title = TITLE_MAP[currentNav] || '全部任务';
       if (currentFolder) title = FOLDER_NAME_MAP[currentFolder] || '任务文件夹';
-      document.getElementById('pageTitle').textContent = title;
+      const pageTitleEl = document.getElementById('pageTitle');
+      const completedDd = document.getElementById('completedTitleDd');
+      const showCompletedDd = currentNav === 'completed' && !currentFolder;
+      if (pageTitleEl) {
+        pageTitleEl.textContent = title;
+        pageTitleEl.hidden = showCompletedDd;
+      }
+      if (completedDd) {
+        completedDd.hidden = !showCompletedDd;
+        if (!showCompletedDd) {
+          const menu = document.getElementById('completedTitleDdMenu');
+          const btn = document.getElementById('completedTitleDdBtn');
+          if (menu) menu.hidden = true;
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      }
 
       /* 范围选择器：任务文件夹页不显示（PRD 2.1） */
       const scopeSwitch = document.getElementById('scopeSwitch');
@@ -4574,6 +5228,8 @@
       syncBatchBar();
       renderHead();
 
+      // 已完成页标题改用「已完成任务」下拉（见 completedTitleDd）
+
       body.innerHTML = pageRows.map((task) => `
         <tr data-id="${task.id}">
           ${activeCols.map((id) => {
@@ -4582,10 +5238,8 @@
           }).join('')}
         </tr>
       `).join('') || `<tr><td colspan="${activeCols.length + 1}" style="text-align:center;color:var(--fdd-ink-3);height:120px">没有符合条件的任务</td></tr>`;
-      /* 行重渲染后同步表头全选勾选态（仅当前页） */
-      const allChecked = pageRows.length > 0 && pageRows.every((t) => selectedIds.has(t.id));
-      const headCheck = document.getElementById('checkAll');
-      if (headCheck) headCheck.checked = allChecked;
+      /* 行重渲染后同步表头全选 / 半选态（仅当前页） */
+      syncCheckAllState(pageRows);
     }
 
     /** 批量选择（PRD 6.1：本页选择，不跨页累计；未勾选不显示提示） */
@@ -4605,29 +5259,66 @@
       }
     }
 
-    /** 批量条「更多」菜单 */
+    /** 批量条「更多」菜单：挂到 body + fixed，避免被表格压住或坐标偏移 */
     (function bindBatchMore() {
       const btn = document.getElementById('batchMoreBtn');
       const menu = document.getElementById('batchMoreMenu');
-      if (!btn || !menu) return;
+      const wrap = document.querySelector('.batch-more-wrap');
+      if (!btn || !menu || !wrap) return;
+      const menuHome = wrap;
+
+      /**
+       * 按按钮位置锚定更多菜单。
+       */
+      function placeBatchMoreMenu() {
+        const rect = btn.getBoundingClientRect();
+        let top = rect.bottom + 6;
+        let left = rect.left;
+        menu.style.top = '0px';
+        menu.style.left = '0px';
+        menu.hidden = false;
+        const mw = menu.offsetWidth;
+        const mh = menu.offsetHeight;
+        if (left + mw > window.innerWidth - 12) left = Math.max(12, window.innerWidth - mw - 12);
+        if (top + mh > window.innerHeight - 12) top = Math.max(12, rect.top - mh - 6);
+        menu.style.top = `${Math.round(top)}px`;
+        menu.style.left = `${Math.round(left)}px`;
+      }
+
+      /**
+       * @param {boolean} open
+       */
+      function setBatchMoreOpen(open) {
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) {
+          if (menu.parentElement !== document.body) document.body.appendChild(menu);
+          placeBatchMoreMenu();
+        } else {
+          menu.hidden = true;
+          if (menu.parentElement !== menuHome) menuHome.appendChild(menu);
+          menu.style.top = '';
+          menu.style.left = '';
+        }
+      }
+
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const open = menu.hidden;
-        menu.hidden = !open;
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        const isOpen = !menu.hidden && menu.parentElement === document.body;
+        setBatchMoreOpen(!isOpen);
       });
       menu.addEventListener('click', (e) => {
-        if (/** @type {HTMLElement} */ (e.target).closest('button')) {
-          menu.hidden = true;
-          btn.setAttribute('aria-expanded', 'false');
-        }
+        if (/** @type {HTMLElement} */ (e.target).closest('button')) setBatchMoreOpen(false);
       });
       document.addEventListener('click', (e) => {
-        if (!/** @type {HTMLElement} */ (e.target).closest('.batch-more-wrap')) {
-          menu.hidden = true;
-          btn.setAttribute('aria-expanded', 'false');
-        }
+        const t = /** @type {HTMLElement} */ (e.target);
+        if (!t.closest('.batch-more-wrap') && !t.closest('#batchMoreMenu')) setBatchMoreOpen(false);
       });
+      window.addEventListener('resize', () => {
+        if (!menu.hidden && menu.parentElement === document.body) placeBatchMoreMenu();
+      });
+      window.addEventListener('scroll', () => {
+        if (!menu.hidden && menu.parentElement === document.body) placeBatchMoreMenu();
+      }, true);
     })();
 
     document.getElementById('taskBody').addEventListener('change', (e) => {
@@ -4636,6 +5327,7 @@
       const id = cb.getAttribute('data-row-check');
       if (/** @type {HTMLInputElement} */ (cb).checked) selectedIds.add(id); else selectedIds.delete(id);
       syncBatchBar();
+      syncCheckAllState();
     });
 
     /** 列表切换（PRD 4.6：切状态列表保留关键词与日期，清附加状态 / 发起人 / 快捷） */
@@ -4677,6 +5369,46 @@
       toast(scope === 'corp' ? '已切换：全部签署（清空旧筛选，默认过去 6 个月）' : '已切换：我的签署');
       render();
     });
+
+    /**
+     * 已完成页：标题「已完成任务」下拉；浮层含协议库入口，点击跳转协议库。
+     */
+    (function bindCompletedTitleDd() {
+      const dd = document.getElementById('completedTitleDd');
+      const btn = document.getElementById('completedTitleDdBtn');
+      const menu = document.getElementById('completedTitleDdMenu');
+      if (!dd || !btn || !menu) return;
+
+      /** @param {boolean} open */
+      const setOpen = (open) => {
+        menu.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setOpen(menu.hidden);
+      });
+
+      menu.addEventListener('click', (e) => {
+        const item = /** @type {HTMLElement} */ (e.target).closest('[data-completed-view]');
+        if (!item) return;
+        const view = item.getAttribute('data-completed-view');
+        if (view === 'library') {
+          location.href = '../contract-library/contract-library.html#contracts';
+          return;
+        }
+        setOpen(false);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dd.contains(/** @type {Node} */ (e.target))) setOpen(false);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !menu.hidden) setOpen(false);
+      });
+    })();
 
     /** 任务文件夹（PRD 6.2：独立页面，无人员范围；目录切换保留关键词 / 日期 / 状态） */
     (function bindFolderModule() {
@@ -4910,27 +5642,75 @@
       syncSidebarActive();
     }
 
-    /** 发起签署：hover 展开原菜单分支（PRD 2.4：直接 / 模板 / 批量创建） */
+    /** 发起签署：悬停延迟展开，避免路过时挡住下方草稿等入口（PRD 2.4） */
     (function bindLaunchMenu() {
       const wrap = document.getElementById('launchWrap');
       const btn = document.getElementById('launchBtn');
       if (!wrap || !btn) return;
-      /* 键盘 / 触屏：点击按钮切换菜单；hover 由 CSS 处理 */
+      /** @type {number} */
+      let openTimer = 0;
+      /** @type {number} */
+      let closeTimer = 0;
+      const OPEN_DELAY = 280;
+      const CLOSE_DELAY = 160;
+
+      /**
+       * 同步展开态与 aria。
+       * @param {boolean} open
+       */
+      function setExpanded(open) {
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      function clearTimers() {
+        window.clearTimeout(openTimer);
+        window.clearTimeout(closeTimer);
+        openTimer = 0;
+        closeTimer = 0;
+      }
+
+      function openByHover() {
+        wrap.classList.add('is-hover');
+        setExpanded(true);
+      }
+
+      function closeByHover() {
+        wrap.classList.remove('is-hover');
+        if (!wrap.classList.contains('is-open')) setExpanded(false);
+      }
+
+      wrap.addEventListener('mouseenter', () => {
+        window.clearTimeout(closeTimer);
+        closeTimer = 0;
+        if (wrap.classList.contains('is-open') || wrap.classList.contains('is-hover')) return;
+        openTimer = window.setTimeout(openByHover, OPEN_DELAY);
+      });
+      wrap.addEventListener('mouseleave', () => {
+        window.clearTimeout(openTimer);
+        openTimer = 0;
+        closeTimer = window.setTimeout(closeByHover, CLOSE_DELAY);
+      });
+
+      /* 键盘 / 触屏：点击按钮切换菜单 */
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        clearTimers();
+        wrap.classList.remove('is-hover');
         const open = wrap.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        setExpanded(open);
       });
       document.addEventListener('click', (e) => {
         if (!wrap.contains(/** @type {Node} */ (e.target))) {
-          wrap.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
         }
       });
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          wrap.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
           btn.focus();
         }
       });
@@ -4942,7 +5722,9 @@
       };
       wrap.querySelectorAll('[data-launch]').forEach((item) => {
         item.addEventListener('click', () => {
-          wrap.classList.remove('is-open');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
           const key = item.getAttribute('data-launch');
           toast(`演示：${LEGACY_LAUNCH[key] || '原有发起流程'}`);
           openLegacy('launch');
@@ -4969,6 +5751,10 @@
         title = '等待处理';
         items = ((task.todo && task.todo.waiting) || []).map((w) => `<div class="mini-popover__item"><span class="p-name">${w.name}</span><span class="p-time">发送于 ${w.time}</span></div>`).join('');
       } else return;
+      const itemCount = key === 'parties'
+        ? (task.parties || []).length
+        : ((task.todo && task.todo.waiting) || []).length;
+      const scrollable = itemCount > 5;
       const pop = document.createElement('div');
       pop.className = 'mini-popover';
       pop.setAttribute('role', 'dialog');
@@ -4976,9 +5762,18 @@
         <div class="mini-popover__head">${title}
           <button type="button" class="mini-popover__close" data-pop-close aria-label="关闭">×</button>
         </div>
-        <div class="mini-popover__list">${items}</div>`;
+        <div class="mini-popover__list${scrollable ? ' is-scrollable' : ''}">${items}</div>`;
       document.body.appendChild(pop);
       miniPopEl = pop;
+      const listEl = /** @type {HTMLElement} */ (pop.querySelector('.mini-popover__list'));
+      if (scrollable && listEl) {
+        const syncScrollEnd = () => {
+          const atEnd = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 2;
+          listEl.classList.toggle('is-scrolled-end', atEnd);
+        };
+        listEl.addEventListener('scroll', syncScrollEnd, { passive: true });
+        syncScrollEnd();
+      }
       const rect = btn.getBoundingClientRect();
       const ph = pop.offsetHeight, pw = pop.offsetWidth;
       let top = rect.bottom + 6;
@@ -5983,14 +6778,6 @@
         }
       });
     })();
-
-    /** 刷新列表（保留已应用条件，重算相对日期，回第 1 页并清勾选） */
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-      selectedIds.clear();
-      pageState.page = 1;
-      toast('已刷新列表（保留当前筛选与排序）');
-      render();
-    });
 
     /** 场景切换（原型验收：我的签署-全部任务 / 全部签署-进行中 / 任务文件夹 / 选择收件人） */
     document.getElementById('scenarioSwitcher').addEventListener('click', (e) => {

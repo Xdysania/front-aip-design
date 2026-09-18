@@ -799,6 +799,8 @@
         <h1>Modal 对话框</h1>
         <p class="en">自典型页抽取 · .ns-modal-mask + .ns-modal</p>
         <div class="kit-doc__note">
+          <!-- [AI 规范：Modal 蒙层] -->
+          蒙层必须使用 <code>--aip-mask-bg</code> + <code>--aip-mask-blur</code>（<code>backdrop-filter: blur()</code>），业务页 <code>.ns-modal-mask</code> 同源；禁止仅半透明无模糊。
           禁止自造确认框。典型页实例：<strong>设置列表列</strong>、<strong>新建文件夹</strong>（同源嵌入，改典型页即改此处）。
           直链：<a href="http://127.0.0.1:8956/versions/0.1/signing-task-list/signing-tasks.html#contracts" target="_blank" rel="noopener">迭代稿协议页</a>
         </div>

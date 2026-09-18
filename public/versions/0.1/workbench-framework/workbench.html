@@ -8,9 +8,10 @@
     AIP 0.1 · 工作台整体框架调整（PRD 0.1-r15）。
     在协议典型页 Libra · 顶栏基础上完善整个顶栏：
       · 一级导航：首页 / 协议 / 模板 / 自动化 / 洞察 / 管理（固定顺序）
-      · 右侧工具：升级、任务中心、帮助、头像（PRD：搜索收回所属页面，不进顶栏）
-      · 帮助菜单：使用帮助 / 帮助中心 / 联系支持 / 购买咨询 / 产品更新 / 移动端入口
-      · 头像菜单：只读身份 + 个人资料 / 个人设置 / 站内信 / 切换企业 / 切换产品 / 语言·条款·退出
+      · 右侧工具：任务中心、帮助、头像（去掉升级；PRD：搜索收回所属页面，不进顶栏）
+      · 帮助菜单：帮助中心 / 联系支持 / 购买咨询 / 产品更新 / 移动端入口（去掉使用帮助）
+      · 头像菜单：只读身份 + 账号与设置 / 站内信 / 切换企业 / 切换产品 / 更多（悬停次级）/ 退出
+      · 更多次级：语言切换（.aip-scope-switch）/ 隐私条款 / 注册协议；「更多」旁灰色提示文案
       · 切换企业、切换产品（含个人工作台）为面板内子视图
       · 任务中心：独立页 /work/tasks，1128px 居中，无业务侧栏，一级模块均不选中；
         按来源分组（签署任务 / 审批任务 / 组织待办 / 功能开通申请），行复用协议列表样式（主题+摘要 / 状态+进度 / 更新时间 / 操作）
@@ -54,7 +55,9 @@
     }
     .wb-topbar { position: relative; z-index: 60; }
     .wb-topbar .aip-topbar__tabs { flex: 1; min-width: 0; }
-    /* PRD：顶栏搜索收回所属页面（升级按钮保留） */
+    /* 顶栏：去掉「升级」；任务中心 / 帮助 / 头像保留 */
+    .wb-topbar .aip-topbar__upgrade { display: none !important; }
+    /* PRD：顶栏搜索收回所属页面 */
     .wb-topbar [data-role="search"] { display: none; }
 
     /* 图标按钮徽标（头像菜单内站内信未读；顶栏任务图标不带红点） */
@@ -133,14 +136,23 @@
     .wb-menu-item__badge + .wb-menu-item__caret { margin-left: 6px; }
     .wb-menu-sep { height: 1px; margin: 4px 10px; background: var(--aip-line-soft); }
     .wb-menu-foot { padding: 6px; border-top: 1px solid var(--aip-line-soft); }
-    /* 更多：左侧弹出的次级浮层（语言/隐私条款/注册协议） */
+    /* 更多：悬停左侧次级浮层（语言切换 / 隐私条款 / 注册协议） */
     .wb-menu-group { position: relative; }
-    .wb-menu-group__caret { margin-left: auto; color: var(--aip-ink-3); transition: transform .15s; }
-    .wb-menu-group__toggle[aria-expanded="true"] { background: var(--aip-bg-hover); }
-    .wb-menu-group__toggle[aria-expanded="true"] .wb-menu-group__caret { transform: rotate(180deg); }
+    .wb-menu-group__toggle { gap: 8px; }
+    .wb-menu-group__toggle .wb-menu-item__label { flex: 0 0 auto; }
+    .wb-menu-item__hint {
+      flex: 1; min-width: 0;
+      color: var(--aip-ink-3);
+      font-size: var(--aip-font-size-xs);
+      line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .wb-menu-group__caret { margin-left: auto; color: var(--aip-ink-3); flex-shrink: 0; }
+    .wb-menu-group__toggle[aria-expanded="true"],
+    .wb-menu-group.is-open .wb-menu-group__toggle { background: var(--aip-bg-hover); }
     .wb-submenu {
       position: fixed; z-index: 91;
-      width: 156px; padding: 6px;
+      width: 188px; padding: 6px;
       background: #fff; border-radius: var(--aip-radius-lg);
       box-shadow: var(--aip-shadow-menu);
       animation: wbSubPop .15s cubic-bezier(.22,1,.36,1);
@@ -149,6 +161,35 @@
     .wb-submenu[hidden] { display: none !important; }
     @keyframes wbSubPop { from { opacity: 0; transform: translateX(4px) scale(.98); } }
     .wb-submenu .wb-menu-item { height: 34px; color: var(--aip-ink-2); font-size: var(--aip-font-size-sm); }
+    /* 语言切换：复用 .aip-scope-switch 结构，选中态用品牌色对齐图2 */
+    /* 语言切换行：左侧文案 + 右侧小号分段开关 */
+    .wb-submenu__lang {
+      display: flex; align-items: center; gap: 8px;
+      height: 34px; padding: 0 10px; margin: 0;
+      color: var(--aip-ink-2); font-size: var(--aip-font-size-sm);
+    }
+    .wb-submenu__lang-label { flex: 1; min-width: 0; }
+    .wb-lang-switch.aip-scope-switch {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 1px;
+      background: var(--aip-bg-page);
+    }
+    .wb-lang-switch.aip-scope-switch button {
+      flex: 0 0 auto;
+      height: 20px;
+      min-width: 32px;
+      padding: 0 6px;
+      font-size: var(--aip-font-size-xs);
+      line-height: 1;
+    }
+    /* 选中态对齐图2 / .aip-scope-switch：白底浮起，非品牌蓝 */
+    .wb-lang-switch.aip-scope-switch button.is-on {
+      background: var(--aip-bg);
+      color: var(--aip-ink);
+      box-shadow: var(--aip-shadow-sm);
+      font-weight: var(--aip-font-weight-semibold);
+    }
     /* 退出登录：黑色文字、无图标 */
     .wb-menu-foot .wb-menu-item--logout { color: var(--aip-ink); }
     .wb-menu-foot .wb-menu-item--logout:hover { background: var(--aip-bg-hover); }
@@ -481,14 +522,14 @@
     </div>
 
     <div class="aip-topbar__right">
-      <!-- 升级按钮（保留，进入升级选购流程） -->
-      <button class="aip-topbar__upgrade" type="button" data-toast="进入升级选购（原有流程）">升级</button>
+      <!-- 升级：本期去掉 -->
+      <button class="aip-topbar__upgrade" type="button" data-toast="进入升级选购（原有流程）" hidden>升级</button>
       <!-- PRD：顶栏搜索移除 -->
       <button class="aip-topbar__icon-btn" type="button" data-role="search" aria-label="搜索" hidden tabindex="-1">
         <span class="aip-icon aip-icon--md"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
       </button>
 
-      <!-- 任务中心（PRD：图标不展示数字或红点） -->
+      <!-- 任务中心 -->
       <button class="aip-topbar__icon-btn" type="button" id="taskBtn" aria-label="任务中心" aria-current="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.43 10.77 2 8.34 3.34 7 5 8.66 8.66 5 10 6.34l-4.43 4.43c-.16.16-.37.23-.57.23s-.41-.07-.57-.23M22 7H12v2h10zM5 19c.21 0 .41-.07.57-.23L10 14.34 8.66 13 5 16.66 3.34 15 2 16.34l2.43 2.43c.16.16.37.23.57.23m17-4H12v2h10z"/></svg>
       </button>
@@ -500,9 +541,7 @@
         </button>
         <div class="wb-pop wb-help" id="helpMenu" hidden role="menu" aria-label="帮助菜单">
           <div class="aip-menu">
-            <button class="aip-menu__item" type="button" role="menuitem" data-toast="新标签页打开 support.fadada.com">使用帮助</button>
             <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开帮助中心文档面板（无面板则新标签 help.fadada.com）">帮助中心</button>
-            <div class="wb-help__sep" role="separator"></div>
             <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开在线客服（原组件）">联系支持 · 在线客服</button>
             <button class="aip-menu__item" type="button" role="menuitem" data-toast="拨打服务热线 tel:400-869-2012">联系支持 · 服务热线 <span class="wb-sub">400-869-2012</span></button>
             <button class="aip-menu__item" type="button" role="menuitem" data-toast="打开购买咨询（原组件）">购买咨询</button>
@@ -531,13 +570,9 @@
               </div>
 
               <div class="wb-menu-list">
-                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开个人资料（原有页面）">
+                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开账号与设置（原个人资料 / 个人设置）">
                   <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/user.svg" alt="" /></span>
-                  <span class="wb-menu-item__label">个人资料</span>
-                </button>
-                <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开个人设置（默认账号信息）">
-                  <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/gear-six.svg" alt="" /></span>
-                  <span class="wb-menu-item__label">个人设置</span>
+                  <span class="wb-menu-item__label">账号与设置</span>
                 </button>
                 <button class="wb-menu-item" type="button" role="menuitem" data-toast="打开站内信（成员消息，保留未读）">
                   <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/bell.svg" alt="" /></span>
@@ -560,15 +595,20 @@
               </div>
 
               <div class="wb-menu-foot">
-                <div class="wb-menu-group">
-                  <button class="wb-menu-item wb-menu-group__toggle" type="button" id="moreGroupToggle" aria-expanded="false" aria-controls="moreGroupItems">
+                <div class="wb-menu-group" id="moreGroup">
+                  <button class="wb-menu-item wb-menu-group__toggle" type="button" id="moreGroupToggle" aria-expanded="false" aria-controls="moreGroupItems" aria-haspopup="menu">
                     <span class="wb-menu-item__label">更多</span>
-                    <svg class="wb-menu-group__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+                    <span class="wb-menu-item__hint">切换语言、隐私条款等</span>
+                    <svg class="wb-menu-group__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
                   </button>
                   <div class="wb-submenu" id="moreGroupItems" hidden role="menu" aria-label="更多">
-                    <button class="wb-menu-item" type="button" role="menuitem" data-toast="语言（子视图：中文 / English）">
-                      <span class="wb-menu-item__label">语言</span>
-                    </button>
+                    <div class="wb-submenu__lang">
+                      <span class="wb-submenu__lang-label">切换语言</span>
+                      <div class="aip-scope-switch wb-lang-switch" role="group" aria-label="切换语言" id="langSwitch">
+                        <button type="button" class="is-on" data-lang="zh" aria-pressed="true">中文</button>
+                        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+                      </div>
+                    </div>
                     <button class="wb-menu-item" type="button" role="menuitem" data-toast="隐私条款（原页面）">
                       <span class="wb-menu-item__label">隐私条款</span>
                     </button>
@@ -1005,25 +1045,59 @@
     $$("[data-back]", avatarMenu).forEach(function (b) {
       b.addEventListener("click", resetSub);
     });
-    // 更多分组（语言/隐私条款/注册协议）：左侧次级浮层
+    // 更多分组（语言切换 / 隐私条款 / 注册协议）：悬停左侧次级浮层
     function closeMoreGroup () {
-      var t = $("#moreGroupToggle"), i = $("#moreGroupItems");
-      if (t && i) { i.hidden = true; t.setAttribute("aria-expanded", "false"); }
+      var t = $("#moreGroupToggle"), i = $("#moreGroupItems"), g = $("#moreGroup");
+      if (t && i) {
+        i.hidden = true;
+        t.setAttribute("aria-expanded", "false");
+      }
+      if (g) g.classList.remove("is-open");
+    }
+    function openMoreGroup () {
+      var toggle = $("#moreGroupToggle"), items = $("#moreGroupItems"), group = $("#moreGroup");
+      if (!toggle || !items) return;
+      items.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      if (group) group.classList.add("is-open");
+      var r = toggle.getBoundingClientRect();
+      var w = items.offsetWidth || 188;
+      items.style.left = Math.max(8, r.left - w - 8) + "px";
+      items.style.top = (r.top - 6) + "px";
     }
     (function () {
-      var toggle = $("#moreGroupToggle"), items = $("#moreGroupItems");
-      if (toggle && items) {
-        var place = function () {
-          var r = toggle.getBoundingClientRect();
-          items.style.left = Math.max(8, r.left - items.offsetWidth - 8) + "px";
-          items.style.top = (r.top - 6) + "px";
-        };
-        toggle.addEventListener("click", function (e) {
+      var toggle = $("#moreGroupToggle"), items = $("#moreGroupItems"), group = $("#moreGroup");
+      if (!toggle || !items || !group) return;
+      var leaveTimer = 0;
+      var clearLeave = function () { if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = 0; } };
+      group.addEventListener("mouseenter", function () {
+        clearLeave();
+        openMoreGroup();
+      });
+      group.addEventListener("mouseleave", function () {
+        clearLeave();
+        leaveTimer = setTimeout(closeMoreGroup, 120);
+      });
+      // 键盘 / 触控兜底：点击切换
+      toggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        clearLeave();
+        if (items.hidden) openMoreGroup();
+        else closeMoreGroup();
+      });
+      // 语言分段切换
+      var lang = $("#langSwitch");
+      if (lang) {
+        lang.addEventListener("click", function (e) {
+          var btn = e.target.closest("button[data-lang]");
+          if (!btn) return;
           e.stopPropagation();
-          var open = items.hidden;
-          items.hidden = !open;
-          toggle.setAttribute("aria-expanded", open ? "true" : "false");
-          if (open) place();
+          $$("button[data-lang]", lang).forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle("is-on", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+          toast(btn.getAttribute("data-lang") === "en" ? "已切换为 English（演示）" : "已切换为中文（演示）");
         });
       }
     })();

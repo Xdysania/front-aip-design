@@ -51,6 +51,8 @@
       --fdd-progress-radius: 0;
       --fdd-shadow-dropdown: none;
       --fdd-shadow-menu: none;
+      --fdd-mask-bg: rgba(28, 43, 51, 0.42);
+      --fdd-mask-blur: 6px;
       --fdd-warning: #f4a317;
       --fdd-warning-soft: #fff6e0;
       --fdd-danger-soft: #fbecec;
@@ -308,7 +310,8 @@
     /* —— 发起签署 hover 菜单（PRD 2.4：直接创建 / 模板创建 / 批量创建） —— */
     .launch-wrap { position: relative; width: 100%; height: 100%; }
     .contract-launch .launch-caret { margin-left: 0; transition: transform 0.15s; }
-    .launch-wrap:hover .launch-caret,
+    /* 仅 is-hover（延迟后）/ is-open（点击）展开，避免路过按钮时挡住下方「草稿」等入口 */
+    .launch-wrap.is-hover .launch-caret,
     .launch-wrap.is-open .launch-caret { transform: rotate(180deg); }
     .launch-menu {
       position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 60;
@@ -317,11 +320,13 @@
       background: #fff;
       box-shadow: 0 2px 6px rgba(28, 43, 51, 0.06), 0 12px 32px rgba(28, 43, 51, 0.16), 0 24px 64px rgba(28, 43, 51, 0.12);
       opacity: 0; visibility: hidden; transform: translateY(-4px);
+      pointer-events: none;
       transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
     }
-    .launch-wrap:hover .launch-menu,
+    .launch-wrap.is-hover .launch-menu,
     .launch-wrap.is-open .launch-menu {
       opacity: 1; visibility: visible; transform: translateY(0);
+      pointer-events: auto;
     }
     .launch-menu button {
       width: 100%; padding: 8px 10px;
@@ -608,7 +613,7 @@
     }
     .envelope-search {
       position: relative;
-      width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 16px 6px 0; padding: 0 8px 0 10px;
+      width: 284px; min-width: 160px; flex-shrink: 1; height: 32px; margin: 6px 8px 6px 0; padding: 0 8px 0 10px;
       display: flex; align-items: center; gap: 8px;
       border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
       background: #fff;
@@ -648,6 +653,14 @@
     .filter-collapse-btn { flex-shrink: 0; }
     /* hidden 属性强制隐藏（.filter-trigger 的 display:flex 会覆盖默认 [hidden]） */
     #filterCollapseBtn[hidden] { display: none !important; }
+    /* 筛选条件按钮：默认收纳全部筛选项；角标 = 已应用条件数量 */
+    .filter-collapse-count {
+      display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 4px; margin-left: 3px;
+      border-radius: 999px; background: var(--fdd-ink-2, #4e5560); color: #fff;
+      font-size: 11px; font-weight: 500; line-height: 1; box-sizing: border-box;
+    }
+    /* display:inline-grid 会覆盖 hidden 属性的 display:none，导致无筛选时也显示空圆，需显式压制 */
+    .filter-collapse-count[hidden] { display: none !important; }
     /* DocuSign：已应用条件以 chip 展示在分隔线左侧，不再与下拉按钮并存 */
     .filter-chips {
       display: none; align-items: center; flex-wrap: nowrap; gap: 8px; min-width: 0; flex-shrink: 1;
@@ -702,22 +715,26 @@
       background: var(--fdd-bg-muted); border-color: var(--fdd-line-strong);
     }
     .filter-trigger .aip-icon { color: var(--fdd-ink-2); }
-    /* 已应用：触发按钮变灰底 chip（对齐典型页"状态：所选值 ×"） */
-    .filter-field.is-applied .filter-trigger {
-      border-color: transparent; background: var(--fdd-bg-muted); font-weight: 500;
-      gap: 0; padding: 0;
-    }
-    .filter-field.is-applied .filter-trigger__label { padding: 0 10px 0 12px; }
-    /* 文案与清除 × 之间的竖向分割线（对齐典型页） */
     .filter-trigger__clear {
       display: inline-grid; place-items: center;
-      width: 32px; height: 100%; margin-left: 0;
-      border-radius: 0; color: var(--fdd-ink); font-size: 16px; line-height: 1;
+      width: 32px; height: 100%; margin-left: 0; padding: 0;
+      flex-shrink: 0; box-sizing: border-box;
+      border: 0; border-radius: 0; border-left: 1px solid var(--fdd-line);
+      background: transparent; color: var(--fdd-ink);
+      font-size: 16px; line-height: 1; font-family: inherit;
       cursor: pointer;
-      border-left: 1px solid var(--fdd-line);
+      appearance: none; -webkit-appearance: none;
     }
     .filter-trigger__clear:hover { background: var(--fdd-bg-hover-strong, #e8ebef); color: var(--fdd-ink); }
     .filter-trigger__clear[hidden] { display: none !important; }
+    .filter-field.is-applied .filter-trigger {
+      border-color: transparent; background: var(--fdd-bg-muted); font-weight: 500;
+      gap: 0; padding: 0; overflow: hidden; max-width: min(420px, 100%);
+    }
+    .filter-field.is-applied .filter-trigger__label {
+      padding: 0 10px 0 12px;
+      min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    }
     .filter-trigger .aip-icon[hidden] { display: none !important; }
     /* 已应用筛选与未应用下拉之间的竖向分割线 */
     .aip-lib-filter-sep-applied {
@@ -959,22 +976,52 @@
     .applied-clearall.is-collapsed,
     .applied-clearall[hidden] { display: none !important; }
 
-    /* 批量操作条：DocuSign 布局（计数 + 次按钮 + 更多）+ 当前页 NotaSign/蓝调 token */
+    /* 批量操作条：勾选后高度展开推动列表，内容渐现 */
     .batch-bar {
-      display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       position: relative; z-index: 6;
       width: 100%; box-sizing: border-box;
-      margin: 0 0 12px; padding: 10px 14px;
-      border: 1px solid var(--fdd-line); border-radius: 10px;
+      margin: 0; padding: 0 14px;
+      border: 1px solid transparent; border-radius: 10px;
       background: #fff; color: var(--fdd-ink); font-size: 13px;
+      box-shadow: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      /* 收起时仅保留透明边框占位，避免表格跳动过大 */
+      transition:
+        max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.24s ease,
+        box-shadow 0.32s ease,
+        opacity 0.22s ease 0.08s;
+    }
+    .batch-bar.is-on {
+      max-height: 80px;
+      min-height: 52px;
+      opacity: 1;
+      /* 上下都留白：原先仅 margin-bottom，顶距丢失后贴紧筛选栏 */
+      margin: 12px 0 16px;
+      padding: 10px 14px;
+      border-color: var(--fdd-line);
       box-shadow: var(--fdd-shadow-menu);
-      animation: nsBatchIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: auto;
+      overflow: visible;
+      z-index: 40;
     }
-    @keyframes nsBatchIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* 收起：先淡出，再收回高度与外边距 */
+    .batch-bar:not(.is-on) {
+      min-height: 0;
+      transition:
+        opacity 0.14s ease,
+        max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        margin 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        padding 0.28s cubic-bezier(0.4, 0, 0.2, 1) 0.04s,
+        border-color 0.18s ease,
+        box-shadow 0.22s ease;
     }
-    .batch-bar.is-on { display: flex; }
     #batchCount {
       color: var(--fdd-ink-2); font-weight: 500; margin-right: 4px;
       white-space: nowrap; flex-shrink: 0;
@@ -1096,7 +1143,9 @@
     .ns-modal-mask {
       position: fixed; inset: 0; z-index: 100;
       display: grid; place-items: center;
-      background: rgba(28, 43, 51, 0.42);
+      background: var(--fdd-mask-bg, rgba(28, 43, 51, 0.42));
+      -webkit-backdrop-filter: blur(var(--fdd-mask-blur, 6px));
+      backdrop-filter: blur(var(--fdd-mask-blur, 6px));
       animation: nsMaskIn 0.16s ease;
     }
     .ns-modal-mask[hidden] { display: none !important; }
@@ -1706,6 +1755,119 @@
     .multi-select-box .ms-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; flex-shrink: 0; accent-color: var(--fdd-brand); cursor: pointer; }
     .multi-select-box .ms-item .added-mark { font-size: 12px; color: var(--fdd-ink-3); }
     .multi-select-box .ms-item.is-added { color: var(--fdd-ink-3); cursor: default; }
+    /* 行内聚合编辑弹窗 */
+    .row-edit-modal { width: 480px; }
+    .row-edit-modal .ns-modal__body { max-height: min(64vh, 560px); overflow-y: auto; }
+    /* 编辑协议弹窗：AI 抓取字段的控件左端内嵌菱形图标（对齐详情页 ai-cell__spark 紫色） */
+    .row-edit-ctl { position: relative; }
+    .row-edit-ai-spark {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px;
+      color: #7c3aed; pointer-events: none; z-index: 2; flex-shrink: 0; display: block;
+    }
+    .row-edit-status { display: flex; align-items: center; gap: 12px; }
+    .row-edit-status .drawer-select-inline { flex: 1; min-width: 0; }
+    /* 聚合编辑弹窗：用白底边框输入/下拉组件（覆盖 libra 弹窗灰底），对齐详情编辑态 */
+    .row-edit-modal .ns-field__input {
+      height: 32px; padding: 0 10px; box-sizing: border-box;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--fdd-radius);
+      background: #fff; color: var(--fdd-ink); font-size: 13px; outline: none;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+    .row-edit-modal .ns-field__input:hover { border-color: var(--fdd-ink-3); background: #fff; }
+    .row-edit-modal .ns-field__input:focus { border-color: var(--fdd-brand); box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); background: #fff; }
+    .row-edit-modal textarea.ns-field__input { height: auto; min-height: 56px; padding: 6px 10px; }
+    /* 日期选择器：内部输入框不受上面 padding 覆盖，保持 libra-dp 标准（图标与文本 4px 间距） */
+    .row-edit-modal .libra-dp__input { padding: 0; border: 0; background: transparent; box-shadow: none; height: 100%; }
+    .row-edit-modal .libra-dp__field { height: 32px; padding: 0 6px 0 10px; gap: 4px; }
+    /* AI 字段：在通用 padding 规则之后提高优先级，给更胖的四角星留出左侧空间 */
+    .row-edit-modal .row-edit-ctl--ai > .ns-field__input,
+    .row-edit-modal .row-edit-ctl--ai textarea.ns-field__input {
+      padding-left: 32px;
+    }
+    .row-edit-modal .row-edit-ctl--ai .libra-dp__field {
+      padding-left: 32px;
+    }
+    .row-edit-modal .row-edit-ctl--ai .aip-select {
+      padding-left: 32px;
+    }
+    .row-edit-modal .aip-select-wrap { display: block; width: 100%; }
+    .row-edit-modal .aip-select { width: 100%; height: 32px; font-size: 13px; }
+    /* AI 字段：输入控件 + 右侧「采用 AI 建议」勾选（对齐详情编辑） */
+    .row-edit-field__body {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .row-edit-field__body .row-edit-ctl {
+      flex: 1; min-width: 0;
+    }
+    .row-edit-modal .ai-accept-check {
+      margin-left: 0; flex-shrink: 0;
+    }
+    /* 状态行：标签左、自动计算开关右（标签同行），下拉在下方独占一行 */
+    .row-edit-status-head { display: flex; align-items: center; justify-content: space-between; }
+    .row-edit-status-head .ns-field__label { margin-bottom: 0; }
+    .row-edit-status-head { margin-bottom: 8px; }
+    .row-edit-modal .row-edit-status__auto.drawer-inline-note { flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fdd-ink); }
+    .row-edit-status .aip-select-wrap { display: block; width: 100%; }
+    /* 禁用下拉更明显：灰底 + 浅文字 + 禁止指针 */
+    .row-edit-modal .aip-select[disabled],
+    .row-edit-modal .aip-select-wrap.is-disabled .aip-select {
+      background: var(--fdd-bg-muted); color: var(--fdd-ink-3); border-color: var(--fdd-line);
+      cursor: not-allowed; opacity: 1;
+    }
+
+    /* —— 关联合同类型：下拉多选（触发器 + 搜索浮层 + 已选标签） —— */
+    .fm-msel { position: relative; }
+    .fm-msel__pop {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 140;
+      display: flex; flex-direction: column; padding: 6px;
+      border: 0.5px solid var(--libra-line, #e9eaea); border-radius: var(--libra-radius, 8px);
+      background: var(--libra-bg-layer, #fff); box-shadow: 0 4px 16px rgba(22, 26, 27, 0.09);
+      animation: libraSelectIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .fm-msel__pop[hidden] { display: none !important; }
+    .fm-msel__search { position: relative; margin-bottom: 4px; }
+    .fm-msel__search .aip-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--fdd-ink-3); pointer-events: none; }
+    .fm-msel__search input {
+      width: 100%; height: 34px; box-sizing: border-box; padding: 0 32px 0 12px;
+      border: 1px solid var(--fdd-line-strong); border-radius: var(--libra-radius, 8px);
+      background: #fff; color: var(--fdd-ink); font-size: 13px; font-family: inherit; outline: none;
+    }
+    .fm-msel__search input:focus { border-color: var(--fdd-brand); box-shadow: 0 0 0 2px rgba(0, 89, 239, 0.16); }
+    .fm-msel__list { max-height: 216px; overflow-y: auto; display: flex; flex-direction: column; }
+    .fm-msel__opt {
+      width: 100%; min-height: 34px; padding: 6px 8px; box-sizing: border-box;
+      display: flex; align-items: center; gap: 8px;
+      border: 0; border-radius: var(--libra-radius, 8px); background: transparent;
+      color: var(--libra-ink, #161a1b); font-size: 13px; font-family: inherit;
+      text-align: left; cursor: pointer; outline: none;
+    }
+    .fm-msel__opt:hover { background: var(--libra-bg-sunken, #f4f4f4); }
+    .fm-msel__opt input[type="checkbox"] { width: 15px; height: 15px; margin: 0; flex-shrink: 0; accent-color: var(--fdd-brand); cursor: pointer; }
+    .fm-msel__opt .opt-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 已存在/禁用项（如「已添加」字段）：置灰、不可点 */
+    .fm-msel__opt.is-disabled { color: var(--fdd-ink-3); cursor: default; }
+    .fm-msel__opt.is-disabled:hover { background: transparent; }
+    .fm-msel__opt .opt-mark { flex-shrink: 0; font-size: 12px; color: var(--fdd-ink-3); }
+    .fm-msel__empty { padding: 14px 8px; text-align: center; color: var(--fdd-ink-3); font-size: 13px; }
+    .fm-msel__foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--libra-line, #e9eaea); }
+    .fm-msel__foot button { height: 30px; padding: 0 14px; border: 0; border-radius: var(--libra-radius, 8px); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.12s ease; }
+    .fm-msel__reset { background: transparent; color: var(--libra-ink, #161a1b); }
+    .fm-msel__reset:hover { background: var(--libra-bg-sunken, #f4f4f4); }
+    .fm-msel__apply { background: var(--fdd-brand); color: #fff; }
+    .fm-msel__apply:hover { background: var(--fdd-brand-hover); }
+    /* 已选标签 */
+    .fm-msel__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .fm-msel__tags:empty { display: none; }
+    .fm-msel__tag {
+      display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 6px 0 10px;
+      border-radius: 6px; background: var(--libra-bg-sunken, #f4f4f4);
+      color: var(--fdd-ink); font-size: 12px; line-height: 1;
+    }
+    .fm-msel__tag button { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0; border: 0; background: transparent; color: var(--fdd-ink-3); cursor: pointer; border-radius: 4px; }
+    .fm-msel__tag button:hover { color: var(--fdd-ink); background: var(--libra-bg-hover, #e9eaea); }
+    /* 已存在项标签：不可移除，弱化展示 */
+    .fm-msel__tag.is-fixed { color: var(--fdd-ink-3); }
     .col-modal-item .col-name { flex: 1; font-size: 14px; color: var(--fdd-ink); }
     .col-modal-item .col-fixed-note { font-size: 12px; color: var(--fdd-ink-3); }
     .col-modal-drag {
@@ -1779,6 +1941,25 @@
       width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0;
       background: #fff; font-size: 14px; line-height: 19.6px;
     }
+    /* 协议库列表：固定布局 + px 列宽；表宽取 max(100%, 列宽之和)，超出时横向滚动 */
+    #contractTable {
+      table-layout: fixed;
+      width: 100%;
+      min-width: 100%;
+    }
+    #contractTable td, #contractTable th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 状态列双行（主状态 + 到期日期）：允许换行，避免被行高/nowrap 裁切 */
+    #contractTable td[data-col="status"] {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      vertical-align: middle;
+    }
+    #contractTable td[data-col="status"] .aip-lib-cell-text {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
     /* 表头纵向置顶，层级必须高于操作列 sticky，避免上下滚动时操作按钮盖过表头 */
     .envelope-table thead { position: sticky; top: 0; z-index: 5; background: #fff; }
     .envelope-table th,
@@ -1787,8 +1968,18 @@
       border-bottom: 1px solid var(--fdd-line);
       vertical-align: middle;
     }
+    #contractTable.envelope-table tbody td {
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
     .envelope-table thead tr { height: var(--fdd-table-head-h); }
+    /* 默认列表行高（合同类型/字段管理 sheet 等依赖此高度；勿全局改成 auto，否则 padding:0 时会塌陷） */
     .envelope-table tbody tr { height: var(--fdd-table-row-h); }
+    /* 协议库主表：状态双行需要自适应行高 */
+    #contractTable.envelope-table tbody tr {
+      height: auto;
+      min-height: var(--fdd-table-row-h);
+    }
     /* 行 hover：整行（含 sticky 操作列）统一浅底 */
     .envelope-table tbody tr { transition: background-color 0.12s; }
     .envelope-table tbody tr:hover td,
@@ -1798,9 +1989,21 @@
     .envelope-table th {
       font-weight: 500; color: var(--fdd-table-head-color, var(--fdd-ink)); background: #fff;
     }
-    /* 主列表首列是勾选框；勿全局套用，否则 sheet 列表首列表头会被挤成竖排 */
-    #contractTable.envelope-table th:first-child,
-    #contractTable.envelope-table td:first-child { width: 48px; min-width: 48px; }
+    /*
+     * 主列表勾选列（对齐全部任务 / aip-design-system .envelope-table--check）
+     * 仅挂在 #contractTable；勿套到 .sheet-wrap 内表（首列不是勾选）。
+     */
+    #contractTable.envelope-table--check th:first-child,
+    #contractTable.envelope-table--check td:first-child {
+      width: 48px; min-width: 48px;
+      padding-left: 20px; padding-right: 8px;
+    }
+    #contractTable.envelope-table--check th:first-child input[type="checkbox"],
+    #contractTable.envelope-table--check td:first-child input[type="checkbox"] {
+      width: 16px; height: 16px; margin: 0;
+      accent-color: var(--fdd-brand);
+      cursor: pointer; vertical-align: middle;
+    }
     /*
      * 操作列 sticky：左侧立面用 ::before。
      * 注意：tbody td 默认 overflow:hidden 会裁掉伸出的 ::before，故操作列必须 visible，
@@ -1814,6 +2017,16 @@
       box-shadow: none;
       overflow: visible;
     }
+    /* 协议库：仅保留「更多」三点，列宽收窄；ID 选择器盖过 #contractTable td 的 overflow:hidden，避免裁切投影 */
+    #contractTable.envelope-table th:last-child,
+    #contractTable.envelope-table td:last-child {
+      width: 64px; min-width: 64px; max-width: 72px;
+      overflow: visible;
+      text-overflow: clip;
+      padding-left: 8px;
+      padding-right: 12px;
+    }
+    #contractTable .more-button { margin-left: 0; }
     .envelope-table td:last-child { z-index: 1; }
     .envelope-table th:last-child {
       z-index: 6;
@@ -1920,13 +2133,29 @@
     }
     .col-settings-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
 
-    .more-wrap { position: relative; }
+    .more-wrap { position: relative; display: inline-flex; }
+    /* 列表「更多」图标按钮：圆角矩形悬停底（对齐 folder-node-more / 规范 icon 强悬停） */
     .more-button {
       width: 32px; height: 32px; margin-left: 4px;
       display: inline-grid; place-items: center;
       border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink);
+      cursor: pointer;
+      transition: background-color 0.12s ease, color 0.12s ease;
     }
-    .more-button:hover { background: var(--fdd-bg-hover); }
+    .more-button:hover,
+    .more-button[aria-expanded="true"] {
+      background: var(--fdd-bg-hover-strong, #e8ebef);
+      color: var(--fdd-ink);
+    }
+    .more-button:focus-visible {
+      outline: 2px solid var(--fdd-brand-soft, rgba(0, 89, 239, 0.28));
+      outline-offset: 0;
+    }
+    /* 行已悬停时同色会看不出，操作列内再加深一档 */
+    .envelope-table tbody tr:hover .more-button:hover,
+    .envelope-table tbody tr:hover .more-button[aria-expanded="true"] {
+      background: #dde1e6;
+    }
     .row-menu {
       position: fixed; z-index: 90;
       width: max-content; min-width: 0; max-width: min(240px, calc(100vw - 24px)); padding: 4px;
@@ -2246,7 +2475,7 @@
     html[data-shell="libra"] .party-dialog-table input { accent-color: var(--fdd-brand); }
     html[data-shell="libra"] .ns-modal__foot .btn-ghost { background: #f3f5f8; }
     html[data-shell="libra"] .ns-modal__foot .btn-ghost:hover { background: #e8ebef; }
-    html[data-shell="libra"] .batch-bar {
+    html[data-shell="libra"] .batch-bar.is-on {
       background: #fff;
       border-color: #e6e9ee;
       border-radius: 10px;
@@ -2520,7 +2749,7 @@
     }
 
     /* 顶部切换 + 操作行 */
-    .lib-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .lib-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 40px; margin-bottom: 24px; }
     .lib-switch {
       display: inline-flex; padding: 2px; gap: 2px;
       background: #f3f5f8; border-radius: 8px;
@@ -2641,14 +2870,30 @@
       width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent;
       color: var(--fdd-ink-3); display: inline-grid; place-items: center; cursor: pointer; opacity: 0;
       flex-shrink: 0;
+      /* 不占文档流宽度，避免常态把日期/主体挤成省略号 */
+      position: absolute; right: 0; top: 50%; transform: translateY(-50%);
     }
     .envelope-table td:hover .aip-lib-cell-edit { opacity: 1; }
     .aip-lib-cell-edit:hover { background: var(--fdd-brand-soft); color: var(--fdd-brand); }
     .aip-lib-cell-with-edit {
+      position: relative;
       display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
-      min-width: 0;
+      min-width: 0; width: 100%;
+      padding-right: 0;
     }
-    .aip-lib-cell-with-edit > span {
+    .envelope-table td:hover .aip-lib-cell-with-edit { padding-right: 28px; }
+    .aip-lib-cell-text {
+      display: block;
+      min-width: 0; max-width: 100%; width: 100%;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    /* AI 淡紫标签自行做省略号，避免外层再硬裁切 */
+    .aip-lib-cell-text:has(.ai-cell) {
+      overflow: visible;
+      text-overflow: clip;
+    }
+    .aip-lib-cell-text .ai-cell { width: 100%; max-width: 100%; }
+    .aip-lib-cell-with-edit > span:not(.aip-lib-cell-text) {
       min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .aip-lib-tag {
@@ -2664,6 +2909,18 @@
     .aip-lib-tag--blue { color: var(--fdd-brand); }
     .aip-lib-tag + .aip-lib-tag { margin-left: 4px; }
     .aip-lib-tag-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 5px; }
+    /* 生效中状态：主标签 + 下方弱化到期日期（与状态文字左对齐，避开圆点） */
+    .aip-lib-status {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+      min-width: 0; max-width: 100%;
+    }
+    .aip-lib-status__expiry {
+      margin-left: 11px;
+      max-width: calc(100% - 11px);
+      font-size: 12px; line-height: 18px; font-weight: 400;
+      color: var(--fdd-ink-3);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .empty-cell { color: var(--fdd-ink-3); }
     /* 弹层内列表也走 envelope-table 时，限制高度即可 */
     .ns-modal .envelope-table-shell,
@@ -2695,7 +2952,7 @@
       position: fixed; inset: 0; z-index: 80;
       display: flex; flex-direction: column;
       box-sizing: border-box;
-      padding: 6px 10px 24px 8px;
+      padding: 6px 10px 6px 8px;
       background: var(--libra-bg-sunken);
     }
     /* 唯一外层白卡：头栏 + 双栏内容都在卡内，不再拆多张浮卡 */
@@ -2758,6 +3015,9 @@
       padding: 0; box-sizing: border-box;
     }
     .drawer-body { flex: 1; min-height: 0; display: flex; }
+    /* 信息面板在左、文档预览在右（视觉上左右对调，DOM 不变） */
+    .detail-page .drawer-body .info-pane { order: 0; border-right: 0.5px solid var(--libra-line); }
+    .detail-page .drawer-body .pdf-pane { order: 1; border-right: 0; }
     /* 左：文档预览区（大卡内分栏，无独立卡片边框） */
     .detail-page .pdf-pane {
       position: relative;
@@ -2919,27 +3179,55 @@
       pointer-events: auto;
     }
     .pdf-page-nav__trigger {
-      height: 28px; min-width: 72px; padding: 0 8px 0 10px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      height: 28px; min-width: 72px; padding: 0 4px 0 8px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 2px;
       border: 0.5px solid var(--libra-line, #e9eaea);
       border-radius: 8px;
       background: var(--libra-bg-layer, #fff);
       box-shadow: 0 1px 4px rgba(22, 26, 27, 0.1);
       color: var(--libra-ink, #161a1b);
       font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums;
-      cursor: pointer;
       transition: background-color 0.15s, border-color 0.15s;
     }
     .pdf-page-nav__trigger:hover,
-    .pdf-page-nav__trigger[aria-expanded="true"] {
+    .pdf-page-nav__trigger:focus-within,
+    .pdf-page-nav__trigger:has(.pdf-page-nav__caret-btn[aria-expanded="true"]) {
       background: var(--libra-bg-sunken, #f4f4f4);
     }
+    .pdf-page-nav__input {
+      width: 1.6em; min-width: 1.2em; max-width: 3em;
+      height: 20px; margin: 0; padding: 0 2px;
+      border: 0; border-radius: 4px;
+      background: transparent;
+      color: inherit; font: inherit; font-variant-numeric: tabular-nums;
+      text-align: right; outline: none;
+      -moz-appearance: textfield;
+    }
+    .pdf-page-nav__input::-webkit-outer-spin-button,
+    .pdf-page-nav__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .pdf-page-nav__input:focus {
+      background: var(--libra-bg-layer, #fff);
+      box-shadow: 0 0 0 1.5px var(--fdd-brand, #0059ef);
+    }
+    .pdf-page-nav__total {
+      color: var(--libra-ink-2, #57514b);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .pdf-page-nav__caret-btn {
+      width: 22px; height: 22px; margin: 0; padding: 0;
+      display: inline-grid; place-items: center;
+      border: 0; border-radius: 6px;
+      background: transparent; color: inherit;
+      cursor: pointer;
+    }
+    .pdf-page-nav__caret-btn:hover { background: rgba(22, 26, 27, 0.06); }
     .pdf-page-nav__caret {
       color: var(--libra-ink-2, #57514b);
       flex-shrink: 0;
       transition: transform 0.15s;
     }
-    .pdf-page-nav__trigger[aria-expanded="true"] .pdf-page-nav__caret {
+    .pdf-page-nav__caret-btn[aria-expanded="true"] .pdf-page-nav__caret {
       transform: rotate(180deg);
     }
     .pdf-page-nav__menu {
@@ -3138,6 +3426,11 @@
     .switch .slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; border-radius: 50%; background: #fff; transition: .2s; }
     .switch input:checked + .slider { background: var(--fdd-brand); }
     .switch input:checked + .slider::before { transform: translateX(16px); }
+    /* 小号开关：用于表单行内「自动计算」等次要控件 */
+    .switch--sm { width: 28px; height: 16px; }
+    .switch--sm .slider { border-radius: 16px; }
+    .switch--sm .slider::before { width: 12px; height: 12px; left: 2px; top: 2px; }
+    .switch--sm input:checked + .slider::before { transform: translateX(12px); }
 
     /* 上传弹窗 */
     .upload-drop {
@@ -3170,7 +3463,7 @@
     .sheet-mask {
       position: fixed; inset: 0; z-index: 90;
       display: flex; flex-direction: column; box-sizing: border-box;
-      padding: 6px 10px 24px 8px;
+      padding: 6px 10px 6px 8px;
       background: #f3f5f8;
     }
     /* 唯一外层白卡：头栏 + 内容都在卡内 */
@@ -3252,6 +3545,26 @@
       min-width: 120px;
       white-space: nowrap;
     }
+    /* sheet 内表：保证单元格纵向内边距，避免被主表样式波及后视觉塌陷 */
+    .sheet-wrap .envelope-table th,
+    .sheet-wrap .envelope-table td {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+    .sheet-wrap .envelope-table tbody tr {
+      height: auto;
+      min-height: 72px;
+    }
+    /* 合同类型行：类型名称 + 字段数副标题（对齐 DocuSign 类型列表） */
+    .sheet-wrap .envelope-table td:first-child { white-space: normal; }
+    .type-row__sub {
+      display: block; margin-top: 2px;
+      font-size: 13px; font-weight: 400; color: var(--fdd-brand);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    /* 整行 hover 可点击：变色 + 指针（操作列除外） */
+    .sheet-wrap .envelope-table tbody tr.type-row { cursor: pointer; }
+    .sheet-wrap .envelope-table tbody tr.type-row:hover td { background: var(--fdd-bg-hover); }
     .sheet-wrap .envelope-table th.col-actions-w200,
     .sheet-wrap .envelope-table td:last-child:has(.row-actions) {
       width: 200px;
@@ -3341,6 +3654,35 @@
     /* 工具类：危险文字 / 辅助说明 / 弹窗宽度变体 / 表格操作列宽 */
     .is-danger { color: var(--fdd-danger) !important; }
     .cell-aux { color: var(--fdd-ink-3); font-size: 12px; }
+    /* 创建人单元格：由 [logo/图标] 创建 */
+    .cell-creator {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 13px; line-height: 20px; color: var(--fdd-ink-2);
+      white-space: nowrap;
+    }
+    .cell-creator__logo {
+      height: 16px; width: auto; object-fit: contain; display: block;
+      vertical-align: middle;
+    }
+    .cell-creator .aip-icon { color: var(--fdd-ink-2); flex-shrink: 0; }
+    /* 字段名称单元格：数据类型图标 + 名称（图标略放大并轻微加粗） */
+    .field-name-cell { display: inline-flex; align-items: center; gap: 10px; }
+    .field-name-cell .field-type-icon,
+    .field-type-icon.aip-icon {
+      width: 20px; height: 20px; font-size: 20px;
+      color: var(--fdd-ink); flex-shrink: 0;
+    }
+    .field-name-cell .field-type-icon .aip-icon__svg,
+    .field-type-icon .aip-icon__svg {
+      width: 20px; height: 20px;
+      /* SVG 作为 img 时用微投影模拟加粗描边 */
+      filter:
+        drop-shadow(0.35px 0 0 currentColor)
+        drop-shadow(-0.35px 0 0 currentColor)
+        drop-shadow(0 0.35px 0 currentColor)
+        drop-shadow(0 -0.35px 0 currentColor);
+      opacity: 0.9;
+    }
     .cell-sub-note { font-size: 12px; color: var(--fdd-ink-3); margin-top: 3px; }
     .ns-field__hint { font-size: 12px; color: var(--fdd-ink-3); margin-top: 4px; }
     .ns-modal--sm { width: 440px; }
@@ -3429,20 +3771,49 @@
     .sheet-mask ~ .ns-modal-mask, body > .ns-modal-mask { z-index: 100; }
 
     /* —— 0.2 AI 合同信息提取：单元格待确认/来源标识 —— */
-    .ai-cell { display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; padding: 1px 5px; margin: -1px -5px; }
+    .ai-cell {
+      display: inline-flex; align-items: center; gap: 4px; border-radius: 4px;
+      padding: 1px 5px; margin: -1px -5px;
+      max-width: 100%; min-width: 0; box-sizing: border-box;
+    }
     /* 待确认淡紫底块：给 4px 外边距，避免贴住单元格边缘像 bug */
     .ai-cell--pending { background: #f1eafe; color: var(--fdd-ink); cursor: pointer; margin: 4px; padding: 1px 5px; }
     .ai-cell--pending:hover { background: #e7dbfd; }
-    .ai-cell__spark { color: #8b5cf6; flex-shrink: 0; }
+    .ai-cell__spark {
+      color: #7c3aed; flex-shrink: 0;
+      width: 14px; height: 14px;
+    }
+    .ai-review-bar__spark {
+      color: #7c3aed; flex-shrink: 0;
+      width: 13px; height: 13px;
+    }
+    .ai-cell__text {
+      min-width: 0; flex: 1 1 auto;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .ai-cell--confirmed, .ai-cell--manual { background: transparent; color: var(--fdd-ink); }
 
     /* —— 0.2 AI 复核栏 —— */
     .ai-review-bar {
       position: relative;
-      margin-bottom: 12px; padding: 12px 14px;
-      background: #f7f4fe; border: 1px solid #e7dbfd; border-radius: 10px;
+      margin: 4px 0 12px; padding: 0;
+      background: transparent; border: 0; border-radius: 0;
     }
+    /* 「详情」标题行（编辑按钮在最右） */
+    .info-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .info-detail-head__title { margin: 0; font-size: 20px; font-weight: 600; color: var(--fdd-ink); line-height: 28px; }
+    .info-detail-head__actions { display: inline-flex; align-items: center; gap: 4px; }
+    .info-detail-head__actions .icon-btn { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2); cursor: pointer; }
+    .info-detail-head__actions .icon-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    /* AI 识别块（图2 DocuSign：徽标 + 描述 + 去核对） */
+    .ai-assisted-badge { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px; background: #f1eafe; color: #7c3aed; font-size: 12px; font-weight: 500; }
+    .ai-review-bar__desc { margin: 0 0 10px; font-size: 13px; line-height: 1.6; color: var(--fdd-ink); }
+    .ai-review-bar__desc b { font-weight: 600; }
+    .ai-review-bar__stage { display: block; margin-top: 2px; font-size: 12px; color: var(--fdd-ink-3); }
+    /* 标题区与内容区分割线 */
+    .info-detail-divider { height: 0; border-top: 1px solid var(--fdd-line); margin: 12px 0 14px; }
     .ai-review-bar__close {
+      position: absolute; top: 0; right: 0;
       flex-shrink: 0;
       width: 24px; height: 24px; padding: 0;
       display: inline-grid; place-items: center;
@@ -3579,10 +3950,6 @@
       </nav>
     </div>
     <div class="header-right">
-      <button class="btn-upgrade" type="button">升级</button>
-      <button class="icon-btn" type="button" aria-label="搜索">
-        <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="m22 20.66-5.72-5.72A7.96 7.96 0 0 0 18 10c0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8a7.9 7.9 0 0 0 4.94-1.72L20.66 22zM10 16.1c-3.36 0-6.1-2.74-6.1-6.1S6.64 3.9 10 3.9s6.1 2.74 6.1 6.1-2.74 6.1-6.1 6.1"/></svg>
-      </button>
       <button class="icon-btn" type="button" aria-label="任务">
         <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4.43 10.77 2 8.34 3.34 7 5 8.66 8.66 5 10 6.34l-4.43 4.43c-.16.16-.37.23-.57.23s-.41-.07-.57-.23M22 7H12v2h10zM5 19c.21 0 .41-.07.57-.23L10 14.34 8.66 13 5 16.66 3.34 15 2 16.34l2.43 2.43c.16.16.37.23.57.23m17-4H12v2h10z"/></svg>
       </button>
@@ -3776,9 +4143,9 @@
             <span class="aip-lib-filter-sep-applied" id="filterSepApplied" aria-hidden="true"></span>
             <div class="filter-triggers" id="filterTriggers">
               <!-- 筛选字段由 JS 渲染；「筛选条件」折叠按钮须在本容器内以吃到 gap:8px（对齐全部任务） -->
-              <button class="filter-trigger filter-collapse-btn" type="button" id="filterCollapseBtn" aria-haspopup="dialog" hidden>
+              <button class="filter-trigger filter-collapse-btn" type="button" id="filterCollapseBtn" aria-haspopup="dialog">
                 <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.18V2H6v3.18A2.996 2.996 0 0 0 7 11c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82M7 9.1c-.61 0-1.1-.49-1.1-1.1S6.39 6.9 7 6.9s1.1.49 1.1 1.1S7.61 9.1 7 9.1m9 2.9c0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.3.84 2.4 2 2.82V18h2v-3.18c1.16-.41 2-1.51 2-2.82m-3 1.1c-.61 0-1.1-.49-1.1-1.1s.49-1.1 1.1-1.1 1.1.49 1.1 1.1-.49 1.1-1.1 1.1M8 18H6v-6h2zm6-10h-2V2h2z"/></svg>
-                筛选条件 <b id="filterCollapseCount" hidden></b>
+                筛选条件 <b class="filter-collapse-count" id="filterCollapseCount" hidden></b>
               </button>
             </div>
           </div>
@@ -3794,13 +4161,13 @@
           <div class="batch-bar__actions">
             <button type="button" class="batch-btn" id="batchDownload">下载</button>
             <button type="button" class="batch-btn" id="batchRemove">移除</button>
-            <button type="button" class="batch-btn" id="batchClear">清除选择</button>
           </div>
         </div>
 
         <!-- 表格：复用全部任务 envelope-table 骨架 -->
         <div class="envelope-table-shell" id="contractTableShell">
-          <table class="envelope-table" id="contractTable">
+          <table class="envelope-table envelope-table--check" id="contractTable">
+            <colgroup id="contractColgroup"></colgroup>
             <thead id="contractHead"></thead>
             <tbody id="contractBody"></tbody>
           </table>
@@ -4005,7 +4372,7 @@
   </div>
 
   <script src="assets/components/fdd-home/home-mount.js"></script>
-  <script src="contract-library.js?v=20260917as"></script>
+  <script src="contract-library.js?v=20260918x"></script>
   <script>
     /**
      * @typedef {{id:string,subject:string,parties:string,statusKey:string,statusText:string,progress:number,date:string,time:string,action:string}} TaskRow
@@ -4992,7 +5359,8 @@
       /* 去掉旧版「已应用按钮」分隔线残留 */
       document.getElementById('filterSepApplied')?.remove();
 
-      requestAnimationFrame(() => updateFilterCollapse());
+      /* 同步重算折叠（上面已重置 is-collapsed），避免异步时序抖动 */
+      updateFilterCollapse();
     }
 
     /**
@@ -5001,6 +5369,9 @@
      * 徽标 = 被收纳的下拉数 + 被收纳的 chip 数。
      */
     function updateFilterCollapse() {
+      /* 合同库页由 contract-library.js 全权接管筛选折叠与角标（真源 listState.filters），
+         骨架这套按宽度折叠 + activeFilters 角标在合同库会覆盖数字、导致角标空白，直接跳过。 */
+      if (document.getElementById('contractBody')) return;
       const collapseBtn = document.getElementById('filterCollapseBtn');
       const search = document.querySelector('.envelope-search');
       const controls = document.querySelector('.envelope-controls');
@@ -5074,45 +5445,15 @@
         sep.classList.toggle('is-on', stillOpen && visibleChips);
       };
 
-      const budget = measureBudget();
-      let collapsedFields = 0;
-      let collapsedChips = 0;
-
-      /* ① 先收未应用下拉（从右往左） */
-      for (let i = fields.length - 1; i >= 0 && usedWidth() > budget; i--) {
-        if (fields[i].classList.contains('is-collapsed')) continue;
-        fields[i].classList.add('is-collapsed');
-        collapsedFields++;
-        syncSep();
-      }
-
-      /* ② 再收「清除所有」（弹窗内已有全部清除） */
-      if (clearAll && !clearAll.hidden && usedWidth() > budget) {
-        clearAll.classList.add('is-collapsed');
-      }
-
-      /* ③ 最后收已应用 chip（从右往左） */
-      for (let i = chips.length - 1; i >= 0 && usedWidth() > budget; i--) {
-        if (chips[i].classList.contains('is-collapsed')) continue;
-        chips[i].classList.add('is-collapsed');
-        collapsedChips++;
-        syncSep();
-      }
-      if (chipsBox && chips.length > 0 && chips.every((c) => c.classList.contains('is-collapsed'))) {
-        chipsBox.classList.add('is-fully-collapsed');
-        if (sep) sep.classList.remove('is-on');
-      }
-
-      /* 仍溢出则强制隐藏清除所有，避免竖排挤爆 */
-      if (clearAll && !clearAll.hidden && usedWidth() > budget) {
-        clearAll.classList.add('is-collapsed');
-      }
-
+      /* 协议库：默认把未应用的筛选项全部收进「筛选条件」按钮；已应用条件以 chip 留在行内。
+         按钮角标 = 当前已应用的筛选条件数量（无应用时隐藏）。 */
+      fields.forEach((f) => f.classList.add('is-collapsed'));
+      syncSep();
+      const appliedCount = Object.values(activeFilters).filter(Boolean).length;
       const cb = document.getElementById('filterCollapseCount');
       if (cb) {
-        const badge = collapsedFields + collapsedChips;
-        cb.hidden = badge === 0;
-        cb.textContent = badge ? String(badge) : '';
+        cb.hidden = appliedCount === 0;
+        cb.textContent = appliedCount > 0 ? String(appliedCount) : '';
         cb.style.fontWeight = '600';
       }
     }
@@ -5992,27 +6333,75 @@
       syncSidebarActive();
     }
 
-    /** 发起签署：hover 展开原菜单分支（PRD 2.4：直接 / 模板 / 批量创建） */
+    /** 发起签署：悬停延迟展开，避免路过时挡住下方草稿等入口（PRD 2.4） */
     (function bindLaunchMenu() {
       const wrap = document.getElementById('launchWrap');
       const btn = document.getElementById('launchBtn');
       if (!wrap || !btn) return;
-      /* 键盘 / 触屏：点击按钮切换菜单；hover 由 CSS 处理 */
+      /** @type {number} */
+      let openTimer = 0;
+      /** @type {number} */
+      let closeTimer = 0;
+      const OPEN_DELAY = 280;
+      const CLOSE_DELAY = 160;
+
+      /**
+       * 同步展开态与 aria。
+       * @param {boolean} open
+       */
+      function setExpanded(open) {
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      function clearTimers() {
+        window.clearTimeout(openTimer);
+        window.clearTimeout(closeTimer);
+        openTimer = 0;
+        closeTimer = 0;
+      }
+
+      function openByHover() {
+        wrap.classList.add('is-hover');
+        setExpanded(true);
+      }
+
+      function closeByHover() {
+        wrap.classList.remove('is-hover');
+        if (!wrap.classList.contains('is-open')) setExpanded(false);
+      }
+
+      wrap.addEventListener('mouseenter', () => {
+        window.clearTimeout(closeTimer);
+        closeTimer = 0;
+        if (wrap.classList.contains('is-open') || wrap.classList.contains('is-hover')) return;
+        openTimer = window.setTimeout(openByHover, OPEN_DELAY);
+      });
+      wrap.addEventListener('mouseleave', () => {
+        window.clearTimeout(openTimer);
+        openTimer = 0;
+        closeTimer = window.setTimeout(closeByHover, CLOSE_DELAY);
+      });
+
+      /* 键盘 / 触屏：点击按钮切换菜单 */
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        clearTimers();
+        wrap.classList.remove('is-hover');
         const open = wrap.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        setExpanded(open);
       });
       document.addEventListener('click', (e) => {
         if (!wrap.contains(/** @type {Node} */ (e.target))) {
-          wrap.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
         }
       });
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          wrap.classList.remove('is-open');
-          btn.setAttribute('aria-expanded', 'false');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
           btn.focus();
         }
       });
@@ -6024,7 +6413,9 @@
       };
       wrap.querySelectorAll('[data-launch]').forEach((item) => {
         item.addEventListener('click', () => {
-          wrap.classList.remove('is-open');
+          clearTimers();
+          wrap.classList.remove('is-open', 'is-hover');
+          setExpanded(false);
           const key = item.getAttribute('data-launch');
           toast(`演示：${LEGACY_LAUNCH[key] || '原有发起流程'}`);
           openLegacy('launch');

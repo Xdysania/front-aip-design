@@ -7,48 +7,48 @@
 
   /* ================= 数据 ================= */
 
-  // 合同类型（FIELD-AIP-029 合同类型分类固定枚举）
-  const TYPE_CATEGORIES = ['销售类', '采购类', '人事类', '财务类', '行政类', '其他'];
-  // 字段分类（FIELD-AIP-034 固定枚举）
-  const FIELD_CATEGORIES = ['基本信息', '金额信息', '日期信息', '主体信息', '其他信息'];
+  // 合同类型（FIELD-AIP-029 固定枚举，对齐 Category：General / Termination / Renewal / Payment / Legal and Compliance / Other）
+  const TYPE_CATEGORIES = ['通用', '终止', '续约', '付款', '法律与合规', '其他'];
+  // 字段分类（协议字段分类固定枚举：00 通用 / 10 终止 / 20 续约 / 30 付款 / 40 法律与合规 / 99 其他）
+  const FIELD_CATEGORIES = ['通用', '终止', '续约', '付款', '法律与合规', '其他'];
 
   const contractTypes = [
-    { id: 't-labor', name: '劳动合同', category: '人事类', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 18 },
-    { id: 't-sales', name: '销售合同', category: '销售类', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz', 'f-region'], fileCount: 42 },
-    { id: 't-purchase', name: '采购合同', category: '采购类', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 26 },
-    { id: 't-nda', name: '保密协议', category: '其他', source: 'system', fields: ['f-name', 'f-party', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 9 },
+    { id: 't-general', name: '通用', category: '通用', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz', 'f-region'], fileCount: 40 },
+    { id: 't-termination', name: '终止', category: '终止', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 8 },
+    { id: 't-renewal', name: '续约', category: '续约', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz', 'f-period'], fileCount: 18 },
+    { id: 't-payment', name: '付款', category: '付款', source: 'system', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 26 },
+    { id: 't-legal', name: '法律与合规', category: '法律与合规', source: 'system', fields: ['f-name', 'f-party', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 12 },
     { id: 't-other', name: '其他', category: '其他', source: 'system', fixed: true, fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz'], fileCount: 7 },
-    { id: 't-outsourcing', name: '外包服务协议', category: '采购类', source: 'custom', fields: ['f-name', 'f-party', 'f-amount', 'f-sign', 'f-effective', 'f-expiry', 'f-biz', 'f-period'], fileCount: 12 },
   ];
 
   // 字段库（7 个基础标准字段对所有类型默认关联且不可移除）
   const fieldDefs = [
-    { id: 'f-name', name: '合同名称', type: 'text', category: '基本信息', source: 'system', base: true },
-    { id: 'f-party', name: '签约主体', type: 'party', category: '主体信息', source: 'system', base: true },
-    { id: 'f-amount', name: '合同总金额', type: 'money', category: '金额信息', source: 'system', base: true },
-    { id: 'f-sign', name: '签署时间', type: 'date', category: '日期信息', source: 'system', base: true },
-    { id: 'f-effective', name: '生效日', type: 'date', category: '日期信息', source: 'system', base: true },
-    { id: 'f-expiry', name: '到期日', type: 'date', category: '日期信息', source: 'system', base: true },
-    { id: 'f-biz', name: '业务条线', type: 'select', category: '基本信息', source: 'system', base: true, options: ['人力资源', '销售', '采购', '未指定'] },
-    { id: 'f-region', name: '销售区域', type: 'select', category: '其他信息', source: 'custom', options: ['华东', '华南', '华北', '西南'] },
-    { id: 'f-period', name: '服务周期', type: 'text', category: '其他信息', source: 'custom' },
-    { id: 'f-owner', name: '负责人', type: 'text', category: '主体信息', source: 'custom' },
+    { id: 'f-name', name: '合同名称', type: 'text', category: '通用', source: 'system', base: true },
+    { id: 'f-party', name: '签约主体', type: 'party', category: '通用', source: 'system', base: true },
+    { id: 'f-amount', name: '合同总金额', type: 'money', category: '付款', source: 'system', base: true },
+    { id: 'f-sign', name: '签署时间', type: 'date', category: '通用', source: 'system', base: true },
+    { id: 'f-effective', name: '生效日', type: 'date', category: '通用', source: 'system', base: true },
+    { id: 'f-expiry', name: '到期日', type: 'date', category: '续约', source: 'system', base: true },
+    { id: 'f-biz', name: '业务条线', type: 'select', category: '通用', source: 'system', base: true, options: ['人力资源', '销售', '采购', '未指定'] },
+    { id: 'f-region', name: '销售区域', type: 'select', category: '法律与合规', source: 'custom', options: ['华东', '华南', '华北', '西南'] },
+    { id: 'f-period', name: '服务周期', type: 'text', category: '续约', source: 'custom' },
+    { id: 'f-owner', name: '负责人', type: 'text', category: '通用', source: 'custom' },
   ];
 
   // 合同记录
   let seq = 100;
   const nid = () => 'c' + (seq++);
   const contracts = [
-    { id: nid(), name: '2026年度软件采购合同-杭州xx科技', typeId: 't-purchase', statusAuto: true, statusMain: '', statusSub: '', parties: ['杭州xx科技有限公司', '法大大'], amount: 860000.00, signDate: '2026-09-02', effectiveDate: '2026-09-10', expiryDate: '2027-09-09', biz: '采购', source: 'fasc', sourceTask: '软件采购合同签署', sourceTaskId: 'EN202609020018', attachments: [{ name: '报价单.pdf' }, { name: '技术规格书.pdf' }], createdAt: '2026-09-02 18:22', archivedAt: '2026-09-02 18:30', creator: '肖德平', custom: {} },
-    { id: nid(), name: '劳动合同-陈晓（2026续签）', typeId: 't-labor', statusAuto: true, statusMain: '', statusSub: '', parties: ['陈晓', '法大大'], amount: null, signDate: '2026-08-28', effectiveDate: '2026-10-01', expiryDate: '2029-09-30', biz: '人力资源', source: 'fasc', sourceTask: '陈晓劳动合同续签', sourceTaskId: 'EN202608280102', attachments: [], createdAt: '2026-08-28 14:05', archivedAt: '2026-08-28 14:10', creator: '郭靖宇', custom: {} },
-    { id: nid(), name: '渠道合作协议-深圳xx网络', typeId: 't-sales', statusAuto: true, statusMain: '', statusSub: '', parties: ['深圳xx网络有限公司', '法大大'], amount: 1200000.00, signDate: '2026-08-15', effectiveDate: '2026-09-01', expiryDate: '2026-12-31', biz: '销售', source: 'fasc', sourceTask: '渠道合作协议签署', sourceTaskId: 'EN202608150077', attachments: [{ name: '渠道政策附件.pdf' }], createdAt: '2026-08-15 11:42', archivedAt: '2026-08-15 11:50', creator: '郭靖宇', custom: { 'f-region': '华南' } },
+    { id: nid(), name: '2026年度软件采购合同-杭州xx科技', typeId: 't-payment', statusAuto: true, statusMain: '', statusSub: '', parties: ['杭州xx科技有限公司', '法大大'], amount: 860000.00, signDate: '2026-09-02', effectiveDate: '2026-09-10', expiryDate: '2027-09-09', biz: '采购', source: 'fasc', sourceTask: '软件采购合同签署', sourceTaskId: 'EN202609020018', attachments: [{ name: '报价单.pdf' }, { name: '技术规格书.pdf' }], createdAt: '2026-09-02 18:22', archivedAt: '2026-09-02 18:30', creator: '肖德平', custom: {} },
+    { id: nid(), name: '劳动合同-陈晓（2026续签）', typeId: 't-renewal', statusAuto: true, statusMain: '', statusSub: '', parties: ['陈晓', '法大大'], amount: null, signDate: '2026-08-28', effectiveDate: '2026-10-01', expiryDate: '2029-09-30', biz: '人力资源', source: 'fasc', sourceTask: '陈晓劳动合同续签', sourceTaskId: 'EN202608280102', attachments: [], createdAt: '2026-08-28 14:05', archivedAt: '2026-08-28 14:10', creator: '郭靖宇', custom: {} },
+    { id: nid(), name: '渠道合作协议-深圳xx网络', typeId: 't-general', statusAuto: true, statusMain: '', statusSub: '', parties: ['深圳xx网络有限公司', '法大大'], amount: 1200000.00, signDate: '2026-08-15', effectiveDate: '2026-09-01', expiryDate: '2026-12-31', biz: '销售', source: 'fasc', sourceTask: '渠道合作协议签署', sourceTaskId: 'EN202608150077', attachments: [{ name: '渠道政策附件.pdf' }], createdAt: '2026-08-15 11:42', archivedAt: '2026-08-15 11:50', creator: '郭靖宇', custom: { 'f-region': '华南' } },
     { id: nid(), name: '办公场地租赁合同扫描件.pdf', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '未指定', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:26', creator: '肖德平', scanned: true, custom: {} },
-    { id: nid(), name: '保密协议-外部顾问李某某', typeId: 't-nda', statusAuto: true, statusMain: '', statusSub: '', parties: ['李某某', '法大大'], amount: null, signDate: '2026-07-20', effectiveDate: '2026-07-20', expiryDate: '2028-07-19', biz: '未指定', source: 'fasc', sourceTask: '顾问保密协议签署', sourceTaskId: 'EN202607200033', attachments: [], createdAt: '2026-07-20 09:18', archivedAt: '2026-07-20 09:25', creator: '敖日根勒', custom: {} },
-    { id: nid(), name: '运维外包服务协议-上海xx信息', typeId: 't-outsourcing', statusAuto: false, statusMain: '生效中', statusSub: '', parties: ['上海xx信息技术有限公司', '法大大'], amount: 450000.00, signDate: '2026-06-30', effectiveDate: '2026-07-01', expiryDate: '2027-06-30', biz: '采购', source: 'fasc', sourceTask: '运维外包协议签署', sourceTaskId: 'EN202606300091', attachments: [{ name: 'SLA 附件.pdf' }], createdAt: '2026-06-30 17:40', archivedAt: '2026-06-30 17:48', creator: '郭靖宇', custom: { 'f-period': '12 个月' } },
-    { id: nid(), name: '旧版代理协议（已终止）.docx', typeId: 't-sales', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '销售', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:27', creator: '肖德平', custom: { 'f-region': '华东' } },
+    { id: nid(), name: '保密协议-外部顾问李某某', typeId: 't-legal', statusAuto: true, statusMain: '', statusSub: '', parties: ['李某某', '法大大'], amount: null, signDate: '2026-07-20', effectiveDate: '2026-07-20', expiryDate: '2028-07-19', biz: '未指定', source: 'fasc', sourceTask: '顾问保密协议签署', sourceTaskId: 'EN202607200033', attachments: [], createdAt: '2026-07-20 09:18', archivedAt: '2026-07-20 09:25', creator: '敖日根勒', custom: {} },
+    { id: nid(), name: '运维外包服务协议-上海xx信息', typeId: 't-general', statusAuto: false, statusMain: '生效中', statusSub: '', parties: ['上海xx信息技术有限公司', '法大大'], amount: 450000.00, signDate: '2026-06-30', effectiveDate: '2026-07-01', expiryDate: '2027-06-30', biz: '采购', source: 'fasc', sourceTask: '运维外包协议签署', sourceTaskId: 'EN202606300091', attachments: [{ name: 'SLA 附件.pdf' }], createdAt: '2026-06-30 17:40', archivedAt: '2026-06-30 17:48', creator: '郭靖宇', custom: { 'f-period': '12 个月' } },
+    { id: nid(), name: '旧版代理协议（已终止）.docx', typeId: 't-termination', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '销售', source: 'upload', sourceUpload: 'Upload-3-2026-9-10_152014', sourceUploadId: 'u2', attachments: [], createdAt: '2026-09-10 15:20', archivedAt: '2026-09-10 15:27', creator: '肖德平', custom: { 'f-region': '华东' } },
     { id: nid(), name: '2025年度审计服务合同', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: ['xx会计师事务所', '法大大'], amount: 180000.00, signDate: '2025-12-10', effectiveDate: '2026-01-01', expiryDate: '2026-12-31', biz: '未指定', source: 'fasc', sourceTask: '审计服务合同签署', sourceTaskId: 'EN202512100204', attachments: [], createdAt: '2025-12-10 10:02', archivedAt: '2025-12-10 10:08', creator: '敖日根勒', custom: {} },
-    { id: nid(), name: '实习生协议-王某某', typeId: 't-labor', statusAuto: true, statusMain: '', statusSub: '', parties: ['王某某', '法大大'], amount: null, signDate: '2026-09-05', effectiveDate: '2026-09-08', expiryDate: '2026-09-25', biz: '人力资源', source: 'fasc', sourceTask: '实习生协议签署', sourceTaskId: 'EN202609050045', attachments: [], createdAt: '2026-09-05 16:33', archivedAt: '2026-09-05 16:40', creator: '肖德平', custom: {} },
-    { id: nid(), name: '框架采购协议-北京xx办公用品', typeId: 't-purchase', statusAuto: true, statusMain: '', statusSub: '', parties: ['北京xx办公用品有限公司', '法大大'], amount: 0.00, signDate: '2026-09-12', effectiveDate: '2026-09-15', expiryDate: null, biz: '采购', source: 'fasc', sourceTask: '框架采购协议签署', sourceTaskId: 'EN202609120011', attachments: [], createdAt: '2026-09-12 13:56', archivedAt: '2026-09-12 14:02', creator: '郭靖宇', custom: {} },
+    { id: nid(), name: '实习生协议-王某某', typeId: 't-general', statusAuto: true, statusMain: '', statusSub: '', parties: ['王某某', '法大大'], amount: null, signDate: '2026-09-05', effectiveDate: '2026-09-08', expiryDate: '2026-09-25', biz: '人力资源', source: 'fasc', sourceTask: '实习生协议签署', sourceTaskId: 'EN202609050045', attachments: [], createdAt: '2026-09-05 16:33', archivedAt: '2026-09-05 16:40', creator: '肖德平', custom: {} },
+    { id: nid(), name: '框架采购协议-北京xx办公用品', typeId: 't-payment', statusAuto: true, statusMain: '', statusSub: '', parties: ['北京xx办公用品有限公司', '法大大'], amount: 0.00, signDate: '2026-09-12', effectiveDate: '2026-09-15', expiryDate: '2028-09-30', biz: '采购', source: 'fasc', sourceTask: '框架采购协议签署', sourceTaskId: 'EN202609120011', attachments: [], createdAt: '2026-09-12 13:56', archivedAt: '2026-09-12 14:02', creator: '郭靖宇', custom: {} },
     /* 演示：本地上传后 AI 字段提取中（未生效、无日期；列表名称旁 loading） */
     { id: nid(), name: '供应商框架协议扫描件-待提取.pdf', typeId: 't-other', statusAuto: true, statusMain: '', statusSub: '', parties: [], amount: null, signDate: null, effectiveDate: null, expiryDate: null, biz: '未指定', source: 'upload', sourceUpload: 'Upload-1-2026-9-11_162018', attachments: [], createdAt: '2026-09-11 16:20', archivedAt: '2026-09-11 16:20', creator: '肖德平', aiExtracting: true, custom: {} },
   ];
@@ -81,6 +81,20 @@
     manual: { text: '人工维护', cls: 'ai-manual' },
     none: { text: '', cls: '' },
   };
+
+  /**
+   * AI 四角星标识（更饱满的菱形星，提升辨识度）。
+   * @param {string} cls SVG class
+   * @param {number} [size=14]
+   * @param {string} [title]
+   * @returns {string}
+   */
+  function aiSparkSvg(cls, size, title) {
+    const s = size || 14;
+    const tip = title ? ` title="${esc(title)}"` : '';
+    /* 腰部更宽的四角星，视觉上比细菱形更「胖」 */
+    return `<svg class="${cls}" viewBox="0 0 16 16" width="${s}" height="${s}" fill="currentColor" aria-hidden="true"${tip}><path d="M8 0.6 11.2 4.8 15.4 8 11.2 11.2 8 15.4 4.8 11.2 0.6 8 4.8 4.8Z"/></svg>`;
+  }
 
   /** 字段级 AI 状态：{ reviewStatus, source, evidence, confirmedBy, confirmedAt } */
   function aiField(reviewStatus, source, evidence, extra) {
@@ -230,8 +244,9 @@
     if (!c.statusAuto) return { main: c.statusMain, sub, hint: '' };
 
     const hasEff = !!c.effectiveDate, hasExp = !!c.expiryDate;
-    if (hasEff && hasExp && c.effectiveDate > c.expiryDate) return { main: '', sub: '', hint: '日期异常' };
-    if (!hasEff && !hasExp) return { main: '', sub: '', hint: '待补充日期' };
+    // 缺日期 / 日期异常：不再单独展示，统一归入「待生效」
+    if (hasEff && hasExp && c.effectiveDate > c.expiryDate) return { main: '待生效', sub: '', hint: '' };
+    if (!hasEff && !hasExp) return { main: '待生效', sub: '', hint: '' };
     let main = '';
     if (hasEff && c.effectiveDate > TODAY) main = '待生效';
     else if (hasExp && c.expiryDate < TODAY) main = '已到期';
@@ -240,7 +255,7 @@
     if (main === '待生效') sub = sub || (hasEff && daysBetween(TODAY, c.effectiveDate) <= 30 ? '即将生效' : '');
     if (main === '生效中') sub = sub || (hasExp && daysBetween(TODAY, c.expiryDate) <= 30 && daysBetween(TODAY, c.expiryDate) >= 0 ? '即将到期' : '');
     if (main === '已到期') sub = '';
-    if (main === '待生效') sub = '即将生效';
+    if (main === '待生效' && hasEff && daysBetween(TODAY, c.effectiveDate) <= 30) sub = '即将生效';
     return { main, sub, hint: '' };
   }
 
@@ -260,6 +275,130 @@
   }
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+  /**
+   * 创建人单元格：system=法大大 logo / custom=文案「用户」。
+   * @param {'system'|'custom'|string} source
+   * @returns {string}
+   */
+  function creatorCell(source) {
+    return source === 'system'
+      ? '<span class="cell-creator" title="由法大大创建"><img class="cell-creator__logo" src="assets/fadada-logo.png" alt="法大大" /></span>'
+      : '<span class="cell-creator" title="由用户创建">用户</span>';
+  }
+  /* 行内「更多」三点按钮（操作统一收入此菜单） */
+  function moreBtn(label) {
+    return `<span class="more-wrap"><button type="button" class="more-button row-more" aria-label="${esc(label || '更多操作')}"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg></button></span>`;
+  }
+  /**
+   * 通用下拉多选控件（触发器 + 搜索浮层 + 全选 + 复选列表 + 重置/应用 + 已选标签）。
+   * 供「关联合同类型」「添加字段」等处复用。
+   * @param {object} cfg
+   * @param {Array<{id:string,name:string,disabled?:boolean,mark?:string}>} cfg.items 可选项；disabled=已存在不可改，mark=右侧灰字（如「已添加」）
+   * @param {string} [cfg.placeholder] 触发器占位文案
+   * @param {string} [cfg.searchPlaceholder] 搜索框占位
+   * @param {string} [cfg.unit] 全选/已选计数单位（如「个合同类型」「个字段」）
+   * @param {(ids:string[])=>void} [cfg.onChange] 应用/移除标签后回调最新选中 id
+   */
+  function createMselDropdown(cfg) {
+    const items = cfg.items || [];
+    const unit = cfg.unit || '项';
+    const wrap = document.createElement('div');
+    wrap.className = 'fm-msel';
+    wrap.innerHTML = `
+      <button type="button" class="libra-select__trigger fm-msel__trigger" aria-haspopup="true" aria-expanded="false">
+        <span class="libra-select__value is-placeholder" data-msel-value>${esc(cfg.placeholder || '请选择（可多选）')}</span>
+        <span class="libra-select__caret" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg></span>
+      </button>
+      <div class="fm-msel__pop" hidden>
+        <div class="fm-msel__search">
+          <input type="search" placeholder="${esc(cfg.searchPlaceholder || '搜索')}" aria-label="${esc(cfg.searchPlaceholder || '搜索')}" data-msel-search />
+          <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+        </div>
+        <div class="fm-msel__list" data-msel-list></div>
+        <div class="fm-msel__foot">
+          <button type="button" class="fm-msel__reset" data-msel-reset>重置</button>
+          <button type="button" class="fm-msel__apply" data-msel-apply>应用</button>
+        </div>
+      </div>
+      <div class="fm-msel__tags" data-msel-tags></div>`;
+    const trigger = wrap.querySelector('.fm-msel__trigger');
+    const pop = wrap.querySelector('.fm-msel__pop');
+    const listEl = wrap.querySelector('[data-msel-list]');
+    const searchEl = wrap.querySelector('[data-msel-search]');
+    const valueEl = wrap.querySelector('[data-msel-value]');
+    const tagsEl = wrap.querySelector('[data-msel-tags]');
+    let selected = items.filter((i) => i.disabled).map((i) => i.id); // 已存在项始终计入
+    let staged = [];
+    const nameOf = (id) => (items.find((i) => i.id === id) || {}).name || '';
+    const itemOf = (id) => items.find((i) => i.id === id);
+    const emit = () => cfg.onChange && cfg.onChange([...selected]);
+    const renderTags = () => {
+      tagsEl.innerHTML = selected.map((id) => {
+        const it = itemOf(id);
+        const fixed = it && it.disabled;
+        return `<span class="fm-msel__tag ${fixed ? 'is-fixed' : ''}">${esc(nameOf(id))}${fixed ? '' : `<button type="button" data-tag-remove="${id}" aria-label="移除 ${esc(nameOf(id))}">${iconClose}</button>`}</span>`;
+      }).join('');
+      valueEl.textContent = selected.length ? `已选 ${selected.length} ${unit}` : (cfg.placeholder || '请选择（可多选）');
+      valueEl.classList.toggle('is-placeholder', !selected.length);
+    };
+    const renderList = () => {
+      const kw = searchEl.value.trim();
+      const matched = items.filter((i) => !kw || i.name.includes(kw));
+      const selectable = matched.filter((i) => !i.disabled);
+      const allOn = selectable.length > 0 && selectable.every((i) => staged.includes(i.id));
+      const rows = [];
+      if (!kw) rows.push(`<button type="button" class="fm-msel__opt" data-msel-all><input type="checkbox" ${allOn ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">全部（${items.length} ${unit}）</span></button>`);
+      rows.push(...matched.map((i) => `<button type="button" class="fm-msel__opt ${i.disabled ? 'is-disabled' : ''}" data-msel-id="${i.id}" ${i.disabled ? 'disabled' : ''}><input type="checkbox" ${(i.disabled || staged.includes(i.id)) ? 'checked' : ''} ${i.disabled ? 'disabled' : ''} tabindex="-1" /> <span class="opt-label">${esc(i.name)}</span>${i.mark ? `<span class="opt-mark">${esc(i.mark)}</span>` : ''}</button>`));
+      if (!matched.length) rows.push('<div class="fm-msel__empty">未找到匹配项</div>');
+      listEl.innerHTML = rows.join('');
+    };
+    const openPop = () => { staged = [...selected]; searchEl.value = ''; renderList(); pop.hidden = false; trigger.setAttribute('aria-expanded', 'true'); searchEl.focus(); };
+    const closePop = () => { pop.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
+    trigger.addEventListener('click', () => { if (pop.hidden) openPop(); else closePop(); });
+    searchEl.addEventListener('input', renderList);
+    listEl.addEventListener('click', (e) => {
+      // 阻止冒泡：renderList 重建节点后，文档级 closePop 会因 e.target 已脱离 wrap 而误关浮层
+      e.stopPropagation();
+      const allBtn = e.target.closest('[data-msel-all]');
+      const opt = e.target.closest('[data-msel-id]');
+      if (allBtn) {
+        const kw = searchEl.value.trim();
+        const matched = items.filter((i) => !kw || i.name.includes(kw)).filter((i) => !i.disabled);
+        const allOn = matched.length > 0 && matched.every((i) => staged.includes(i.id));
+        staged = allOn ? staged.filter((id) => !matched.some((i) => i.id === id)) : [...new Set([...staged, ...matched.map((i) => i.id)])];
+        renderList();
+      } else if (opt && !opt.disabled) {
+        const id = opt.dataset.mselId;
+        staged = staged.includes(id) ? staged.filter((x) => x !== id) : [...staged, id];
+        renderList();
+      }
+    });
+    wrap.querySelector('[data-msel-reset]').addEventListener('click', () => { staged = selected.filter((id) => itemOf(id)?.disabled); searchEl.value = ''; renderList(); });
+    wrap.querySelector('[data-msel-apply]').addEventListener('click', () => { selected = [...new Set([...selected.filter((id) => itemOf(id)?.disabled), ...staged])]; renderTags(); emit(); closePop(); });
+    tagsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-tag-remove]');
+      if (!btn) return;
+      selected = selected.filter((x) => x !== btn.dataset.tagRemove);
+      renderTags(); emit();
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) closePop(); });
+    renderTags();
+    return { el: wrap, getSelected: () => [...selected], setSelected: (ids) => { selected = [...new Set([...items.filter((i) => i.disabled).map((i) => i.id), ...(ids || [])])]; renderTags(); } };
+  }
+  /* 字段数据类型图标（对齐 phosphor 资产；title 提供类型文字提示） */
+  const FIELD_TYPE_META = {
+    text:   { icon: 'file-text',      label: '文本' },
+    number: { icon: 'grid-four',      label: '数字' },
+    date:   { icon: 'calendar-check', label: '日期' },
+    money:  { icon: 'cards',          label: '金额' },
+    select: { icon: 'squares-four',   label: '下拉选项' },
+    multi:  { icon: 'checks',         label: '多选' },
+    party:  { icon: 'user',           label: '主体' },
+  };
+  function fieldTypeIcon(type) {
+    const m = FIELD_TYPE_META[type] || { icon: 'file-text', label: type || '' };
+    return `<span class="aip-icon aip-icon--md field-type-icon" title="${esc(m.label)}" aria-label="${esc(m.label)}"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/${m.icon}.svg" alt="" /></span>`;
+  }
   function fmtMoney(n) { return n == null ? '<span class="empty-cell">—</span>' : '¥ ' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function fmtVal(v) { return v == null || v === '' ? '<span class="empty-cell">—</span>' : esc(v); }
   function typeOf(id) { return contractTypes.find((t) => t.id === id) || contractTypes.find((t) => t.id === 't-other'); }
@@ -300,6 +439,33 @@
       mask.addEventListener('mousedown', (e) => { if (e.target === mask) closeLayer(); });
     });
     $$('[data-close]', layerRoot).forEach((b) => b.addEventListener('click', closeLayer));
+  }
+  /**
+   * 叠加模态（独立于单例 layerRoot，append 到 body）：用于上传流程等需叠加在已有浮层（如文件上传记录）之上的弹窗。
+   * 不干扰 layerRoot 中已打开的内容。返回 close 函数。
+   * @param {string} html 含 .ns-modal-mask 的弹层 HTML
+   * @param {{ onClose?: () => void, escClose?: boolean }} [opts]
+   */
+  function openOverlayModal(html, opts) {
+    const host = document.createElement('div');
+    host.className = 'overlay-modal-host';
+    host.innerHTML = html;
+    document.body.appendChild(host);
+    let closed = false;
+    const escHandler = (e) => { if (e.key === 'Escape' && opts?.escClose !== false) close(); };
+    function close() {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', escHandler, true);
+      host.remove();
+      opts?.onClose && opts.onClose();
+    }
+    host.querySelectorAll('.ns-modal-mask, .drawer-mask, .overlay-mask').forEach((mask) => {
+      mask.addEventListener('mousedown', (e) => { if (e.target === mask && opts?.escClose !== false) close(); });
+    });
+    host.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+    document.addEventListener('keydown', escHandler, true);
+    return close;
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && layerRoot.innerHTML) closeLayer(); });
 
@@ -507,6 +673,27 @@
     window.addEventListener('scroll', () => { if (!pop.hidden) placePop(); }, true);
     sync();
     return wrap;
+  }
+
+  /**
+   * 同步原生 select 与其挂载的 .aip-select 禁用态；可选写入当前值并刷新触发器文案。
+   * @param {HTMLSelectElement|null} sel
+   * @param {boolean} disabled
+   * @param {string} [forceValue]
+   */
+  function syncAipSelectDisabled(sel, disabled, forceValue) {
+    if (!sel) return;
+    if (forceValue != null && forceValue !== '') sel.value = forceValue;
+    sel.disabled = disabled;
+    const aipWrap = sel.closest('.aip-select-wrap');
+    const trigger = /** @type {HTMLButtonElement|null} */ (aipWrap?.querySelector('.aip-select'));
+    if (trigger) trigger.disabled = disabled;
+    aipWrap?.classList.toggle('is-disabled', disabled);
+    const valueEl = aipWrap?.querySelector('.aip-select__value');
+    if (valueEl) {
+      const opt = sel.selectedOptions && sel.selectedOptions[0];
+      valueEl.textContent = (opt && opt.textContent) || sel.value || '请选择';
+    }
   }
 
   /**
@@ -806,10 +993,10 @@
   /* ================= 合同列表 ================= */
 
   const ALL_COLUMNS = [
-    { id: 'name', name: '合同名称', fixed: true },
-    { id: 'status', name: '合同状态' },
-    { id: 'parties', name: '合同主体' },
-    { id: 'type', name: '合同类型' },
+    { id: 'name', name: '名称', fixed: true },
+    { id: 'status', name: '状态' },
+    { id: 'parties', name: '主体' },
+    { id: 'type', name: '类型' },
     { id: 'amount', name: '合同总金额' },
     { id: 'effectiveDate', name: '生效日', sortable: true },
     { id: 'expiryDate', name: '到期日', sortable: true },
@@ -859,15 +1046,31 @@
     return rows;
   }
 
+  /**
+   * 将 ISO 日期格式化为列表弱文案（如 2028-09-30 → 2028/9/30）。
+   * @param {string|null|undefined} d
+   * @returns {string}
+   */
+  function formatExpiryShort(d) {
+    if (!d) return '';
+    const parts = String(d).split('-');
+    if (parts.length !== 3) return d;
+    return `${parts[0]}/${Number(parts[1])}/${Number(parts[2])}`;
+  }
+
   function statusCell(c) {
-    if (isAiExtracting(c)) {
-      return `<span class="aip-lib-tag aip-lib-tag--blue aip-lib-tag-dot">正在提取中</span>`;
-    }
+    // 提取中 / 缺日期不再单独成状态，统一走主状态（多为「待生效」）
     const s = computeStatus(c);
     if (s.hint) return `<span class="aip-lib-tag aip-lib-tag--gray aip-lib-tag-dot">${s.hint}</span>`;
     const map = { 待生效: 'aip-lib-tag--gray', 生效中: 'aip-lib-tag--green', 已到期: 'aip-lib-tag--red', 即将到期: 'aip-lib-tag--orange', 即将生效: 'aip-lib-tag--blue' };
-    let html = s.main ? `<span class="aip-lib-tag aip-lib-tag-dot ${map[s.main] || 'aip-lib-tag--gray'}">${s.main}</span>` : '';
-    return html || '<span class="empty-cell">—</span>';
+    if (!s.main) return '<span class="empty-cell">—</span>';
+    const mainHtml = `<span class="aip-lib-tag aip-lib-tag-dot ${map[s.main] || 'aip-lib-tag--gray'}">${s.main}</span>`;
+    /* 生效中：主标签下方展示弱化到期日期（对齐参考：到期日期 YYYY/M/D） */
+    if (s.main === '生效中' && c.expiryDate) {
+      const expiryLabel = `到期日期 ${formatExpiryShort(c.expiryDate)}`;
+      return `<div class="aip-lib-status" title="${esc(`${s.main} · ${expiryLabel}`)}">${mainHtml}<span class="aip-lib-status__expiry" title="${esc(expiryLabel)}">${esc(expiryLabel)}</span></div>`;
+    }
+    return mainHtml;
   }
 
   function sourceHtml(c) {
@@ -889,10 +1092,44 @@
     if (fid) { const f = aiFieldOf(c, fid); if (f) st = f.reviewStatus; }
     if (!st || st === 'none') return valueHtml;
     const meta = AI_REVIEW[st];
+    /** 文本外包一层，保证超长时出现 …（flex 容器本身无法 text-overflow） */
+    const text = `<span class="ai-cell__text">${valueHtml}</span>`;
     if (st === 'pending') {
-      return `<span class="ai-cell ai-cell--pending" data-ai-field="${fid}" title="AI 提取，待人工确认，点击查看来源"><svg class="ai-cell__spark" viewBox="0 0 16 16" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13 6.5 8.5 2 7l4.5-1.5z"/></svg>${valueHtml}</span>`;
+      return `<span class="ai-cell ai-cell--pending" data-ai-field="${fid}" title="AI 提取，待人工确认，点击查看来源">${aiSparkSvg('ai-cell__spark', 14)}${text}</span>`;
     }
-    return `<span class="ai-cell ai-cell--${st}" data-ai-field="${fid}" title="${meta.text}">${valueHtml}</span>`;
+    return `<span class="ai-cell ai-cell--${st}" data-ai-field="${fid}" title="${meta.text}">${text}</span>`;
+  }
+
+  /**
+   * 列表单元格纯文本（用于 title 悬浮展示完整内容）。
+   * @param {object} c
+   * @param {string} colId
+   * @returns {string}
+   */
+  function cellTitleText(c, colId) {
+    const type = typeOf(c.typeId);
+    switch (colId) {
+      case 'status': {
+        const s = computeStatus(c);
+        if (s.hint) return s.hint;
+        if (!s.main) return '';
+        if (s.main === '生效中' && c.expiryDate) return `${s.main} · 到期日期 ${formatExpiryShort(c.expiryDate)}`;
+        return s.main;
+      }
+      case 'parties': return c.parties.length ? c.parties.join('、') : '';
+      case 'type': return type.name || '';
+      case 'amount': return c.amount == null ? '' : `¥ ${Number(c.amount).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      case 'signDate': return c.signDate || '';
+      case 'effectiveDate': return c.effectiveDate || '';
+      case 'expiryDate': return c.expiryDate || '';
+      case 'biz': return c.biz || '';
+      case 'archivedAt': return c.archivedAt || '';
+      case 'sourceTaskId': return c.source === 'fasc' ? (c.sourceTaskId || '') : '';
+      default: {
+        const v = (c.custom || {})[colId];
+        return v == null ? '' : String(v);
+      }
+    }
   }
 
   function cellValue(c, colId) {
@@ -924,6 +1161,20 @@
   function renderTable() {
     const head = $('#contractHead'), body = $('#contractBody');
     const cols = visibleColumns();
+    // 列宽用 px + 表 min-width：超出容器时由 .envelope-table-shell 横向滚动，避免 % 列宽把字段挤扁
+    const COL_W = {
+      name: 300, status: 180, parties: 248, type: 132, amount: 156,
+      effectiveDate: 152, expiryDate: 152, signDate: 152, biz: 132, archivedAt: 160, sourceTaskId: 176,
+    };
+    const COL_CHECK = 48;
+    const COL_ACTION = 64;
+    const tableMinW = COL_CHECK + cols.reduce((sum, id) => sum + (COL_W[id] || 120), 0) + COL_ACTION;
+    const cg = $('#contractColgroup');
+    if (cg) {
+      cg.innerHTML = `<col style="width:${COL_CHECK}px" />${cols.map((id) => `<col style="width:${COL_W[id] || 120}px" />`).join('')}<col style="width:${COL_ACTION}px" />`;
+    }
+    const tableEl = $('#contractTable');
+    if (tableEl) tableEl.style.minWidth = `${tableMinW}px`;
     head.innerHTML = `<tr>
       <th><input type="checkbox" id="checkAll" aria-label="选择所有行" /></th>
       ${cols.map((id) => {
@@ -972,14 +1223,15 @@
           </td>`;
         }
         const editable = ['status', 'parties', 'type', 'amount', 'effectiveDate', 'expiryDate', 'biz'].includes(id) || (fieldOf(id) && fieldOf(id).source === 'custom');
-        return `<td><span class="aip-lib-cell-with-edit">
-          <span>${cellValue(c, id)}</span>
+        const tip = cellTitleText(c, id);
+        const tipAttr = tip ? ` title="${esc(tip)}"` : '';
+        return `<td data-col="${id}"><span class="aip-lib-cell-with-edit">
+          <span class="aip-lib-cell-text"${tipAttr}>${cellValue(c, id)}</span>
           ${editable ? `<button type="button" class="aip-lib-cell-edit" data-edit-cell="${id}" aria-label="编辑">${iconEdit}</button>` : ''}
         </span></td>`;
       }).join('')}
       <td>
         <div class="row-actions">
-          <button type="button" class="resend-button" data-view="${c.id}">查看</button>
           <span class="more-wrap">
             <button type="button" class="more-button row-more" aria-haspopup="menu" aria-label="更多操作">
               <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>
@@ -1041,30 +1293,31 @@
       });
       $('[data-open-detail]', tr)?.addEventListener('click', () => openDetail(c));
       $('[data-open-upload-records]', tr)?.addEventListener('click', () => openUploadRecords());
-      $('[data-view]', tr)?.addEventListener('click', () => {
-        openDetail(c);
-      });
       $('.row-more', tr)?.addEventListener('click', (e) => {
         e.stopPropagation();
         closeMenus();
         // 行内菜单：fixed 定位（对齐全部任务 row-menu），避开 sticky 操作列的定位上下文
         const existing = $('.aip-lib-menu-pop.row-menu-pop');
         if (existing) { existing.remove(); return; }
-        const rect = e.target.closest('.row-more').getBoundingClientRect();
+        const moreBtn = e.target.closest('.row-more');
+        const rect = moreBtn.getBoundingClientRect();
+        moreBtn.setAttribute('aria-expanded', 'true');
         const menu = document.createElement('div');
         menu.className = 'aip-lib-menu-pop row-menu-pop';
         menu.style.position = 'fixed';
         menu.style.top = (rect.bottom + 4) + 'px';
         menu.style.left = 'auto';
         menu.style.right = (window.innerWidth - rect.right) + 'px';
-        menu.innerHTML = `<button type="button" data-act="download">下载文件</button><button type="button" data-act="remove">移除</button>`;
+        menu.innerHTML = `<button type="button" data-act="view">查看</button><button type="button" data-act="download">下载文件</button><button type="button" data-act="remove">移除</button>`;
         document.body.appendChild(menu);
-        menu.querySelector('[data-act="download"]').addEventListener('click', () => { closeMenus(); toast(`演示：下载「${c.name}」PDF`); });
-        menu.querySelector('[data-act="remove"]').addEventListener('click', () => { closeMenus(); openRemoveConfirm([c]); });
+        const resetExpanded = () => moreBtn.setAttribute('aria-expanded', 'false');
+        menu.querySelector('[data-act="view"]').addEventListener('click', () => { closeMenus(); resetExpanded(); openDetail(c); });
+        menu.querySelector('[data-act="download"]').addEventListener('click', () => { closeMenus(); resetExpanded(); toast(`演示：下载「${c.name}」PDF`); });
+        menu.querySelector('[data-act="remove"]').addEventListener('click', () => { closeMenus(); resetExpanded(); openRemoveConfirm([c]); });
       });
       $$('[data-edit-cell]', tr).forEach((btn) => btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        openCellPop(c, btn.dataset.editCell, btn);
+        openRowEditModal(c);
       }));
     });
   }
@@ -1074,6 +1327,7 @@
     $$('.aip-lib-menu-pop').forEach((m) => { if (m.id !== 'manageMenu' && !m.closest('#layerRoot')) m.remove(); });
     const manageMenu = $('#manageMenu');
     if (manageMenu) manageMenu.hidden = true;
+    $$('.row-more[aria-expanded="true"]').forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
   }
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.aip-lib-menu-wrap') && !e.target.closest('.aip-lib-cell-pop')) closeMenus();
@@ -1819,13 +2073,20 @@
       if (applied) {
         anyApplied = true;
         field.classList.add('is-applied');
+        /* 清除控件用 span，禁止 button 嵌套 button（多选长文案时浏览器会拆 DOM，× 出现默认黑框） */
         trigger.innerHTML = `<span class="filter-trigger__label">${esc(applied.label)}</span>
-          <button type="button" class="filter-trigger__clear" aria-label="清除${def.name}">×</button>`;
-        $('.filter-trigger__clear', trigger).addEventListener('click', (e) => {
+          <span class="filter-trigger__clear" role="button" tabindex="0" aria-label="清除${def.name}">×</span>`;
+        const clearBtn = $('.filter-trigger__clear', trigger);
+        const clearFilter = (e) => {
           e.stopPropagation();
+          e.preventDefault();
           listState.filters = listState.filters.filter((f) => f.id !== id);
           listState.page = 1; listState.selected.clear();
           renderTable(); syncFilterTriggers();
+        };
+        clearBtn.addEventListener('click', clearFilter);
+        clearBtn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') clearFilter(e);
         });
       } else {
         field.classList.remove('is-applied');
@@ -1833,6 +2094,8 @@
       }
     });
     $('#filterSepApplied').classList.toggle('is-on', anyApplied);
+    // applied 状态在此确定，顺带收尾折叠态与角标（默认折叠未应用项）
+    updateFilterCollapse();
   }
 
   // 旧函数名保留（其它处调用），实际转到新同步逻辑
@@ -1840,45 +2103,21 @@
     syncFilterTriggers();
   }
 
-  /* —— 筛选折叠（对齐全部任务 updateFilterCollapse：超宽从右往左收纳进「筛选条件」弹窗） —— */
+  /* —— 筛选折叠（协议库：默认把未应用的筛选项收进「筛选条件」按钮；已应用的保留 chip 在行内。
+        按钮角标 = 当前已应用的筛选条件数量，无应用时隐藏。） —— */
   function updateFilterCollapse() {
     const collapseBtn = $('#filterCollapseBtn');
-    const controls = $('.envelope-controls');
-    const search = $('.envelope-search');
-    if (!collapseBtn || !controls || !search) return;
+    if (!collapseBtn) return;
     const fields = $$('#filterTriggers .filter-field');
-
-    // 先重置折叠态量预算
-    fields.forEach((f) => f.classList.remove('is-collapsed'));
+    // 默认折叠：未应用的整组收起，已应用的 chip 留在行内便于快速清除
+    fields.forEach((f) => f.classList.toggle('is-collapsed', !f.classList.contains('is-applied')));
     collapseBtn.hidden = false;
-    void controls.offsetWidth; // 强制重排，确保下面量到的是展开态宽度
-
-    const controlsW = controls.getBoundingClientRect().width;
-    const searchW = search.getBoundingClientRect().width + 16;
-    let rightW = 0;
-    const toolbarRight = $('.toolbar-right');
-    if (toolbarRight && toolbarRight.offsetParent !== null) rightW = toolbarRight.getBoundingClientRect().width + 8;
-    const collapseW = collapseBtn.getBoundingClientRect().width + 8;
-    const budget = Math.max(0, controlsW - searchW - rightW - collapseW - 16);
-
-    let used = 0;
-    fields.forEach((f) => { used += f.getBoundingClientRect().width + 8; });
-    let collapsedCount = 0;
-    if (used > budget) {
-      // 从右往左折叠未应用的下拉（已应用的 chip 保留）
-      for (let i = fields.length - 1; i >= 0 && used > budget; i--) {
-        const f = fields[i];
-        if (f.classList.contains('is-applied')) continue;
-        f.classList.add('is-collapsed');
-        used -= f.getBoundingClientRect().width + 8;
-        collapsedCount++;
-      }
-    }
-    // 仍有超宽时，继续折已应用的（保留至少）
-    collapseBtn.hidden = collapsedCount === 0;
     const badge = $('#filterCollapseCount');
-    badge.hidden = collapsedCount === 0;
-    badge.textContent = collapsedCount ? `(${collapsedCount})` : '';
+    if (badge) {
+      const n = listState.filters.length;
+      badge.hidden = n === 0;
+      badge.textContent = n > 0 ? String(n) : '';
+    }
   }
 
   // 「筛选条件」弹窗：草稿编辑，仅「保存」提交查询
@@ -2060,7 +2299,6 @@
   });
 
   /* ================= 批量操作 ================= */
-  $('#batchClear').addEventListener('click', () => { listState.selected.clear(); renderTable(); });
   $('#batchDownload').addEventListener('click', () => {
     toast(`演示：批量下载 ${listState.selected.size} 份合同 PDF（打包 ZIP，同名附加记录 ID）`);
   });
@@ -2088,113 +2326,125 @@
     });
   }
 
-  /* ================= 单元格浮层编辑 ================= */
-  function openCellPop(c, colId, anchor) {
-    $('.aip-lib-cell-pop')?.remove();
-    const pop = document.createElement('div');
-    pop.className = 'aip-lib-cell-pop';
-    const rect = anchor.getBoundingClientRect();
-    pop.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-    pop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-
-    const title = (ALL_COLUMNS.find((x) => x.id === colId) || fieldOf(colId) || {}).name || colId;
-    let inner = `<h4>编辑${esc(title)}</h4>`;
-
-    if (colId === 'status') {
-      pop.innerHTML = `${inner}
-        <label class="aip-lib-radio-row" style="justify-content:space-between;">自动计算状态
-          <label class="switch"><input type="checkbox" id="popAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label>
-        </label>
-        <div id="popManual" ${c.statusAuto ? 'hidden' : ''}>
-          ${['待生效', '生效中', '已到期'].map((s) => `<label class="aip-lib-radio-row"><input type="radio" name="popStatus" value="${s}" ${c.statusMain === s ? 'checked' : ''} /> ${s}</label>`).join('')}
+  /* ================= 行内聚合编辑（点击单元格编辑 → 整行可编辑字段聚合弹窗） ================= */
+  function openRowEditModal(c) {
+    const type = typeOf(c.typeId) || { fields: [] };
+    const wrap = document.createElement('div');
+    /** @type {Set<string>} 勾选「采用 AI 建议」的字段 id */
+    const accepted = new Set();
+    /* AI 抓取（待确认）的字段：控件左端内嵌更饱满的四角星 */
+    const aiSpark = aiSparkSvg('row-edit-ai-spark', 14, 'AI 提取值');
+    const fieldRows = type.fields.map((fid) => fieldOf(fid)).filter(Boolean).map((f) => {
+      const af = aiFieldOf(c, f.id);
+      const isAi = !!(af && af.reviewStatus === 'pending');
+      const acceptHtml = isAi
+        ? `<label class="ai-accept-check" data-tip="采用 AI 建议">
+            <input type="checkbox" data-accept-field="${f.id}" aria-label="采用 AI 建议：${esc(f.name)}" />
+          </label>`
+        : '';
+      return `
+        <div class="ns-field${isAi ? ' row-edit-field--ai' : ''}">
+          <label class="ns-field__label">${esc(f.name)}</label>
+          <div class="row-edit-field__body">
+            <div class="row-edit-ctl ${isAi ? 'row-edit-ctl--ai' : ''}" data-edit-field="${f.id}">${isAi ? aiSpark : ''}${editControl(f, c)}</div>
+            ${acceptHtml}
+          </div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal ns-modal--fit row-edit-modal">
+      <div class="ns-modal__head"><h2>编辑协议</h2><button class="ns-modal__close" type="button" data-x aria-label="关闭">${iconClose}</button></div>
+      <div class="ns-modal__body">
+        <div class="ns-field">
+          <label class="ns-field__label">合同类型</label>
+          <select class="ns-field__input aip-select-native" id="reType">${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>
         </div>
-        <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-      document.body.appendChild(pop);
-      $('#popAuto', pop).addEventListener('change', (e) => { $('#popManual', pop).hidden = e.target.checked; });
-      bindPopSave(pop, () => {
-        c.statusAuto = $('#popAuto', pop).checked;
-        if (!c.statusAuto) c.statusMain = ($('input[name="popStatus"]:checked', pop) || {}).value || '生效中';
-        toast('合同状态已更新');
+        <div class="ns-field">
+          <div class="row-edit-status-head">
+            <label class="ns-field__label">合同状态</label>
+            <span class="drawer-inline-note row-edit-status__auto"><label class="switch switch--sm"><input type="checkbox" id="reAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label>自动计算</span>
+          </div>
+          <div class="row-edit-status">
+            <select class="ns-field__input aip-select-native" id="reMainStatus" ${c.statusAuto ? 'disabled' : ''}>${['待生效', '生效中', '已到期'].map((sv) => {
+              const cur = c.statusAuto ? (computeStatus(c).main || '待生效') : (c.statusMain || computeStatus(c).main || '待生效');
+              return `<option value="${sv}" ${cur === sv ? 'selected' : ''}>${sv}</option>`;
+            }).join('')}</select>
+          </div>
+        </div>
+        ${fieldRows}
+        <div class="ns-field__error" id="reErr" hidden></div>
+      </div>
+      <div class="ns-modal__foot">
+        <button class="btn-ghost" type="button" data-x>取消</button>
+        <button class="btn-solid" type="button" data-ok>保存</button>
+      </div>
+    </div></div>`;
+    document.body.appendChild(wrap);
+    hydrateAipSelects(wrap);
+    bindLibraDpFields(wrap);
+    // 状态开关：关闭自动计算才可手动选状态（需同步 .aip-select 触发器，不能只改原生 select）
+    const reAuto = /** @type {HTMLInputElement|null} */ ($('#reAuto', wrap));
+    const reMain = /** @type {HTMLSelectElement|null} */ ($('#reMainStatus', wrap));
+    const syncReStatusEnabled = () => {
+      const autoOn = !!reAuto?.checked;
+      const seed = (!autoOn)
+        ? (reMain?.value || c.statusMain || computeStatus(c).main || '待生效')
+        : undefined;
+      syncAipSelectDisabled(reMain, autoOn, seed);
+    };
+    reAuto?.addEventListener('change', syncReStatusEnabled);
+    syncReStatusEnabled();
+    $$('[data-accept-field]', wrap).forEach((inp) => {
+      inp.addEventListener('change', () => {
+        const fid = inp.getAttribute('data-accept-field');
+        if (!fid) return;
+        if (/** @type {HTMLInputElement} */ (inp).checked) accepted.add(fid);
+        else accepted.delete(fid);
       });
-      return;
-    }
-    if (colId === 'type') {
-      pop.innerHTML = `${inner}
-        <select class="ns-field__input aip-select-native" id="popType">${contractTypes.map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>
-        <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-      document.body.appendChild(pop);
-      hydrateAipSelects(pop);
-      bindPopSave(pop, () => {
-        c.typeId = $('#popType', pop).value;
-        toast('合同类型已更新');
-      });
-      return;
-    }
-    if (colId === 'biz') {
-      pop.innerHTML = `${inner}
-        <select class="ns-field__input aip-select-native" id="popBiz">${['人力资源', '销售', '采购', '未指定'].map((s) => `<option value="${esc(s)}" ${c.biz === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
-        <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-      document.body.appendChild(pop);
-      hydrateAipSelects(pop);
-      bindPopSave(pop, () => { c.biz = $('#popBiz', pop).value; toast('业务条线已更新'); });
-      return;
-    }
-    if (colId === 'parties') {
-      pop.innerHTML = `${inner}
-        <textarea class="ns-field__input" id="popVal" placeholder="多个主体以、分隔">${esc(c.parties.join('、'))}</textarea>
-        <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-      document.body.appendChild(pop);
-      bindPopSave(pop, () => { c.parties = $('#popVal', pop).value.split('、').map((s) => s.trim()).filter(Boolean); toast('合同主体已更新'); });
-      return;
-    }
-    const isDate = colId === 'effectiveDate' || colId === 'expiryDate';
-    const isMoney = colId === 'amount';
-    const cur = isDate ? (c[colId] || '') : isMoney ? (c.amount == null ? '' : c.amount) : ((c.custom || {})[colId] || '');
-    if (isDate) {
-      pop.innerHTML = `${inner}
-        ${libraDpFieldHtml(cur, '年 / 月 / 日', 'id="popVal"')}
-        <div class="ns-field__error" id="popErr" hidden></div>
-        <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-      document.body.appendChild(pop);
-      bindLibraDpFields(pop);
-      bindPopSave(pop, () => {
-        const input = /** @type {HTMLInputElement} */ ($('.libra-dp__input', pop));
-        const v = input?.dataset.iso || '';
-        const next = { ...c, [colId]: v || null };
-        if (next.effectiveDate && next.expiryDate && next.effectiveDate > next.expiryDate) {
-          const err = $('#popErr', pop); err.hidden = false; err.textContent = '生效日不得晚于到期日';
-          return false;
-        }
-        c[colId] = v || null;
-        toast('日期已更新，状态已重新计算');
-      });
-      return;
-    }
-    pop.innerHTML = `${inner}
-      <input class="ns-field__input" id="popVal" type="${isMoney ? 'number' : 'text'}" ${isMoney ? 'step="0.01"' : ''} value="${esc(cur)}" />
-      <div class="ns-field__error" id="popErr" hidden></div>
-      <div class="aip-lib-cell-pop-foot"><button class="aip-lib-btn aip-lib-btn-ghost aip-lib-btn-sm" data-cancel>取消</button><button class="aip-lib-btn aip-lib-btn-primary aip-lib-btn-sm" data-save>保存</button></div>`;
-    document.body.appendChild(pop);
-    bindPopSave(pop, () => {
-      const v = $('#popVal', pop).value;
-      if (isMoney) {
-        c.amount = v === '' ? null : Number(v);
-        toast('合同总金额已更新');
-      } else {
-        c.custom = c.custom || {};
-        c.custom[colId] = v;
-        toast('字段已更新');
-      }
     });
-  }
-
-  function bindPopSave(pop, onSave) {
-    $('[data-cancel]', pop).addEventListener('click', () => pop.remove());
-    $('[data-save]', pop).addEventListener('click', () => {
-      const r = onSave();
-      if (r === false) return;
-      pop.remove();
+    const close = () => wrap.remove();
+    wrap.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', close));
+    wrap.querySelector('.ns-modal-mask')?.addEventListener('mousedown', (e) => { if (e.target.classList.contains('ns-modal-mask')) close(); });
+    wrap.querySelector('[data-ok]').addEventListener('click', () => {
+      closeSharedDateCalFloat();
+      const nameInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-name"] input', wrap));
+      const name = nameInput ? nameInput.value.trim() : c.name;
+      if (!name) { const er = $('#reErr', wrap); er.hidden = false; er.textContent = '合同名称不能为空'; return; }
+      const effInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-effective"] .libra-dp__input', wrap));
+      const expInput = /** @type {HTMLInputElement|null} */ ($('[data-edit-field="f-expiry"] .libra-dp__input', wrap));
+      const eff = (effInput?.dataset.iso || '') || null;
+      const exp = (expInput?.dataset.iso || '') || null;
+      if (eff && exp && eff > exp) { const er = $('#reErr', wrap); er.hidden = false; er.textContent = '生效日不得晚于到期日'; return; }
+      // 应用
+      c.name = name;
+      c.typeId = $('#reType', wrap).value;
+      c.statusAuto = $('#reAuto', wrap).checked;
+      if (!c.statusAuto) c.statusMain = $('#reMainStatus', wrap).value;
+      $$('[data-edit-field]', wrap).forEach((box) => {
+        const fid = box.dataset.editField;
+        const dp = /** @type {HTMLInputElement|null} */ ($('.libra-dp__input', box));
+        const input = dp || $('input, select, textarea', box);
+        if (!input) return;
+        const v = dp ? (dp.dataset.iso || '') : input.value;
+        if (fid === 'f-amount') c.amount = v === '' ? null : Number(v);
+        else if (fid === 'f-sign') c.signDate = v || null;
+        else if (fid === 'f-effective') c.effectiveDate = v || null;
+        else if (fid === 'f-expiry') c.expiryDate = v || null;
+        else if (fid === 'f-biz') c.biz = v;
+        else if (fid === 'f-party') c.parties = v.split('、').map((x) => x.trim()).filter(Boolean);
+        else if (fid !== 'f-name') { c.custom = c.custom || {}; c.custom[fid] = v; }
+      });
+      // 勾选「采用 AI 建议」的字段一并确认为可信（对齐详情编辑）
+      if (accepted.size) {
+        const now = '2026-09-17 10:30';
+        accepted.forEach((fid) => {
+          const af = aiFieldOf(c, fid);
+          if (af) { af.reviewStatus = 'confirmed'; af.confirmedBy = '肖德平'; af.confirmedAt = now; }
+        });
+        accepted.clear();
+      }
+      close();
       renderTable();
+      toast('已保存');
     });
   }
 
@@ -2219,10 +2469,16 @@
     const statusHtml = s.hint ? `<span class="aip-lib-tag aip-lib-tag--gray aip-lib-tag-dot">${s.hint}</span>`
       : (s.main ? `<span class="aip-lib-tag aip-lib-tag-dot ${statusMap[s.main]}">${s.main}</span>` : '');
 
-    const groups = FIELD_CATEGORIES.map((cat) => ({
-      cat,
-      fields: type.fields.map((fid) => fieldOf(fid)).filter((f) => f && f.category === cat),
-    })).filter((g) => g.fields.length);
+    // 详情分组：通用组含合同类型全部字段（不按分类过滤），其余按分类归入 终止/续约/付款/法律与合规，未识别归其他
+    const typeFields = type.fields.map((fid) => fieldOf(fid)).filter(Boolean);
+    const SPEC_CATS = ['终止', '续约', '付款', '法律与合规'];
+    const groups = [{ cat: '通用', fields: typeFields }];
+    SPEC_CATS.forEach((cat) => {
+      const fs = typeFields.filter((f) => f.category === cat);
+      if (fs.length) groups.push({ cat, fields: fs });
+    });
+    const otherFs = typeFields.filter((f) => !FIELD_CATEGORIES.slice(0, 5).includes(f.category));
+    if (otherFs.length) groups.push({ cat: '其他', fields: otherFs });
 
     const fieldValueHtml = (f) => {
       if (f.id === 'f-name') return esc(c.name);
@@ -2242,8 +2498,8 @@
           <div class="detail-title-wrap">
             <h2 id="detailTitle" class="detail-title--editable" title="点击编辑合同名称">${esc(c.name)}</h2>
           </div>
-          <button class="aip-lib-btn aip-lib-btn-secondary" type="button" id="detailEdit">
-            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>编辑
+          <button class="icon-btn" type="button" id="detailEdit" aria-label="编辑" title="编辑">
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>
           </button>
           <button class="aip-lib-btn aip-lib-btn-secondary" type="button" id="detailDownload">
             <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download-simple.svg" alt="" /></span>下载
@@ -2297,17 +2553,25 @@
             </div>
             <div class="pdf-page-nav-hotspot" id="pdfPageNavHotspot">
               <div class="pdf-page-nav" id="pdfPageNav">
-                <button type="button" class="pdf-page-nav__trigger" id="pdfPageNavBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="选择页码">
-                  <span id="pdfPageNavLabel">1 / 2</span>
-                  <svg class="pdf-page-nav__caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
+                <div class="pdf-page-nav__trigger" role="group" aria-label="页码跳转">
+                  <input type="text" inputmode="numeric" pattern="[0-9]*" class="pdf-page-nav__input" id="pdfPageNavInput" value="1" aria-label="跳转到页码" autocomplete="off" />
+                  <span class="pdf-page-nav__total" id="pdfPageNavTotal">/ 2</span>
+                  <button type="button" class="pdf-page-nav__caret-btn" id="pdfPageNavBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="选择页码">
+                    <svg class="pdf-page-nav__caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                </div>
                 <div class="pdf-page-nav__menu" id="pdfPageNavMenu" role="listbox" hidden></div>
               </div>
             </div>
           </div>
           <div class="info-pane">
             <div class="info-scroll" id="infoScroll">
+              <div class="info-detail-head">
+                <h3 class="info-detail-head__title">详情</h3>
+                <span class="info-detail-head__actions" id="infoDetailActions"></span>
+              </div>
               <div class="ai-review-bar" id="aiReviewBar" hidden></div>
+              <div class="info-detail-divider" aria-hidden="true"></div>
               <div id="fieldGroups"></div>
             </div>
             <!-- 编辑态底栏 -->
@@ -2324,6 +2588,11 @@
     const detailState = { accepted: new Set(), barDismissed: false };
     let editing = false;
 
+    // 编辑按钮从顶部栏移到右侧信息面板的「详情」标题行最右
+    const detailActions = $('#infoDetailActions');
+    const detailEditBtn = $('#detailEdit');
+    if (detailActions && detailEditBtn) detailActions.appendChild(detailEditBtn);
+
     /* ---- 0.2 AI 复核栏：点「复核全部」进入编辑态 ---- */
     const ai = aiOf(c);
     const renderReviewBar = () => {
@@ -2336,15 +2605,10 @@
       const typeName = typeOf(c.typeId).name;
       bar.hidden = false;
       bar.innerHTML = `
-        <div class="ai-review-bar__head">
-          <svg class="ai-review-bar__spark" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13 6.5 8.5 2 7l4.5-1.5z"/></svg>
-          <div class="ai-review-bar__text">
-            <b>识别到「${esc(typeName)}」，共有 ${total} 个字段${pending ? `，其中 <em>${pending} 条由 AI 抓取</em>` : '，无 AI 抓取建议'}</b>
-            <small>${stageText}${ai.stage === 'partial' ? '，可人工编辑' : ''}</small>
-          </div>
-          ${pending && !editing ? `<button type="button" class="resend-button is-solid" id="reviewAllBtn">去核对</button>` : ''}
-          <button type="button" class="ai-review-bar__close" id="aiReviewBarClose" aria-label="关闭复核提示" title="关闭">${iconClose}</button>
-        </div>`;
+        <span class="ai-assisted-badge">${aiSparkSvg('ai-review-bar__spark', 13)}AI 识别</span>
+        <p class="ai-review-bar__desc">识别到「<b>${esc(typeName)}</b>」，共有 <b>${total}</b> 个字段${pending ? `，其中 <b>${pending}</b> 条由 AI 抓取待复核` : '，无 AI 抓取建议'}。<small class="ai-review-bar__stage">${stageText}${ai.stage === 'partial' ? '，可人工编辑' : ''}</small></p>
+        ${pending && !editing ? `<button type="button" class="resend-button" id="reviewAllBtn">去核对</button>` : ''}
+        <button type="button" class="ai-review-bar__close" id="aiReviewBarClose" aria-label="关闭复核提示" title="关闭">${iconClose}</button>`;
       $('#aiReviewBarClose')?.addEventListener('click', (e) => {
         e.stopPropagation();
         detailState.barDismissed = true;
@@ -2360,12 +2624,12 @@
 
     const renderGroups = (editing) => {
       const statusTypeHtml = `<div class="info-group">
-          <button class="info-group__head" type="button" aria-expanded="true">状态与类型
+          <button class="info-group__head" type="button" aria-expanded="true">合同类型
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s;"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="info-group__body">
-            <div class="field-row"><span class="field-label">合同类型</span><span class="field-value">${editing ? `<select class="ns-field__input aip-select-native" id="editType">${contractTypes.map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : esc(type.name)}</span></div>
-            <div class="field-row"><span class="field-label">合同状态</span><span class="field-value">${statusHtml}${editing ? `<span class="drawer-inline-note">自动计算 <label class="switch"><input type="checkbox" id="editAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label></span><select class="ns-field__input aip-select-native drawer-select-inline" id="editMainStatus" ${c.statusAuto ? 'disabled' : ''}>${['待生效', '生效中', '已到期'].map((sv) => `<option value="${sv}" ${c.statusMain === sv ? 'selected' : ''}>${sv}</option>`).join('')}</select>` : ''}</span></div>
+            <div class="field-row"><span class="field-label">合同类型</span><span class="field-value">${editing ? `<select class="ns-field__input aip-select-native" id="editType">${contractTypes.filter((t) => !t.deleted).map((t) => `<option value="${t.id}" ${t.id === c.typeId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : esc(type.name)}</span></div>
+            <div class="field-row"><span class="field-label">合同状态</span><span class="field-value">${statusHtml}${editing ? `<span class="drawer-inline-note">自动计算 <label class="switch switch--sm"><input type="checkbox" id="editAuto" ${c.statusAuto ? 'checked' : ''} /><span class="slider"></span></label></span><select class="ns-field__input aip-select-native drawer-select-inline" id="editMainStatus" ${c.statusAuto ? 'disabled' : ''}>${['待生效', '生效中', '已到期'].map((sv) => `<option value="${sv}" ${c.statusMain === sv ? 'selected' : ''}>${sv}</option>`).join('')}</select>` : ''}</span></div>
           </div>
         </div>`;
       const isFascSource = c.source === 'fasc';
@@ -2484,6 +2748,41 @@
     renderGroups(false);
     renderReviewBar();
 
+    // 标题内联编辑：编辑态下把标题换成输入框，失焦（点其他地方）即确定；Enter 确定，Escape 还原
+    function bindTitleInlineEdit() {
+      const nameInput = $('#editName');
+      if (!nameInput) return;
+      nameInput.addEventListener('input', markDirty);
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); nameInput.blur(); }
+        // 阻止冒泡：避免触发整层浮层的 Escape 关闭
+        else if (e.key === 'Escape') { e.stopPropagation(); nameInput.value = c.name; nameInput.blur(); }
+      });
+      nameInput.addEventListener('blur', () => {
+        const v = nameInput.value.trim();
+        if (!v) { toast('合同名称不能为空'); nameInput.value = c.name; return; }
+        if (v === c.name) return;
+        c.name = v;
+        // 同步「基本信息」里的合同名称输入框与列表
+        const fName = /** @type {HTMLInputElement|null} */ ($('#infoScroll [data-edit-field="f-name"] input'));
+        if (fName) fName.value = v;
+        renderTable();
+        toast('合同名称已更新');
+        // 重建标题输入框以同步值，并重新挂监听（可继续再点标题改名）
+        $('#detailTitle').innerHTML = `<input class="ns-field__input drawer-name-input" id="editName" value="${esc(c.name)}" />`;
+        bindTitleInlineEdit();
+      });
+    }
+    $('#detailTitle').addEventListener('click', () => {
+      if (!editing) $('#detailEdit').click();
+      // 编辑态下标题即输入框，直接聚焦
+      if (!$('#editName')) {
+        $('#detailTitle').innerHTML = `<input class="ns-field__input drawer-name-input" id="editName" value="${esc(c.name)}" />`;
+        bindTitleInlineEdit();
+      }
+      $('#editName')?.focus();
+    });
+
     // —— 编辑态（「编辑」与「复核全部」共用） ——
     $('#detailEdit').addEventListener('click', () => {
       if (editing) return;
@@ -2500,13 +2799,19 @@
         if (e.target.id !== 'editAuto') return;
         const sel = /** @type {HTMLSelectElement|null} */ ($('#editMainStatus'));
         if (!sel) return;
-        sel.disabled = e.target.checked;
-        const wrap = sel.closest('.aip-select-wrap');
-        const trigger = wrap?.querySelector('.aip-select');
-        if (trigger) /** @type {HTMLButtonElement} */ (trigger).disabled = e.target.checked;
-        wrap?.classList.toggle('is-disabled', e.target.checked);
+        const autoOn = /** @type {HTMLInputElement} */ (e.target).checked;
+        const seed = (!autoOn)
+          ? (sel.value || c.statusMain || computeStatus(c).main || '待生效')
+          : undefined;
+        syncAipSelectDisabled(sel, autoOn, seed);
         markDirty();
       });
+      // 进入编辑态时按当前自动计算开关同步一次
+      {
+        const autoEl = /** @type {HTMLInputElement|null} */ ($('#editAuto'));
+        const sel = /** @type {HTMLSelectElement|null} */ ($('#editMainStatus'));
+        if (autoEl && sel) syncAipSelectDisabled(sel, !!autoEl.checked);
+      }
       $$('#infoScroll input, #infoScroll select, #infoScroll textarea').forEach((el) => el.addEventListener('input', markDirty));
       $$('#infoScroll input, #infoScroll select, #infoScroll textarea').forEach((el) => el.addEventListener('change', markDirty));
     });
@@ -2580,7 +2885,8 @@
     let pdfPageIdx = 0;
     const pageNavBtn = $('#pdfPageNavBtn');
     const pageNavMenu = $('#pdfPageNavMenu');
-    const pageNavLabel = $('#pdfPageNavLabel');
+    const pageNavInput = /** @type {HTMLInputElement|null} */ ($('#pdfPageNavInput'));
+    const pageNavTotal = $('#pdfPageNavTotal');
     const pageNavHotspot = $('#pdfPageNavHotspot');
     const zoomTrigger = $('#pdfZoomTrigger');
     const zoomMenu = $('#pdfZoomMenu');
@@ -2597,17 +2903,21 @@
       window.clearTimeout(pageNavContextTimer);
       pageNavContextTimer = window.setTimeout(() => {
         if (pageNavHotspot.matches(':hover') || pageNavHotspot.classList.contains('is-open')) return;
+        if (pageNavInput && document.activeElement === pageNavInput) return;
         pageNavHotspot.classList.remove('is-context');
       }, force ? 2200 : 1800);
     }
 
     /**
-     * 同步页码标签与下拉选中态。
+     * 同步页码输入框、总数与下拉选中态。
      * @param {number} idx
      */
     function setPdfPageIdx(idx) {
       pdfPageIdx = Math.max(0, Math.min(pdfPages.length - 1, idx));
-      if (pageNavLabel) pageNavLabel.textContent = `${pdfPageIdx + 1} / ${pdfPages.length}`;
+      if (pageNavInput && document.activeElement !== pageNavInput) {
+        pageNavInput.value = String(pdfPageIdx + 1);
+      }
+      if (pageNavTotal) pageNavTotal.textContent = `/ ${pdfPages.length}`;
       if (pageNavMenu) {
         $$('[data-pdf-page]', pageNavMenu).forEach((opt) => {
           const i = Number(opt.getAttribute('data-pdf-page'));
@@ -2615,6 +2925,23 @@
           opt.setAttribute('aria-selected', String(i === pdfPageIdx));
         });
       }
+    }
+
+    /**
+     * 手输页码跳转（1-based）；非法值回落到当前页。
+     * @param {string|number} raw
+     */
+    function jumpPdfPageFromInput(raw) {
+      const total = pdfPages.length;
+      const n = parseInt(String(raw).trim(), 10);
+      if (!Number.isFinite(n) || total < 1) {
+        if (pageNavInput) pageNavInput.value = String(pdfPageIdx + 1);
+        return;
+      }
+      const page = Math.max(1, Math.min(total, n));
+      if (pageNavInput) pageNavInput.value = String(page);
+      if (page - 1 !== pdfPageIdx) goPdfPage(page - 1);
+      else setPdfPageIdx(pdfPageIdx);
     }
 
     /**
@@ -2738,6 +3065,33 @@
       $('#pdfPageNav')?.classList.toggle('is-open', open);
       $('#pdfPageNavHotspot')?.classList.toggle('is-open', open);
     });
+    pageNavInput?.addEventListener('focus', () => {
+      revealPageNavContext(true);
+      pageNavInput.select();
+    });
+    pageNavInput?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePageNav();
+    });
+    pageNavInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        jumpPdfPageFromInput(pageNavInput.value);
+        pageNavInput.blur();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        pageNavInput.value = String(pdfPageIdx + 1);
+        pageNavInput.blur();
+      }
+    });
+    pageNavInput?.addEventListener('blur', () => {
+      jumpPdfPageFromInput(pageNavInput.value);
+    });
+    pageNavInput?.addEventListener('input', () => {
+      // 仅保留数字，避免非整页输入
+      const digits = pageNavInput.value.replace(/\D/g, '');
+      if (pageNavInput.value !== digits) pageNavInput.value = digits;
+    });
     $('.detail-page')?.addEventListener('click', (e) => {
       if (!e.target.closest('#pdfPageNavHotspot')) closePageNav();
       if (!e.target.closest('.pdf-tool-group')) closeZoomMenu();
@@ -2764,8 +3118,10 @@
     });
     pageNavHotspot?.addEventListener('mouseleave', () => {
       if (pageNavHotspot.classList.contains('is-open')) return;
+      if (pageNavInput && document.activeElement === pageNavInput) return;
       window.clearTimeout(pageNavContextTimer);
       pageNavContextTimer = window.setTimeout(() => {
+        if (pageNavInput && document.activeElement === pageNavInput) return;
         pageNavHotspot.classList.remove('is-context');
       }, 500);
     });
@@ -2841,12 +3197,20 @@
 
   /* ================= 本地上传（8.3 三段式） ================= */
   const uploadState = { files: [], taskName: '' };
+  /* 上传流程当前叠加层关闭句柄：三段式（选择/确认/进度）共用同一叠加位，开新层前先关旧层，
+     保证从「文件上传记录」页打开时叠加在其上而不替换它。 */
+  let closeUploadOverlay = null;
+  function openUploadModal(html) {
+    if (closeUploadOverlay) { closeUploadOverlay(); closeUploadOverlay = null; }
+    closeUploadOverlay = openOverlayModal(html, { onClose: () => { if (closeUploadOverlay) closeUploadOverlay = null; } });
+    return closeUploadOverlay;
+  }
   const DEMO_FILES = ['年度服务合同-2026.pdf', '采购订单-9月.xlsx', '补充协议.docx', '验收单扫描.jpg', '报价单.pdf', '会议纪要.docx'];
 
   function openUpload() {
     uploadState.files = [];
     uploadState.taskName = '';
-    openLayer(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
+    openUploadModal(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
       <div class="ns-modal__head"><h2>上传合同</h2><button class="ns-modal__close" type="button" data-close>${iconClose}</button></div>
       <div class="ns-modal__body">
         <div class="upload-drop" id="uploadDrop">
@@ -2884,7 +3248,7 @@
   }
 
   function openUploadConfirm() {
-    openLayer(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
+    openUploadModal(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
       <div class="ns-modal__head"><h2>确认上传</h2><button class="ns-modal__close" type="button" data-close>${iconClose}</button></div>
       <div class="ns-modal__body">
         <div class="ns-field">
@@ -2915,7 +3279,7 @@
       if (rest <= 0) { toast('每次最多上传 5 份文件。'); return; }
       addFiles(DEMO_FILES.slice(3, 3 + Math.min(2, rest)));
     });
-    $$('.fremove').forEach((b) => b.addEventListener('click', () => {
+    $$('#submitUpload').length && $$('.fremove', $('#submitUpload').closest('.ns-modal')).forEach((b) => b.addEventListener('click', () => {
       uploadState.files.splice(Number(b.dataset.i), 1);
       if (!uploadState.files.length) { openUpload(); return; }
       openUploadConfirm();
@@ -2932,7 +3296,7 @@
 
   function openUploadProgress() {
     const total = uploadState.files.length;
-    openLayer(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
+    openUploadModal(`<div class="ns-modal-mask ns-modal-mask--libra"><div class="ns-modal">
       <div class="ns-modal__head"><h2>${esc(uploadState.taskName)}</h2><button class="ns-modal__close" type="button" data-close-try>${iconClose}</button></div>
       <div class="ns-modal__body">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -2963,15 +3327,15 @@
         $('#uploadFoot').innerHTML = `
           <button class="aip-lib-btn aip-lib-btn-ghost" type="button" id="viewRecords">查看进度</button>
           <button class="btn-solid" type="button" data-close>关闭</button>`;
-        $$('[data-close]').forEach((b) => b.addEventListener('click', closeLayer));
-        $('#viewRecords').addEventListener('click', () => openUploadRecords());
+        $('#uploadFoot [data-close]').addEventListener('click', () => { if (closeUploadOverlay) closeUploadOverlay(); });
+        $('#viewRecords').addEventListener('click', () => { if (closeUploadOverlay) closeUploadOverlay(); openUploadRecords(); });
         // 写入记录
         uploadTasks.unshift({
           id: 'u' + Date.now(), name: uploadState.taskName, creator: '肖德平', createdAt: '2026-09-16 ' + new Date().toTimeString().slice(0, 5),
           count: total, status: failCount ? 'partial' : 'done', success: successCount, fail: failCount, mine: true,
           fails: failCount ? [{ name: uploadState.files[total - 1], reason: '入库处理失败' }] : [],
         });
-        // 成功文件入库：先进入「正在提取中」，由 AI 抽字段
+        // 成功文件入库：缺日期时列表显示「待生效」，AI 仍后台抽字段
         const nowStamp = '2026-09-16 ' + new Date().toTimeString().slice(0, 5);
         uploadState.files.slice(0, successCount).forEach((f) => {
           const id = 'c' + (seq++);
@@ -2986,12 +3350,15 @@
           scheduleExtractDone(id, f);
         });
         renderTable();
+        /* 若「文件上传记录」浮层正开着（从记录页发起上传），上传完成后即时刷新记录列表，
+           保证关闭进度弹窗回到记录页能看到新记录。 */
+        if ($('.sheet-mask #recBody')) openUploadRecords();
       }
     }, 600);
 
     const tryClose = () => {
-      if (processed >= total) { closeLayer(); return; }
-      openCancelConfirm(() => { cancelled = true; clearInterval(timer); closeLayer(); toast('已取消上传，未产生入库数据'); });
+      if (processed >= total) { if (closeUploadOverlay) closeUploadOverlay(); return; }
+      openCancelConfirm(() => { cancelled = true; clearInterval(timer); if (closeUploadOverlay) closeUploadOverlay(); toast('已取消上传，未产生入库数据'); });
     };
     $('[data-close-try]').addEventListener('click', tryClose);
     $('#cancelUpload').addEventListener('click', tryClose);
@@ -3033,15 +3400,16 @@
             <option value="failed">上传失败</option>
           </select>
           <button class="applied-clearall" type="button" id="recClear" hidden>清除所有</button>
+          <div class="toolbar-right"><button class="btn-solid" type="button" id="recUploadBtn">本地上传</button></div>
         </div>
         <div class="envelope-table-shell"><table class="envelope-table">
           <thead><tr>
             <th class="sortable" data-rs="createdAt">创建时间</th>
-            <th class="sortable" data-rs="creator">创建者</th>
             <th class="sortable" data-rs="name">文件上传任务名称</th>
+            <th class="sortable" data-rs="creator">创建者</th>
             <th class="sortable" data-rs="count">提交文件数</th>
             <th class="sortable" data-rs="status">任务状态</th>
-            <th class="col-actions-w200">操作</th>
+            <th class="col-actions-w130">操作</th>
           </tr></thead>
           <tbody id="recBody"></tbody>
         </table>
@@ -3061,6 +3429,18 @@
       btn.hidden = !(recState.min || recState.max || recState.status);
     }
     function renderRecords() {
+      const queryRecordFiles = (t) => {
+        if (!t || !t.success) { toast('暂无可查询文件'); return; }
+        const ids = contracts.filter((c) => c.sourceUpload === t.name && !c.removed).map((c) => c.id);
+        closeLayer();
+        listState.search = JSON.stringify(ids);
+        searchInput.value = listState.search;
+        searchClear.hidden = false;
+        listState.filters = [];
+        listState.page = 1; listState.selected.clear();
+        renderTable(); renderFilterChips();
+        toast(`已查询该任务成功入库的 ${ids.length} 份文件`);
+      };
       let rows = uploadTasks.filter((t) => !t.deleted);
       if (recState.min) rows = rows.filter((t) => t.createdAt.slice(0, 10) >= recState.min);
       if (recState.max) rows = rows.filter((t) => t.createdAt.slice(0, 10) <= recState.max);
@@ -3085,14 +3465,13 @@
           </div>`;
         return `<tr>
           <td>${esc(t.createdAt)}</td>
-          <td>${esc(t.creator)}</td>
           <td>${esc(t.name)}</td>
+          <td>${esc(t.creator)}</td>
           <td>${t.count}</td>
           <td><span class="aip-lib-tag ${st.cls} aip-lib-tag-dot">${st.text}</span>${summary}</td>
-          <td><div class="row-actions">
+          <td><div class="row-actions" data-rec-id="${t.id}">
             ${t.status === 'uploading' ? `<button type="button" class="resend-button" data-progress="${t.id}">查看进度</button>` : ''}
-            <button type="button" class="resend-button" data-query="${t.id}" ${t.success ? '' : 'disabled'}>查询文件</button>
-            <span class="more-wrap"><button type="button" class="more-button row-more" aria-label="更多操作"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg></button></span>
+            ${moreBtn()}
           </div></td>
         </tr>`;
       }).join('');
@@ -3100,25 +3479,14 @@
         const t = uploadTasks.find((x) => x.id === b.dataset.fails);
         openFailFiles(t);
       }));
-      $$('#recBody [data-query]').forEach((b) => b.addEventListener('click', () => {
-        const t = uploadTasks.find((x) => x.id === b.dataset.query);
-        if (!t.success) { toast('暂无可查询文件'); return; }
-        const ids = contracts.filter((c) => c.sourceUpload === t.name && !c.removed).map((c) => c.id);
-        closeLayer();
-        listState.search = JSON.stringify(ids);
-        searchInput.value = listState.search;
-        searchClear.hidden = false;
-        listState.filters = [];
-        listState.page = 1; listState.selected.clear();
-        renderTable(); renderFilterChips();
-        toast(`已查询该任务成功入库的 ${ids.length} 份文件`);
-      }));
       $$('#recBody .row-more').forEach((b) => b.addEventListener('click', (e) => {
         e.stopPropagation();
-        const tr = b.closest('tr');
-        const queryBtn = tr.querySelector('[data-query]');
-        const t = uploadTasks.find((x) => x.id === (queryBtn?.dataset.query || tr.querySelector('[data-progress]')?.dataset.progress));
-        openRowMenu(b, [{ label: '删除', danger: true, onClick: () => confirmDeleteRecord(t) }]);
+        const t = uploadTasks.find((x) => x.id === b.closest('[data-rec-id]')?.dataset.recId);
+        if (!t) return;
+        openRowMenu(b, [
+          { label: '查询文件', onClick: () => queryRecordFiles(t) },
+          { label: '删除', danger: true, onClick: () => confirmDeleteRecord(t) },
+        ]);
       }));
     }
     function confirmDeleteRecord(t) {
@@ -3137,6 +3505,7 @@
     }
     bindLibraDpFields($('.sheet-toolbar'));
     hydrateSheetSelects($('.sheet-mask'));
+    $('#recUploadBtn').addEventListener('click', openUpload);
     const syncRecDates = () => {
       recState.min = /** @type {HTMLInputElement} */ ($('[data-rec-min]'))?.dataset.iso || '';
       recState.max = /** @type {HTMLInputElement} */ ($('[data-rec-max]'))?.dataset.iso || '';
@@ -3213,12 +3582,12 @@
           <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
           <input type="search" id="typeSearch" placeholder="搜索类型名称" aria-label="搜索类型名称" />
         </label>
-        <select class="ns-field__input sheet-filter" id="typeSourceFilter"><option value="">全部来源</option><option value="system">系统预置</option><option value="custom">企业自定义</option></select>
+        <select class="ns-field__input sheet-filter" id="typeSourceFilter"><option value="">全部创建人</option><option value="system">法大大</option><option value="custom">用户</option></select>
         <select class="ns-field__input sheet-filter" id="typeCatFilter"><option value="">全部合同类型分类</option>${TYPE_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
         <div class="toolbar-right"><button class="btn-solid" type="button" id="newTypeBtn" ${contractTypes.filter((t) => t.source === 'custom').length >= 200 ? 'disabled title="已达 200 个自定义类型上限"' : ''}>新建类型</button></div>
       </div>
       <div class="envelope-table-shell"><table class="envelope-table">
-        <thead><tr><th>类型名称</th><th>关联字段数</th><th>关联文件数</th><th>合同类型分类</th><th>来源</th><th class="col-actions-w130">操作</th></tr></thead>
+        <thead><tr><th>类型名称</th><th>关联文件数</th><th>合同类型分类</th><th>创建人</th><th class="col-actions-w90">操作</th></tr></thead>
         <tbody id="typeBody"></tbody>
       </table></div>`;
     const tpState = { size: 10, page: 1, total: () => 0 };
@@ -3231,22 +3600,31 @@
         && (!cat || t.category === cat));
       tpState.total = () => rows.length;
       syncAipPager('tpPager', tpState);
-      $('#typeBody').innerHTML = pagerSlice(rows, tpState).map((t) => `<tr>
-        <td><button type="button" class="envelope-name" data-fields="${t.id}">${esc(t.name)}</button>${t.fixed ? ' <span class="aip-lib-tag aip-lib-tag--gray">默认</span>' : ''}</td>
-        <td><button type="button" class="envelope-name" data-fields="${t.id}">${t.fields.length}</button></td>
+      $('#typeBody').innerHTML = pagerSlice(rows, tpState).map((t) => `<tr class="type-row" data-fields-row="${t.id}">
+        <td>
+          <button type="button" class="envelope-name" data-fields="${t.id}">${esc(t.name)}</button>${t.fixed ? ' <span class="aip-lib-tag aip-lib-tag--gray">默认</span>' : ''}
+          <small class="type-row__sub">${t.fields.length} 个字段</small>
+        </td>
         <td>${contracts.filter((c) => c.typeId === t.id && !c.removed).length}</td>
         <td>${esc(t.category)}</td>
-        <td>${t.source === 'system' ? '系统预置' : '企业自定义'}</td>
+        <td>${creatorCell(t.source)}</td>
         <td>
-          ${t.source === 'custom' ? `<div class="row-actions"><button type="button" class="resend-button" data-edit-type="${t.id}">编辑</button><span class="more-wrap"><button type="button" class="more-button row-more" aria-label="更多操作"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg></button></span></div>` : '<span class="cell-aux">—</span>'}
+          ${t.source === 'custom' ? `<div class="row-actions" data-type-id="${t.id}">${moreBtn()}</div>` : '<span class="cell-aux">—</span>'}
         </td>
       </tr>`).join('');
+      /* 整行 hover 可点击打开类型详情（操作列更多按钮除外） */
+      $$('#typeBody tr[data-fields-row]').forEach((tr) => tr.addEventListener('click', (e) => {
+        if (e.target.closest('.row-actions, .row-more, .more-wrap, button.row-more')) return;
+        renderTypeFields(tr.dataset.fieldsRow);
+      }));
       $$('#typeBody [data-fields]').forEach((b) => b.addEventListener('click', () => renderTypeFields(b.dataset.fields)));
-      $$('#typeBody [data-edit-type]').forEach((b) => b.addEventListener('click', () => openTypeModal(contractTypes.find((t) => t.id === b.dataset.editType))));
       $$('#typeBody .row-more').forEach((b) => b.addEventListener('click', (e) => {
         e.stopPropagation();
-        const t = contractTypes.find((x) => x.id === b.closest('tr').querySelector('[data-edit-type]')?.dataset.editType);
-        openRowMenu(b, [{ label: '删除', danger: true, onClick: () => confirmDeleteType(t) }]);
+        const t = contractTypes.find((x) => x.id === b.closest('[data-type-id]')?.dataset.typeId);
+        openRowMenu(b, [
+          { label: '编辑', onClick: () => openTypeModal(t) },
+          { label: '删除', danger: true, onClick: () => confirmDeleteType(t) },
+        ]);
       }));
     }
     function confirmDeleteType(t) {
@@ -3341,11 +3719,11 @@
           <input type="search" id="tfSearch" placeholder="搜索字段名称" aria-label="搜索字段名称" />
         </label>
         <select class="ns-field__input sheet-filter" id="tfCat"><option value="">全部字段分类</option>${FIELD_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
-        <select class="ns-field__input sheet-filter" id="tfSource"><option value="">全部来源</option><option value="system">系统预置</option><option value="custom">企业自定义</option></select>
+        <select class="ns-field__input sheet-filter" id="tfSource"><option value="">全部创建人</option><option value="system">法大大</option><option value="custom">用户</option></select>
         <div class="toolbar-right"><button class="btn-solid" type="button" id="addFieldBtn">添加字段</button></div>
       </div>
       <div class="envelope-table-shell"><table class="envelope-table">
-        <thead><tr><th>字段名称</th><th>数据类型</th><th>字段分类</th><th>来源</th><th class="col-actions-w110">操作</th></tr></thead>
+        <thead><tr><th>字段名称</th><th>字段分类</th><th>创建人</th><th class="col-actions-w90">操作</th></tr></thead>
         <tbody id="tfBody"></tbody>
       </table></div>`;
     const typeText = { text: '文本', number: '数字', date: '日期', multi: '多选', select: '下拉选项', party: '主体', money: '金额' };
@@ -3358,31 +3736,29 @@
       tfState.total = () => rows.length;
       syncAipPager('tfPager', tfState);
       $('#tfBody').innerHTML = pagerSlice(rows, tfState).map((f) => `<tr>
-        <td>${esc(f.name)}${f.base ? ' <span class="aip-lib-tag aip-lib-tag--gray">系统预置</span>' : ''}</td>
-        <td>${typeText[f.type] || f.type}</td>
+        <td><span class="field-name-cell">${fieldTypeIcon(f.type)}${esc(f.name)}</span></td>
         <td>${esc(f.category)}</td>
-        <td>${f.source === 'system' ? '系统预置' : '企业自定义'}</td>
+        <td>${creatorCell(f.source)}</td>
         <td>
-          ${f.source === 'custom' ? `<button type="button" class="resend-button" data-edit-field="${f.id}">编辑字段</button>` : ''}
-          ${!f.base ? `<span class="more-wrap"><button type="button" class="more-button row-more" data-remove-field="${f.id}" aria-label="移除字段"><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m2-10c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2m0 16c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg></button></span>` : ''}
+          ${(f.source === 'custom' || !f.base) ? `<div class="row-actions" data-tf-id="${f.id}">${moreBtn()}</div>` : '<span class="cell-aux">—</span>'}
         </td>
       </tr>`).join('');
-      $$('#tfBody [data-remove-field]').forEach((b) => b.addEventListener('click', () => {
-        const fid = b.dataset.removeField;
-        openConfirm({
-          title: '移除字段？',
-          note: '移除后，该字段将不再展示在此类型的文件中，已有数据将保留。',
-          cancelText: '取消',
-          confirmText: '移除',
-          danger: true,
-          onConfirm: () => {
-            t.fields = t.fields.filter((x) => x !== fid);
-            render(); toast('已移除字段关联');
-          },
+      $$('#tfBody .row-more').forEach((b) => b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const f = fieldOf(b.closest('[data-tf-id]')?.dataset.tfId);
+        if (!f) return;
+        const items = [];
+        if (f.source === 'custom') items.push({ label: '编辑', onClick: () => openFieldModal(f, () => render()) });
+        if (!f.base) items.push({
+          label: '移除字段', danger: true,
+          onClick: () => openConfirm({
+            title: '移除字段？',
+            note: '移除后，该字段将不再展示在此类型的文件中，已有数据将保留。',
+            cancelText: '取消', confirmText: '移除', danger: true,
+            onConfirm: () => { t.fields = t.fields.filter((x) => x !== f.id); render(); toast('已移除字段关联'); },
+          }),
         });
-      }));
-      $$('#tfBody [data-edit-field]').forEach((b) => b.addEventListener('click', () => {
-        openFieldModal(fieldOf(b.dataset.editField), () => render());
+        openRowMenu(b, items);
       }));
     };
     hydrateSheetSelects($('.sheet-mask'));
@@ -3405,13 +3781,7 @@
       <div class="ns-modal__head"><h2>添加字段</h2><button class="ns-modal__close" type="button" data-x>${iconClose}</button></div>
       <div class="ns-modal__body">
         <p class="ns-modal__note">从企业统一字段库选择字段；所需字段不存在时，请先到字段管理新建。</p>
-        <div class="multi-select-box">
-          ${fieldDefs.map((f) => `<label class="ms-item ${t.fields.includes(f.id) ? 'is-added' : ''}">
-            <input type="checkbox" class="checkbox" value="${f.id}" ${t.fields.includes(f.id) ? 'disabled checked' : ''} />
-            ${esc(f.name)}
-            <span class="added-mark">${t.fields.includes(f.id) ? '已添加' : esc(f.category)}</span>
-          </label>`).join('')}
-        </div>
+        <div id="afMselHost"></div>
       </div>
       <div class="ns-modal__foot">
         <button class="btn-ghost" type="button" data-x>取消</button>
@@ -3419,10 +3789,21 @@
       </div>
     </div></div>`;
     document.body.appendChild(wrap);
+    /* 复用关联合同类型同款下拉多选：已添加项禁用并置灰标记，分类作为未添加项右侧提示 */
+    const msel = createMselDropdown({
+      items: fieldDefs.map((f) => {
+        const added = t.fields.includes(f.id);
+        return { id: f.id, name: f.name, disabled: added, mark: added ? '已添加' : f.category };
+      }),
+      placeholder: '请选择字段（可多选）',
+      searchPlaceholder: '搜索字段名称',
+      unit: '个字段',
+    });
+    wrap.querySelector('#afMselHost').appendChild(msel.el);
     const close = () => wrap.remove();
     wrap.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', close));
     wrap.querySelector('[data-ok]').addEventListener('click', () => {
-      const picked = $$('input:checked:not([disabled])', wrap).map((i) => i.value);
+      const picked = msel.getSelected().filter((id) => !t.fields.includes(id));
       if (t.fields.length + picked.length > 100) { toast('每个类型最多关联 100 个字段'); return; }
       t.fields.push(...picked);
       close(); onDone(); toast(`已添加 ${picked.length} 个字段`);
@@ -3445,11 +3826,11 @@
             <input type="search" id="fdSearch" placeholder="搜索字段名称" aria-label="搜索字段名称" />
           </label>
           <select class="ns-field__input sheet-filter" id="fdCat"><option value="">全部字段分类</option>${FIELD_CATEGORIES.map((c) => `<option>${c}</option>`).join('')}</select>
-          <select class="ns-field__input sheet-filter" id="fdSource"><option value="">全部来源</option><option value="system">系统预置</option><option value="custom">企业自定义</option></select>
+          <select class="ns-field__input sheet-filter" id="fdSource"><option value="">全部创建人</option><option value="system">法大大</option><option value="custom">用户</option></select>
           <div class="toolbar-right"><button class="btn-solid" type="button" id="newFieldBtn">新建字段</button></div>
         </div>
         <div class="envelope-table-shell"><table class="envelope-table">
-          <thead><tr><th>字段名称</th><th>数据类型</th><th>字段分类</th><th>来源</th><th class="col-actions-w90">操作</th></tr></thead>
+          <thead><tr><th>字段名称</th><th>字段分类</th><th>创建人</th><th class="col-actions-w90">操作</th></tr></thead>
           <tbody id="fdBody"></tbody>
         </table></div>
       </div></div>
@@ -3463,13 +3844,17 @@
       fdState.total = () => rows.length;
       syncAipPager('fdPager', fdState);
       $('#fdBody').innerHTML = pagerSlice(rows, fdState).map((f) => `<tr>
-        <td>${esc(f.name)}${f.base ? ' <span class="aip-lib-tag aip-lib-tag--gray">基础标准字段</span>' : ''}</td>
-        <td>${typeText[f.type] || f.type}</td>
+        <td><span class="field-name-cell">${fieldTypeIcon(f.type)}${esc(f.name)}</span></td>
         <td>${esc(f.category)}</td>
-        <td>${f.source === 'system' ? '系统预置' : '企业自定义'}</td>
-        <td>${f.source === 'custom' ? `<div class="row-actions"><button type="button" class="resend-button" data-fd-edit="${f.id}">编辑</button></div>` : '<span class="cell-aux">只读</span>'}</td>
+        <td>${creatorCell(f.source)}</td>
+        <td>${f.source === 'custom' ? `<div class="row-actions" data-fd-id="${f.id}">${moreBtn()}</div>` : ''}</td>
       </tr>`).join('');
-      $$('#fdBody [data-fd-edit]').forEach((b) => b.addEventListener('click', () => openFieldModal(fieldOf(b.dataset.fdEdit), render)));
+      $$('#fdBody .row-more').forEach((b) => b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const f = fieldOf(b.closest('[data-fd-id]')?.dataset.fdId);
+        if (!f) return;
+        openRowMenu(b, [{ label: '编辑', onClick: () => openFieldModal(f, render) }]);
+      }));
     };
     hydrateSheetSelects($('.sheet-mask'));
     $('#fdSearch').addEventListener('input', render);
@@ -3526,8 +3911,23 @@
           <div class="ns-field__error" id="fmAiDefErr" hidden></div>
         </div>
         ${isEdit ? '' : `<div class="ns-field"><label class="ns-field__label">关联合同类型</label>
-          <div class="multi-select-box">
-            ${contractTypes.filter((t) => !t.deleted).map((t) => `<label class="ms-item"><input type="checkbox" class="checkbox fm-type-rel" value="${t.id}" /> ${esc(t.name)}</label>`).join('')}
+          <div class="fm-msel" id="fmTypeMsel">
+            <button type="button" class="libra-select__trigger fm-msel__trigger" aria-haspopup="true" aria-expanded="false">
+              <span class="libra-select__value is-placeholder" data-msel-value>请选择合同类型（可多选）</span>
+              <span class="libra-select__caret" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" focusable="false"><path d="m15 8.32-4.43 4.45c-.16.16-.37.23-.57.23s-.41-.07-.57-.23L5 8.32 6.32 7 10 10.66 13.68 7z"/></svg></span>
+            </button>
+            <div class="fm-msel__pop" hidden>
+              <div class="fm-msel__search">
+                <input type="search" placeholder="搜索合同类型" aria-label="搜索合同类型" data-msel-search />
+                <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/magnifying-glass.svg" alt="" /></span>
+              </div>
+              <div class="fm-msel__list" data-msel-list></div>
+              <div class="fm-msel__foot">
+                <button type="button" class="fm-msel__reset" data-msel-reset>重置</button>
+                <button type="button" class="fm-msel__apply" data-msel-apply>应用</button>
+              </div>
+            </div>
+            <div class="fm-msel__tags" data-msel-tags></div>
           </div>
         </div>`}
       </div>
@@ -3538,6 +3938,66 @@
     </div></div>`;
     document.body.appendChild(wrap);
     hydrateLibraSelects(wrap);
+    // 关联合同类型：下拉多选（搜索 + 全选 + 多选 + 重置/应用）
+    const fmTypeMsel = $('#fmTypeMsel');
+    let fmRelTypes = []; // 已确认（应用）的类型 id
+    if (fmTypeMsel) {
+      const allTypes = contractTypes.filter((t) => !t.deleted);
+      const trigger = fmTypeMsel.querySelector('.fm-msel__trigger');
+      const pop = fmTypeMsel.querySelector('.fm-msel__pop');
+      const listEl = fmTypeMsel.querySelector('[data-msel-list]');
+      const searchEl = fmTypeMsel.querySelector('[data-msel-search]');
+      const valueEl = fmTypeMsel.querySelector('[data-msel-value]');
+      const tagsEl = fmTypeMsel.querySelector('[data-msel-tags]');
+      let staged = []; // 浮层内勾选（未应用）
+      const nameOf = (id) => (allTypes.find((t) => t.id === id) || {}).name || '';
+      const renderTags = () => {
+        tagsEl.innerHTML = fmRelTypes.map((id) => `<span class="fm-msel__tag">${esc(nameOf(id))}<button type="button" data-tag-remove="${id}" aria-label="移除 ${esc(nameOf(id))}">${iconClose}</button></span>`).join('');
+        valueEl.textContent = fmRelTypes.length ? `已选 ${fmRelTypes.length} 个合同类型` : '请选择合同类型（可多选）';
+        valueEl.classList.toggle('is-placeholder', !fmRelTypes.length);
+      };
+      const renderList = () => {
+        const kw = searchEl.value.trim();
+        const matched = allTypes.filter((t) => !kw || t.name.includes(kw));
+        const allOn = matched.length > 0 && matched.every((t) => staged.includes(t.id));
+        const rows = [];
+        if (!kw) {
+          rows.push(`<button type="button" class="fm-msel__opt" data-msel-all><input type="checkbox" ${allOn ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">全部（${allTypes.length} 个合同类型）</span></button>`);
+        }
+        rows.push(...matched.map((t) => `<button type="button" class="fm-msel__opt" data-msel-id="${t.id}"><input type="checkbox" ${staged.includes(t.id) ? 'checked' : ''} tabindex="-1" /> <span class="opt-label">${esc(t.name)}</span></button>`));
+        if (!matched.length) rows.push('<div class="fm-msel__empty">未找到匹配的合同类型</div>');
+        listEl.innerHTML = rows.join('');
+      };
+      const openPop = () => { staged = [...fmRelTypes]; searchEl.value = ''; renderList(); pop.hidden = false; trigger.setAttribute('aria-expanded', 'true'); searchEl.focus(); };
+      const closePop = () => { pop.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
+      trigger.addEventListener('click', () => { if (pop.hidden) openPop(); else closePop(); });
+      searchEl.addEventListener('input', renderList);
+      listEl.addEventListener('click', (e) => {
+        const allBtn = e.target.closest('[data-msel-all]');
+        const opt = e.target.closest('[data-msel-id]');
+        if (allBtn) {
+          const kw = searchEl.value.trim();
+          const matched = allTypes.filter((t) => !kw || t.name.includes(kw));
+          const allOn = matched.length > 0 && matched.every((t) => staged.includes(t.id));
+          staged = allOn ? staged.filter((id) => !matched.some((t) => t.id === id)) : [...new Set([...staged, ...matched.map((t) => t.id)])];
+          renderList();
+        } else if (opt) {
+          const id = opt.dataset.mselId;
+          staged = staged.includes(id) ? staged.filter((x) => x !== id) : [...staged, id];
+          renderList();
+        }
+      });
+      fmTypeMsel.querySelector('[data-msel-reset]').addEventListener('click', () => { staged = []; searchEl.value = ''; renderList(); });
+      fmTypeMsel.querySelector('[data-msel-apply]').addEventListener('click', () => { fmRelTypes = [...staged]; renderTags(); closePop(); });
+      tagsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-tag-remove]');
+        if (!btn) return;
+        fmRelTypes = fmRelTypes.filter((x) => x !== btn.dataset.tagRemove);
+        renderTags();
+      });
+      document.addEventListener('click', (e) => { if (!fmTypeMsel.contains(e.target)) closePop(); });
+      renderTags();
+    }
     const fmAiToggle = $('#fmAiEnabled'), fmAiDef = $('#fmAiDef');
     if (fmAiToggle && fmAiDef) fmAiToggle.addEventListener('change', () => { fmAiDef.style.display = fmAiToggle.checked ? '' : 'none'; });
     const close = () => wrap.remove();
@@ -3592,8 +4052,8 @@
       }
       const nf = { id: 'f' + Date.now(), name, type, category: cat, source: 'custom', aiEnabled: fmAiEnabled, aiDef: fmAiDefVal, options };
       fieldDefs.push(nf);
-      $$('.fm-type-rel:checked', wrap).forEach((i) => {
-        const t = contractTypes.find((x) => x.id === i.value);
+      fmRelTypes.forEach((tid) => {
+        const t = contractTypes.find((x) => x.id === tid);
         if (t && !t.fields.includes(nf.id)) t.fields.push(nf.id);
       });
       close(); onSaved(); renderTable();
@@ -3606,7 +4066,7 @@
     const shell = document.getElementById('contractTableShell');
     if (!shell) return;
     const sync = () => {
-      shell.classList.toggle('is-scrolled-x', shell.scrollLeft > 0);
+      shell.classList.toggle('is-scrolled-x', shell.scrollLeft > 2);
     };
     shell.addEventListener('scroll', sync, { passive: true });
     sync();
@@ -3673,7 +4133,7 @@
   // 侧栏交互（发起签署菜单/任务文件夹/记录与处理）由复用骨架的主脚本统一初始化，此处不再重复绑定。
   buildFilterTriggers();
   renderTable();
-  updateFilterCollapse();
+  syncFilterTriggers();
 
   // 支持 #upload-records 直达（详情/列表中跳转）
   if (location.hash === '#upload-records') openUploadRecords();
