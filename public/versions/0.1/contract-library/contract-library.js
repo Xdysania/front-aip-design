@@ -83,7 +83,7 @@
   };
 
   /**
-   * AI 四角星标识（更饱满的菱形星，提升辨识度）。
+   * AI 四角星标识（适中腰宽，兼顾辨识度与纤细感）。
    * @param {string} cls SVG class
    * @param {number} [size=14]
    * @param {string} [title]
@@ -92,8 +92,8 @@
   function aiSparkSvg(cls, size, title) {
     const s = size || 14;
     const tip = title ? ` title="${esc(title)}"` : '';
-    /* 腰部更宽的四角星，视觉上比细菱形更「胖」 */
-    return `<svg class="${cls}" viewBox="0 0 16 16" width="${s}" height="${s}" fill="currentColor" aria-hidden="true"${tip}><path d="M8 0.6 11.2 4.8 15.4 8 11.2 11.2 8 15.4 4.8 11.2 0.6 8 4.8 4.8Z"/></svg>`;
+    /* 腰部适中的四角星：比初版瘦、比极细版更有分量 */
+    return `<svg class="${cls}" viewBox="0 0 16 16" width="${s}" height="${s}" fill="currentColor" aria-hidden="true"${tip}><path d="M8 0.9 10.2 5.8 15.1 8 10.2 10.2 8 15.1 5.8 10.2 0.9 8 5.8 5.8Z"/></svg>`;
   }
 
   /** 字段级 AI 状态：{ reviewStatus, source, evidence, confirmedBy, confirmedAt } */
@@ -2332,7 +2332,7 @@
     const wrap = document.createElement('div');
     /** @type {Set<string>} 勾选「采用 AI 建议」的字段 id */
     const accepted = new Set();
-    /* AI 抓取（待确认）的字段：控件左端内嵌更饱满的四角星 */
+    /* AI 抓取（待确认）的字段：控件左端内嵌细腰四角星 */
     const aiSpark = aiSparkSvg('row-edit-ai-spark', 14, 'AI 提取值');
     const fieldRows = type.fields.map((fid) => fieldOf(fid)).filter(Boolean).map((f) => {
       const af = aiFieldOf(c, f.id);
@@ -2498,8 +2498,8 @@
           <div class="detail-title-wrap">
             <h2 id="detailTitle" class="detail-title--editable" title="点击编辑合同名称">${esc(c.name)}</h2>
           </div>
-          <button class="icon-btn" type="button" id="detailEdit" aria-label="编辑" title="编辑">
-            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>
+          <button class="info-detail-edit-btn" type="button" id="detailEdit" aria-label="编辑" title="编辑">
+            <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/pencil-simple.svg" alt="" /></span>编辑
           </button>
           <button class="aip-lib-btn aip-lib-btn-secondary" type="button" id="detailDownload">
             <span class="aip-icon aip-icon--sm"><img class="aip-icon__svg" src="assets/icons/phosphor/regular/download-simple.svg" alt="" /></span>下载
@@ -2601,13 +2601,14 @@
       if (!ai || detailState.barDismissed) { bar.hidden = true; return; }
       const pending = aiPendingCount(c);
       const total = aiApplicableCount(c);
-      const stageText = { done: '提取完成', partial: '部分内容未提取', failed: '未提取', processing: '提取中' }[ai.stage] || '';
+      /* 「提取完成」不展示；仅异常/进行中阶段保留说明 */
+      const stageText = { done: '', partial: '部分内容未提取，可人工编辑', failed: '未提取', processing: '提取中' }[ai.stage] || '';
       const typeName = typeOf(c.typeId).name;
       bar.hidden = false;
       bar.innerHTML = `
         <span class="ai-assisted-badge">${aiSparkSvg('ai-review-bar__spark', 13)}AI 识别</span>
-        <p class="ai-review-bar__desc">识别到「<b>${esc(typeName)}</b>」，共有 <b>${total}</b> 个字段${pending ? `，其中 <b>${pending}</b> 条由 AI 抓取待复核` : '，无 AI 抓取建议'}。<small class="ai-review-bar__stage">${stageText}${ai.stage === 'partial' ? '，可人工编辑' : ''}</small></p>
-        ${pending && !editing ? `<button type="button" class="resend-button" id="reviewAllBtn">去核对</button>` : ''}
+        <p class="ai-review-bar__desc">识别到「<b>${esc(typeName)}</b>」，共有 <b>${total}</b> 个字段${pending ? `，其中 <b>${pending}</b> 条由 AI 抓取待复核` : '，无 AI 抓取建议'}。${stageText ? `<small class="ai-review-bar__stage">${stageText}</small>` : ''}</p>
+        ${pending && !editing ? `<div class="ai-review-bar__foot"><button type="button" class="resend-button" id="reviewAllBtn">去核对</button></div>` : ''}
         <button type="button" class="ai-review-bar__close" id="aiReviewBarClose" aria-label="关闭复核提示" title="关闭">${iconClose}</button>`;
       $('#aiReviewBarClose')?.addEventListener('click', (e) => {
         e.stopPropagation();

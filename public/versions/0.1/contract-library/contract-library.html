@@ -1780,16 +1780,16 @@
     /* 日期选择器：内部输入框不受上面 padding 覆盖，保持 libra-dp 标准（图标与文本 4px 间距） */
     .row-edit-modal .libra-dp__input { padding: 0; border: 0; background: transparent; box-shadow: none; height: 100%; }
     .row-edit-modal .libra-dp__field { height: 32px; padding: 0 6px 0 10px; gap: 4px; }
-    /* AI 字段：在通用 padding 规则之后提高优先级，给更胖的四角星留出左侧空间 */
+    /* AI 字段：在通用 padding 规则之后提高优先级，给左侧四角星留出空间 */
     .row-edit-modal .row-edit-ctl--ai > .ns-field__input,
     .row-edit-modal .row-edit-ctl--ai textarea.ns-field__input {
-      padding-left: 32px;
+      padding-left: 30px;
     }
     .row-edit-modal .row-edit-ctl--ai .libra-dp__field {
-      padding-left: 32px;
+      padding-left: 30px;
     }
     .row-edit-modal .row-edit-ctl--ai .aip-select {
-      padding-left: 32px;
+      padding-left: 30px;
     }
     .row-edit-modal .aip-select-wrap { display: block; width: 100%; }
     .row-edit-modal .aip-select { width: 100%; height: 32px; font-size: 13px; }
@@ -3793,27 +3793,56 @@
     }
     .ai-cell--confirmed, .ai-cell--manual { background: transparent; color: var(--fdd-ink); }
 
-    /* —— 0.2 AI 复核栏 —— */
+    /* —— 0.2 AI 复核栏：与下方来源信息等同款淡色卡片 —— */
     .ai-review-bar {
       position: relative;
-      margin: 4px 0 12px; padding: 0;
-      background: transparent; border: 0; border-radius: 0;
+      margin: 8px 0 0; padding: 12px 14px 14px;
+      background: #fafafa;
+      border: 1px solid var(--libra-line, #e9eaea);
+      border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(22, 26, 27, 0.04);
+      box-sizing: border-box;
+      transition: box-shadow 0.3s cubic-bezier(0, 0, 0.2, 1), background-color 0.3s cubic-bezier(0, 0, 0.2, 1);
     }
+    .ai-review-bar:hover {
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(22, 26, 27, 0.08), 0 2px 6px rgba(22, 26, 27, 0.05);
+    }
+    .ai-review-bar[hidden] { display: none !important; }
     /* 「详情」标题行（编辑按钮在最右） */
     .info-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .info-detail-head__title { margin: 0; font-size: 20px; font-weight: 600; color: var(--fdd-ink); line-height: 28px; }
     .info-detail-head__actions { display: inline-flex; align-items: center; gap: 4px; }
     .info-detail-head__actions .icon-btn { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 0; border-radius: var(--fdd-radius); background: transparent; color: var(--fdd-ink-2); cursor: pointer; }
     .info-detail-head__actions .icon-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    /* 详情标题行「编辑」：图标 + 文案 */
+    .info-detail-edit-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 8px; margin: 0;
+      border: 0; border-radius: var(--fdd-radius);
+      background: transparent; color: var(--fdd-ink-2);
+      font-size: 13px; font-family: inherit; line-height: 1; cursor: pointer;
+      white-space: nowrap;
+    }
+    .info-detail-edit-btn:hover { background: var(--fdd-bg-hover); color: var(--fdd-ink); }
+    .info-detail-edit-btn .aip-icon { color: inherit; }
     /* AI 识别块（图2 DocuSign：徽标 + 描述 + 去核对） */
     .ai-assisted-badge { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px; background: #f1eafe; color: #7c3aed; font-size: 12px; font-weight: 500; }
-    .ai-review-bar__desc { margin: 0 0 10px; font-size: 13px; line-height: 1.6; color: var(--fdd-ink); }
+    .ai-review-bar__desc { margin: 0; padding-right: 20px; font-size: 13px; line-height: 1.6; color: var(--fdd-ink); }
     .ai-review-bar__desc b { font-weight: 600; }
     .ai-review-bar__stage { display: block; margin-top: 2px; font-size: 12px; color: var(--fdd-ink-3); }
-    /* 标题区与内容区分割线 */
+    .ai-review-bar__foot {
+      display: flex; justify-content: flex-end; align-items: center;
+      margin-top: 10px;
+    }
+    .ai-review-bar__foot .resend-button { flex-shrink: 0; }
+    /* 标题区与内容区分割线：有 AI 卡片时靠卡片间距成组，分割线收轻 */
     .info-detail-divider { height: 0; border-top: 1px solid var(--fdd-line); margin: 12px 0 14px; }
+    .info-scroll:has(.ai-review-bar:not([hidden])) .info-detail-divider {
+      border-top: 0; margin: 10px 0 0;
+    }
     .ai-review-bar__close {
-      position: absolute; top: 0; right: 0;
+      position: absolute; top: 10px; right: 10px;
       flex-shrink: 0;
       width: 24px; height: 24px; padding: 0;
       display: inline-grid; place-items: center;
@@ -3882,17 +3911,37 @@
     }
     .detail-page .field-row:has(.ai-accept-check) {
       align-items: center;
+      overflow: visible;
+      position: relative;
+      z-index: 1;
     }
-    /* 勾选框悬浮提示「采用 AI 建议」：hover 立即显示 */
+    .detail-page .field-row:has(.ai-accept-check:hover) {
+      z-index: 6;
+    }
+    .detail-page .info-group:has(.ai-accept-check),
+    .detail-page .info-group__body:has(.ai-accept-check) {
+      overflow: visible;
+    }
+    .row-edit-field__body:has(.ai-accept-check) {
+      overflow: visible;
+      position: relative;
+      z-index: 1;
+    }
+    .row-edit-field__body:has(.ai-accept-check:hover) {
+      z-index: 6;
+    }
+    /* 勾选框悬浮提示「采用 AI 建议」：出现在勾选框上方 */
     .ai-accept-check { position: relative; }
     .ai-accept-check::after {
       content: attr(data-tip);
-      position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
-      padding: 4px 10px; border-radius: 6px;
-      background: var(--fdd-ink); color: #fff; font-size: 12px; white-space: nowrap;
+      position: absolute; left: 50%; bottom: calc(100% + 6px); right: auto; top: auto;
+      transform: translateX(-50%);
+      padding: 3px 8px; border-radius: 6px;
+      background: var(--fdd-ink); color: #fff; font-size: 12px; line-height: 18px; white-space: nowrap;
       box-shadow: 0 4px 12px rgba(0,0,0,0.14);
       opacity: 0; pointer-events: none;
       transition: opacity 0.1s ease;
+      z-index: 5;
     }
     .ai-accept-check:hover::after { opacity: 1; }
 
